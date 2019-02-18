@@ -6,8 +6,14 @@
  * especially within the Eventities model.
  * @see tiny.rerum.io
  */
+
+ /**
+    Not familiar with modern javascript classes?  https://javascript.info/class
+    Need a list to test with?  http://devstore.rerum.io/v1/id/5c6abfd3e4b022c367220537
+ */
 class Deer {
     constructor(collectionURL) {
+        console.log("DEER Constructor")
         this.collectionURL = collectionURL
         this.collection = localStorage.getItem(collectionURL) || {
             "@context": "",
