@@ -7,11 +7,12 @@ author: Patrick Cuba <cubap@slu.edu>
 <head>
     <title>Deep Codex</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="css/deep-codex.css">
+    <!-- <link rel="stylesheet" href="css/deep-codex.css"> -->
     <link rel="stylesheet" href="https://unpkg.com/chota@latest">
 </head>
 
 <body>
+    <div id="sanity"> welcome to DEER </div>
     <div class="container">
         <div id="messages" class="row"></div>
         <div id="main" class="row">
@@ -20,9 +21,9 @@ author: Patrick Cuba <cubap@slu.edu>
         </div>
         <nav id="manifestNav" class="row"></nav>
     </div>
-    <!-- Breaks in some browsers, here is why https://developers.google.com/web/fundamentals/primers/modules -->
-    <!-- https://html.spec.whatwg.org/multipage/scripting.html#scriptingLanguages:javascript-mime-type -->s
-    <script src="js/deer.js" type="module"></script>
+    <!-- Breaks locally when script type="module", MIME type violation-->
+    <!-- https://html.spec.whatwg.org/multipage/scripting.html#scriptingLanguages:javascript-mime-type -->
+    <script src="js/deer.js" type="javascript"></script>
     <script src="js/config.js" type="javascript" ></script>
 </body>
 
