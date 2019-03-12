@@ -11,11 +11,108 @@
     Not familiar with modern javascript classes?  https://javascript.info/class
     Need a list to test with?  http://devstore.rerum.io/v1/id/5c6abfd3e4b022c367220537
  */
+
 class Deer {
-    constructor(collectionURL) {
-        console.log("DEER Constructor")
-        this.collectionURL = collectionURL
-        this.collection = localStorage.getItem(collectionURL) || {
+    constructor() {
+        this.TYPES = {Event:"Event", Person:"Person", Location:"Location", List:"List", Thing:"Thing", Unknown:"Unknown"} //More like an enum
+        this.TEMPLATES = {
+            Person: function(){
+                let obj = this.suppliedObj
+                try {
+                    let elem = `<label>${this.getValue(obj.label)||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
+                    elem += `<div class="mc-name">${this.getValue(obj[options.familyName])||this.getValue(obj.familyName)||"[ unknown ]"}, ${this.getValue(obj[options.givenName])||this.getValue(obj.givenName)||""}</div>`
+                    elem += renderProp(obj, options.birthDate || "birthDate", "Birth Date") + renderProp(obj, options.deathDate || "deathDate", "Death Date")
+                    elem += renderDepiction(obj, options)
+                    return elem
+                } catch (err) {
+                    return null
+                }
+                return null
+            },
+            List: function(){
+                console.log("DRAW A LIST")
+                let obj = this.suppliedObj
+                let resources = this.getResourcesFromList(obj)
+                try {
+                    let elem = `<label>This is a list, here's what is inside</label>`
+                    if(resources.length > 0){
+                        for(let item in resources){
+                            elem += `<div class="mc-list-entry">${item}</div>`
+                        }
+                    }
+                    else{
+                        elem += `<div class="mc-list-entry">This list is empty or the resources could not be found</div>`
+                    }
+                    return elem
+                } catch (err) {
+                    return null
+                }
+                return null
+            },
+            Event: function(){
+                let obj = this.suppliedObj
+                try {
+                    let elem = `<h1> EVENT </h1>`
+                    return elem
+                } catch (err) {
+                    return null
+                }
+                return null
+            },
+            Location: function(){
+                let obj = this.suppliedObj
+                try {
+                    let elem = `<h1>LOCATION</h1>`
+                    return elem
+                } catch (err) {
+                    return null
+                }
+                return null
+            },
+            Thing: function(){
+                let obj = this.suppliedObj
+                try {
+                    let elem = `<h1>THING</h1>`
+                    return elem
+                } catch (err) {
+                    return null
+                }
+                return null
+            },
+            Unknown: function(){
+                console.log("RENDER AN UNKNOWN")
+                let obj = this.suppliedObj
+                try {
+                    let elem = `<label>This list is of an unknown type</label>`
+                    elem += `<div class="mc-name">${this.getValue(obj["@id"])}</div>`
+                    return elem
+                } catch (err) {
+                    return null
+                }
+                return null
+            },
+            default: function(){
+                let obj = this.suppliedObj
+                let elem = `<label>${this.getValue(obj[options.label])||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
+                let tmp = []
+                for (prop in obj) {
+                    tmp += renderProp(obj, options)
+                }
+                return elem
+            },
+            json: function(){
+                let obj = this.suppliedObj
+                let indent = options.indent || 4
+                let replacer = options.replacer || null
+                try {
+                    return `<pre>${JSON.stringify(obj, replacer, indent)}</pre>`
+                } catch (err) {
+                    return null
+                }
+            }
+        }
+        
+        this.defaultTemplate = {
             "@context": "",
             "@type": "List",
             "label": "List of Entities",
@@ -38,13 +135,18 @@ class Deer {
                 },
                 "generatedBy": "DEER tool"
             },
-            "@id": collectionURL
+            "@id": this.suppliedURL
         }
+        this.suppliedURL = ""
+        this.suppliedObj = this.defaultTemplate
+        this.collectionType = this.determineType(this.suppliedObj)
         this.resources = []
-        if (!localStorage.getItem("CURRENT_LIST_ID")) {
-            localStorage.setItem("CURRENT_LIST_ID", collectionURL)
-        }
 
+        /*
+        if (!localStorage.getItem("CURRENT_LIST_ID")) {
+            localStorage.setItem("CURRENT_LIST_ID", this.suppliedURL)
+        }
+        */
         this.default = {
             context: "https:schema.org",
             type: "Thing",
@@ -53,28 +155,45 @@ class Deer {
         }
 
         // "Constants"
-        this.DEFAULT_LIST_ID = "li01"
+        this.DEFAULT_LIST_ID = "li01" //http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
         this.BASE_ID = "http://devstore.rerum.io/v1"
         this.CREATE_URL = "http://tinydev.rerum.io/app/create"
         this.UPDATE_URL = "http://tinydev.rerum.io/app/update"
         this.QUERY_URL = "http://tinydev.rerum.io/app/query"
-        this.TYPES = ["Event", "Person", "Location", "List", "Thing"]
         this.FOCUS_OBJECT = document.getElementsByTagName("deer-view")[0] || document.getElementById("deer-view")
 
-        this.TEMPLATES = {
-            Person: this.renderPerson,
-            List: this.renderList,
-            Event: this.renderEvent,
-            default: this.renderEntity,
-            json: this.renderJSON
-        }
 
-        this.newObjectLoader = new MutationObserver(newObjectRender)
+
+        //this.TEMPLATES[this.collectionType] //Actually draw into deer-view or wait to do
+
+        //return this; //??
+        //This is giving errors I can't seem to get around.
+        /*
+        this.newObjectLoader = new MutationObserver(newObjectRender) //this.newObjectRender(this.TEMPLATES.default)
         this.newObjectLoader.observe(this.FOCUS_OBJECT, {
             attributes: true
         })
-
+        */
     }
+
+    /**
+     * Fetch the JSON from a URL
+     * @param {String} id: http or https URL
+     */
+    async resolveJSON(id) {
+        let j = {}
+        if(id){
+            await fetch(id)
+                .then(this.handleHTTPError)
+                .then(resp => j = resp.json())
+                .catch(error => alert(error)) //DEER.err(error) TODO:Need to make a DEER error class
+        }
+        else{
+            alert("No id provided to resolve for JSON.  Make sure you have an id.") //TODO: DEER.err()
+        }
+        return j
+    }
+
     /**
      * Generate a new object URI for a resource. Abstract additional
      * properties to annotations.
@@ -143,6 +262,94 @@ class Deer {
         // just enforcing the delay
         let temp = await Promise.all(annotations.map(upsert))
         return newObj.new_obj_state
+    }
+
+    async supplyURL(url){
+        this.suppliedURL = url
+        let resolvedCollection = await this.resolveJSON(url)
+        this.suppliedObj = resolvedCollection
+        this.collectionType = this.determineType(resolvedCollection)
+        this.resources = [] //??
+    }
+
+    supplyObj(obj){
+        this.suppliedObj = obj
+        this.collectionType = this.determineType(obj)
+        this.resources = [] //??
+    }
+
+    draw(){
+        this.TEMPLATES[this.collectionType]
+    }
+
+    determineType(obj){
+        let t = "Unknown"
+        let objType = (obj.type) ? obj.type : (obj["@type"]) ? obj["@type"] : "not found"
+
+        if(objType !== "not found"){
+            if(Array.isArray(objType)){
+                //See if we understand any of the values in the array
+                for(let type in objType){
+                    let g = this.determineType(type)
+                    if(g !== "Unknown"){
+                        t = type
+                        break;
+                    }
+                }
+            }
+            else if(typeof objType === "string"){
+                //See if we know anything by this type
+                objType = objType.charAt(0).toUpperCase() + objType.slice(1) //capitalize first letter
+                t = objType
+                if(!this.TYPES[t]){
+                    switch(objType){
+                        case "ItemList":
+                            t = "List"
+                            break;
+                        case "Other":
+                            t = "Thing"
+                            break;
+                        default:
+                            t="Unknown"
+                    }
+                }
+
+            }
+            else{
+                //obj.type was not an array or string...should we be expected something else or is this malformed?
+            }
+        }
+        return this.TYPES[t]
+    }
+
+    handleHTTPError(response){
+        if (!response.ok){
+            let status = response.status
+            switch(status){
+                case 400:
+                    console.log("Bad Request")
+                break;
+                case 401:
+                    console.log("Request was unauthorized")
+                break;
+                case 403:
+                    console.log("Forbidden to make request")
+                break;
+                case 404:
+                    console.log("Not found")
+                break;
+                case 500:
+                    console.log("Internal server error")
+                break;
+                case 503:
+                    console.log("Server down time")
+                break;
+                default:
+                    console.log("unahndled HTTP ERROR")
+            }
+            throw Error("HTTP Error: "+response.statusText)
+        }
+        return response
     }
 
     /**
@@ -351,7 +558,23 @@ class Deer {
         return tmpl
     }
 
-    renderProp(obj, options) {
+    async getResourcesFromList(listObj){
+        //How can we know where to look to get resources out of a list
+        let resources = []
+        if(listObj.resources){
+            resources = listObj.resources
+        }
+        else if(listObj.itemListElement){
+            resources = listObj.itemListElement
+        }
+        else{
+            //Not a list we recognize the format of, even if we recognize the TYPE
+        }
+        return resources
+    }
+
+    renderProp(options) {
+        let obj = this.suppliedObj
         let prop = options.prop
         let altLabel = options.altLabel || prop
         let prefix = (options.prefix || "deer") + "-"
@@ -363,7 +586,8 @@ class Deer {
         }
     }
 
-    renderJSON(obj, options) {
+    renderJSON(options) {
+        let obj = this.suppliedObj
         let indent = options.indent || 4
         let replacer = options.replacer || null
         try {
@@ -373,7 +597,8 @@ class Deer {
         }
     }
 
-    renderEntity(obj, options = {}) {
+    renderEntity(options = {}) {
+        let obj = this.suppliedObj
         let elem = `<label>${this.getValue(obj[options.label])||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
         let tmp = []
         for (prop in obj) {
@@ -382,36 +607,27 @@ class Deer {
         return elem
     }
 
-    renderPerson(obj, options = {}) {
-        try {
-            let elem = `<label>${this.getValue(obj.label)||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
-            elem += `<div class="mc-name">${this.getValue(obj[options.familyName])||this.getValue(obj.familyName)||"[ unknown ]"}, ${this.getValue(obj[options.givenName])||this.getValue(obj.givenName)||""}</div>`
-            elem += renderProp(obj, options.birthDate || "birthDate", "Birth Date") + renderProp(obj, options.deathDate || "deathDate", "Death Date")
-            elem += renderDepiction(obj, options)
-            return elem
-        } catch (err) {
-            return null
-        }
-        return null
+    renderPerson(options = {}) {
+        
     }
-    renderEvent(obj, options) {
-        let elem = ``
-        try {
-            return elem
-        } catch (err) {
-            return null
-        }
-        return null
+    renderEvent(options) {
+        
     }
-    renderList(obj, options) {
-        let elem = ``
-        try {
-            return elem
-        } catch (err) {
-            return null
-        }
-        return null
+    renderList() {
+
+        
+    }
+    renderUnknown(options){
+        
+    }
+    renderLocation(options){
+        
+    }
+    renderThing(options){
+        
     }
 }
+
+
 
 //export {Deer}

@@ -1,3 +1,5 @@
+console.log("CONFIG")
+
 const CONFIG = {
     "fields": [{
         "label": "short describing",
@@ -52,6 +54,7 @@ const CONFIG = {
         "type": "schema:note"
     }]
 }
+
 
 // Dummy schema
 // let fields = [{
