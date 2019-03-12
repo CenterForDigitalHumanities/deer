@@ -15,101 +15,112 @@
 class Deer {
     constructor() {
         this.TYPES = {Event:"Event", Person:"Person", Location:"Location", List:"List", Thing:"Thing", Unknown:"Unknown"} //More like an enum
+        // this.TEMPLATES = {
+        //     Person: function(){
+        //         let obj = this.suppliedObj
+        //         try {
+        //             let elem = `<label>${this.getValue(obj.label)||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
+        //             elem += `<div class="mc-name">${this.getValue(obj[options.familyName])||this.getValue(obj.familyName)||"[ unknown ]"}, ${this.getValue(obj[options.givenName])||this.getValue(obj.givenName)||""}</div>`
+        //             elem += renderProp(obj, options.birthDate || "birthDate", "Birth Date") + renderProp(obj, options.deathDate || "deathDate", "Death Date")
+        //             elem += renderDepiction(obj, options)
+        //             return elem
+        //         } catch (err) {
+        //             return null
+        //         }
+        //         return null
+        //     },
+        //     List: function(){
+        //         console.log("DRAW A LIST")
+        //         let obj = this.suppliedObj
+        //         let resources = getResourcesFromList(obj)
+        //         try {
+        //             let elem = `<label>This is a list, here's what is inside</label>`
+        //             if(resources.length > 0){
+        //                 for(let item in resources){
+        //                     elem += `<div class="mc-list-entry">${item}</div>`
+        //                 }
+        //             }
+        //             else{
+        //                 elem += `<div class="mc-list-entry">This list is empty or the resources could not be found</div>`
+        //             }
+        //             return elem
+        //         } catch (err) {
+        //             return null
+        //         }
+        //         return null
+        //     },
+        //     Event: function(){
+        //         let obj = this.suppliedObj
+        //         try {
+        //             let elem = `<h1> EVENT </h1>`
+        //             return elem
+        //         } catch (err) {
+        //             return null
+        //         }
+        //         return null
+        //     },
+        //     Location: function(){
+        //         let obj = this.suppliedObj
+        //         try {
+        //             let elem = `<h1>LOCATION</h1>`
+        //             return elem
+        //         } catch (err) {
+        //             return null
+        //         }
+        //         return null
+        //     },
+        //     Thing: function(){
+        //         let obj = this.suppliedObj
+        //         try {
+        //             let elem = `<h1>THING</h1>`
+        //             return elem
+        //         } catch (err) {
+        //             return null
+        //         }
+        //         return null
+        //     },
+        //     Unknown: function(){
+        //         console.log("RENDER AN UNKNOWN")
+        //         let obj = this.suppliedObj
+        //         try {
+        //             let elem = `<label>This list is of an unknown type</label>`
+        //             elem += `<div class="mc-name">${this.getValue(obj["@id"])}</div>`
+        //             return elem
+        //         } catch (err) {
+        //             return null
+        //         }
+        //         return null
+        //     },
+        //     default: function(){
+        //         let obj = this.suppliedObj
+        //         let elem = `<label>${this.getValue(obj[options.label])||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
+        //         let tmp = []
+        //         for (prop in obj) {
+        //             tmp += renderProp(obj, options)
+        //         }
+        //         return elem
+        //     },
+        //     json: function(){
+        //         let obj = this.suppliedObj
+        //         let indent = options.indent || 4
+        //         let replacer = options.replacer || null
+        //         try {
+        //             return `<pre>${JSON.stringify(obj, replacer, indent)}</pre>`
+        //         } catch (err) {
+        //             return null
+        //         }
+        //     }
+        // }
+
         this.TEMPLATES = {
-            Person: function(){
-                let obj = this.suppliedObj
-                try {
-                    let elem = `<label>${this.getValue(obj.label)||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
-                    elem += `<div class="mc-name">${this.getValue(obj[options.familyName])||this.getValue(obj.familyName)||"[ unknown ]"}, ${this.getValue(obj[options.givenName])||this.getValue(obj.givenName)||""}</div>`
-                    elem += renderProp(obj, options.birthDate || "birthDate", "Birth Date") + renderProp(obj, options.deathDate || "deathDate", "Death Date")
-                    elem += renderDepiction(obj, options)
-                    return elem
-                } catch (err) {
-                    return null
-                }
-                return null
-            },
-            List: function(){
-                console.log("DRAW A LIST")
-                let obj = this.suppliedObj
-                let resources = this.getResourcesFromList(obj)
-                try {
-                    let elem = `<label>This is a list, here's what is inside</label>`
-                    if(resources.length > 0){
-                        for(let item in resources){
-                            elem += `<div class="mc-list-entry">${item}</div>`
-                        }
-                    }
-                    else{
-                        elem += `<div class="mc-list-entry">This list is empty or the resources could not be found</div>`
-                    }
-                    return elem
-                } catch (err) {
-                    return null
-                }
-                return null
-            },
-            Event: function(){
-                let obj = this.suppliedObj
-                try {
-                    let elem = `<h1> EVENT </h1>`
-                    return elem
-                } catch (err) {
-                    return null
-                }
-                return null
-            },
-            Location: function(){
-                let obj = this.suppliedObj
-                try {
-                    let elem = `<h1>LOCATION</h1>`
-                    return elem
-                } catch (err) {
-                    return null
-                }
-                return null
-            },
-            Thing: function(){
-                let obj = this.suppliedObj
-                try {
-                    let elem = `<h1>THING</h1>`
-                    return elem
-                } catch (err) {
-                    return null
-                }
-                return null
-            },
-            Unknown: function(){
-                console.log("RENDER AN UNKNOWN")
-                let obj = this.suppliedObj
-                try {
-                    let elem = `<label>This list is of an unknown type</label>`
-                    elem += `<div class="mc-name">${this.getValue(obj["@id"])}</div>`
-                    return elem
-                } catch (err) {
-                    return null
-                }
-                return null
-            },
-            default: function(){
-                let obj = this.suppliedObj
-                let elem = `<label>${this.getValue(obj[options.label])||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
-                let tmp = []
-                for (prop in obj) {
-                    tmp += renderProp(obj, options)
-                }
-                return elem
-            },
-            json: function(){
-                let obj = this.suppliedObj
-                let indent = options.indent || 4
-                let replacer = options.replacer || null
-                try {
-                    return `<pre>${JSON.stringify(obj, replacer, indent)}</pre>`
-                } catch (err) {
-                    return null
-                }
-            }
+            Person: this.renderPerson,
+            List: this.renderList,
+            Event: this.renderEvent,
+            Location: this.renderLocation,
+            Thing: this.renderThing,
+            Unknown: this.renderUnknown,
+            default: this.renderElement,
+            json: this.renderJSON
         }
         
         this.defaultTemplate = {
@@ -139,7 +150,7 @@ class Deer {
         }
         this.suppliedURL = ""
         this.suppliedObj = this.defaultTemplate
-        this.collectionType = this.determineType(this.suppliedObj)
+        this.collectionType = "Unknown"
         this.resources = []
 
         /*
@@ -264,6 +275,15 @@ class Deer {
         return newObj.new_obj_state
     }
 
+    async drawUsingURL(url){
+        this.suppliedURL = url
+        let resolvedCollection = await this.resolveJSON(url)
+        this.suppliedObj = resolvedCollection
+        this.collectionType = this.determineType(resolvedCollection)
+        this.resources = [] //??
+        this.draw()
+    }
+
     async supplyURL(url){
         this.suppliedURL = url
         let resolvedCollection = await this.resolveJSON(url)
@@ -279,7 +299,8 @@ class Deer {
     }
 
     draw(){
-        this.TEMPLATES[this.collectionType]
+        //SO i think this is more what we are going for but something feels way off. 
+        this.TEMPLATES[this.collectionType]()
     }
 
     determineType(obj){
@@ -290,9 +311,10 @@ class Deer {
             if(Array.isArray(objType)){
                 //See if we understand any of the values in the array
                 for(let type in objType){
-                    let g = this.determineType(type)
+                    let g = this.determineType({"type":objType[type]})
                     if(g !== "Unknown"){
-                        t = type
+                        t = g
+                        return this.TYPES[t]
                         break;
                     }
                 }
@@ -313,13 +335,14 @@ class Deer {
                             t="Unknown"
                     }
                 }
-
+                return this.TYPES[t]
             }
             else{
                 //obj.type was not an array or string...should we be expected something else or is this malformed?
+                //return this.TYPES["Unknown"]
             }
         }
-        return this.TYPES[t]
+        
     }
 
     handleHTTPError(response){
@@ -608,23 +631,80 @@ class Deer {
     }
 
     renderPerson(options = {}) {
-        
+        let obj = this.suppliedObj
+        try {
+            let elem = `<label>${this.getValue(obj.label)||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
+            elem += `<div class="mc-name">${this.getValue(obj[options.familyName])||this.getValue(obj.familyName)||"[ unknown ]"}, ${this.getValue(obj[options.givenName])||this.getValue(obj.givenName)||""}</div>`
+            elem += renderProp(obj, options.birthDate || "birthDate", "Birth Date") + renderProp(obj, options.deathDate || "deathDate", "Death Date")
+            elem += renderDepiction(obj, options)
+            return elem
+        } catch (err) {
+            return null
+        }
+        return null
     }
     renderEvent(options) {
-        
+        let obj = this.suppliedObj
+        try {
+            let elem = `<h1> EVENT </h1>`
+            return elem
+        } catch (err) {
+            return null
+        }
+        return null
     }
     renderList() {
-
-        
+        //Remember that this in here in actually this.TEMPLATE.  Maybe we should scope these helpers to that obj.
+        console.log("DRAW A LIST")
+        let obj = this.suppliedObj
+        let resources = this.getResourcesFromList(obj)
+        try {
+            let elem = `<label>This is a list, here's what is inside</label>`
+            if(resources.length > 0){
+                for(let item in resources){
+                    elem += `<div class="mc-list-entry">${resources[item]}</div>`
+                }
+            }
+            else{
+                elem += `<div class="mc-list-entry">This list is empty or the resources could not be found</div>`
+            }
+            return elem
+        } catch (err) {
+            return null
+        }
+        return null
     }
     renderUnknown(options){
-        
+        console.log("RENDER AN UNKNOWN")
+        let obj = this.suppliedObj
+        try {
+            let elem = `<label>This list is of an unknown type</label>`
+            elem += `<div class="mc-name">${this.getValue(obj["@id"])}</div>`
+            return elem
+        } catch (err) {
+            return null
+        }
+        return null
     }
     renderLocation(options){
-        
+        let obj = this.suppliedObj
+        try {
+            let elem = `<h1>LOCATION</h1>`
+            return elem
+        } catch (err) {
+            return null
+        }
+        return null
     }
     renderThing(options){
-        
+        let obj = this.suppliedObj
+        try {
+            let elem = `<h1>THING</h1>`
+            return elem
+        } catch (err) {
+            return null
+        }
+        return null
     }
 }
 
