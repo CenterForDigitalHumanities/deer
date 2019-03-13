@@ -170,7 +170,10 @@ class Deer {
             let temp = await Promise.all(annotations.map(upsert))
             return newObj.new_obj_state
         }
-
+        /**
+         * Set this as the DEER object to draw's URL
+         * @param {String} url A URL that leads to a JSON object we want to draw
+         */
         this.drawUsingURL = async function(url){
             this.suppliedURL = url
             let resolvedCollection = await this.resolveJSON(url)
@@ -179,7 +182,21 @@ class Deer {
             this.resources = [] //??
             this.draw()
         }
-
+        /**
+         * Take in a new object for DEER to understand as its supplied object for drawing
+         * @param {Object} obj Some JSON object to draw to th screen
+         */
+        this.drawUsingObject = function(obj){
+            this.suppliedURL = (obj.id)?obj.id:(obj["@id"])?obj["@id"]:""
+            this.suppliedObj = obj //Or should we make a clone instead?
+            this.templateType = this.determineType(obj)
+            this.resources = [] //??
+            this.draw()
+        }
+        /**
+         * Set this as the DEER object to draw's URL
+         * @param {String} url The URL of some supplied json object
+         */
         this.supplyURL = async function(url){
             this.suppliedURL = url
             let resolvedCollection = await this.resolveJSON(url)
@@ -187,19 +204,31 @@ class Deer {
             this.templateType = this.determineType(resolvedCollection)
             this.resources = [] //??
         }
-
+         /**
+         * Set this as the DEER object to draw
+         * @param {Object} obj some json object we are hoping to draw to the screen
+         */
         this.supplyObj=function(obj){
             this.suppliedObj = obj
             this.templateType = this.determineType(obj)
             this.resources = [] //??
         }
-
+        /**
+         * Interact with known DEER templates to draw a json object to the screen
+         * In particular, this draws the object we know was supplied by the user. 
+         * @see this.drawUsingObject
+         * @see this.drawUsingURL
+         */
         this.draw=async function(){
             let options = {}
             let html = await this.TEMPLATES[this.templateType](this.suppliedObj, options)
+            //Note this won't keep appending templates, it will replace what is there.  
             this.FOCUS_OBJECT.innerHTML = html
         }
-
+        /**
+         * Given an object, try to determine what type it is so we know how to draw it.
+         * @param {Object} obj some json object we are hoping has a discernable type
+         */
         this.determineType=function(obj){
             let t = "Unknown"
             let objType = (obj.type) ? obj.type : (obj["@type"]) ? obj["@type"] : "not found"
@@ -301,6 +330,11 @@ class Deer {
                     return newState.new_obj_state
                 })
         }
+        /**
+         * Get the value of a certain property as a certain type
+         * @param {?} property some obj.thing being passed in
+         * @param {String} asType some typeof thing you are expecting back as the value
+         */
         this.getValue=function(property, asType) {
             // TODO: There must be a best way to do this...
             let prop;
@@ -480,8 +514,6 @@ class Deer {
             this.FOCUS_OBJECT.setAttribute('deer-object', id)
         }
 
-        // Templates
-
         /**
          * Return template literal for given object type. DEER ships
          * with Person, List, Event, JSON, and default.
@@ -499,7 +531,12 @@ class Deer {
             return tmpl
         }
 
-        //Just made this work, it probably isn't exactly right
+        /**
+         * Get a certain property from an object and return it formatted as HTML to be drawn.  
+         * @param {Object} obj some obj containing a key that needs to be drawn
+         * @param {String} key the name of the key in the obj we are looking for
+         * @param {String} label The label to be displayed when drawn
+         */
         this.renderProp=function(obj, key, label) {
             let prop = obj.key
             //let altLabel = options.altLabel || prop
@@ -513,7 +550,11 @@ class Deer {
                 return null
             }
         }
-
+        /**
+         * The TEMPLATED renderer to draw JSON to the screen
+         * @param {Object} obj some json to be drawn as JSON
+         * @param {Object} options additional properties to draw with the JSON
+         */
         this.renderJSON=function(obj, options) {
             let indent = options.indent || 4
             let replacer = options.replacer || null
@@ -523,7 +564,11 @@ class Deer {
                 return null
             }
         }
-
+        /**
+         * The TEMPLATED renderer to draw an JSON to the screen as some HTML template
+         * @param {Object} obj some json of type Entity to be drawn
+         * @param {Object} options additional properties to draw with the Entity
+         */
         this.renderEntity=function(obj, options = {}) {
             let elem = `<label>${this.getValue(obj[options.label])||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
             let tmp = []
@@ -532,7 +577,11 @@ class Deer {
             }
             return elem
         }
-
+        /**
+         * The TEMPLATED renderer to draw JSON to the screen
+         * @param {Object} obj some json of type Person to be drawn
+         * @param {Object} options additional properties to draw with the Person
+         */
         this.renderPerson=function(obj, options) {
             try {
                 let label = this.getValue(obj.label)||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"
@@ -553,6 +602,11 @@ class Deer {
             }
             return null
         }
+        /**
+         * The TEMPLATED renderer to draw JSON to the screen
+         * @param {Object} obj some json of type Event to be drawn
+         * @param {Object} options additional properties to draw with the Event
+         */
         this.renderEvent=function(obj, options) {
             try {
                 let elem = `<h1> EVENT </h1>`
@@ -562,6 +616,11 @@ class Deer {
             }
             return null
         }
+        /**
+         * The TEMPLATED renderer to draw JSON to the screen
+         * @param {Object} obj some json of type List to be drawn
+         * @param {Object} options additional properties to draw with the List
+         */
         this.renderList=async function(obj, options) {
             /**
             *   Define rendering helper functions for lists here
@@ -604,6 +663,11 @@ class Deer {
             }
             return null
         }
+        /**
+         * The TEMPLATED renderer to draw JSON to the screen
+         * @param {Object} obj some json of type Unknown to be drawn
+         * @param {Object} options additional properties to draw with the Unknown
+         */
         this.renderUnknown=function(obj, options){
             console.log("RENDER AN UNKNOWN")
             try {
@@ -615,6 +679,11 @@ class Deer {
             }
             return null
         }
+        /**
+         * The TEMPLATED renderer to draw JSON to the screen
+         * @param {Object} obj some json of type Location to be drawn
+         * @param {Object} options additional properties to draw with the Location
+         */
         this.renderLocation=function(obj, options){
             try {
                 let elem = `<h1>LOCATION</h1>`
@@ -624,6 +693,11 @@ class Deer {
             }
             return null
         }
+        /**
+         * The TEMPLATED renderer to draw JSON to the screen
+         * @param {Object} obj some json of type Thing to be drawn
+         * @param {Object} options additional properties to draw with the Thing
+         */
         this.renderThing=function(obj, options){
             try {
                 let elem = `<h1>THING</h1>`
@@ -641,7 +715,7 @@ class Deer {
             attributes: true
         })
         */
-        
+
         /**
             * Want to be able to do like DEER.TEMPLATES.Person to have it build the HTML form for a person.
             * Remember the functions have to already have been defined above to be added into the template here and
