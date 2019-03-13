@@ -129,6 +129,7 @@ class Deer {
                     },
                     body: JSON.stringify(mint)
                 })
+                .then(this.handleHTTPError)
                 .then(response => response.json())
             const listID = localStorage.getItem("CURRENT_LIST_ID") || this.DEFAULT_LIST_ID
             let list = await get(listID)
@@ -145,6 +146,7 @@ class Deer {
                         },
                         body: JSON.stringify(list)
                     })
+                    .then(this.handleHTTPError)
                     .then(response => response.json().new_obj_state)
                     .catch(err => Promise.reject(err))
             } catch (err) {}
@@ -298,6 +300,7 @@ class Deer {
                     },
                     body: JSON.stringify(config.body)
                 }).catch(error => console.error('Error:', error))
+                .then(this.handleHTTPError)
                 .then(response => response.json())
                 .then(function (newState) {
                     localStorage.setItem(newState["@id"], JSON.stringify(newState.new_obj_state))
@@ -440,7 +443,9 @@ class Deer {
                 headers: {
                     "Content-Type": "application/json"
                 }
-            }).then(response => response.json())
+            })
+            .then(this.handleHTTPError)
+            .then(response => response.json())
             let local_matches = everything.filter(o => o.target === id)
             matches = local_matches.concat(matches)
             return matches
@@ -564,7 +569,7 @@ class Deer {
             }
             return null
         }
-       this.renderList=async function(obj) {
+        this.renderList=async function(obj) {
             /**
             *   Define rendering helper functions for lists here
             */
