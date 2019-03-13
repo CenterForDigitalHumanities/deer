@@ -202,7 +202,8 @@ class Deer {
         }
 
         this.draw=async function(){
-            let html = await this.TEMPLATES[this.templateType](this.suppliedObj)
+            let options = {}
+            let html = await this.TEMPLATES[this.templateType](this.suppliedObj, options)
             this.FOCUS_OBJECT.innerHTML = html
         }
 
@@ -505,6 +506,7 @@ class Deer {
             return tmpl
         }
 
+        //Just made this work, it probably isn't exactly right
         this.renderProp=function(obj, key, label) {
             let prop = obj.key
             //let altLabel = options.altLabel || prop
@@ -519,8 +521,7 @@ class Deer {
             }
         }
 
-        this.renderJSON=function(options) {
-            let obj = this.suppliedObj
+        this.renderJSON=function(obj, options) {
             let indent = options.indent || 4
             let replacer = options.replacer || null
             try {
@@ -530,8 +531,7 @@ class Deer {
             }
         }
 
-        this.renderEntity=function(options = {}) {
-            let obj = this.suppliedObj
+        this.renderEntity=function(obj, options = {}) {
             let elem = `<label>${this.getValue(obj[options.label])||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
             let tmp = []
             for (prop in obj) {
@@ -560,7 +560,7 @@ class Deer {
             }
             return null
         }
-        this.renderEvent=function(obj) {
+        this.renderEvent=function(obj, options) {
             try {
                 let elem = `<h1> EVENT </h1>`
                 return elem
@@ -569,12 +569,13 @@ class Deer {
             }
             return null
         }
-        this.renderList=async function(obj) {
+        this.renderList=async function(obj, options) {
             /**
             *   Define rendering helper functions for lists here
             */
             async function getResourcesFromList (listObj){
-                //How can we know where to look to get resources out of a list
+                //TODO FIXME How can we know where to look to get resources out of a list
+                //If resources are a URL, we may have to fetch them
                 let resources = []
                 if(listObj.resources){
                     resources = listObj.resources
@@ -587,7 +588,7 @@ class Deer {
                 }
                 return resources
             }
-            /* END OF HELPERS */
+            /* END OF LIST HELPERS */
 
 
             let resources = await getResourcesFromList(obj)
@@ -610,9 +611,8 @@ class Deer {
             }
             return null
         }
-        this.renderUnknown=function(obj){
+        this.renderUnknown=function(obj, options){
             console.log("RENDER AN UNKNOWN")
-            let obj = this.suppliedObj
             try {
                 let elem = `<label>This list is of an unknown type</label>`
                 elem += `<div class="mc-name">${this.getValue(obj["@id"])}</div>`
@@ -622,8 +622,7 @@ class Deer {
             }
             return null
         }
-        this.renderLocation=function(obj){
-            let obj = this.suppliedObj
+        this.renderLocation=function(obj, options){
             try {
                 let elem = `<h1>LOCATION</h1>`
                 return elem
@@ -632,8 +631,7 @@ class Deer {
             }
             return null
         }
-        this.renderThing=function(obj){
-            let obj = this.suppliedObj
+        this.renderThing=function(obj, options){
             try {
                 let elem = `<h1>THING</h1>`
                 return elem
