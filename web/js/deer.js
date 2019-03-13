@@ -1,6 +1,8 @@
 /**
  * @module Data Encoding and Exhibition for RERUM (DEER)
  * @author Patrick Cuba <cubap@slu.edu>
+ * @author Bryan Haberberger <bryan.j.haberberger@slu.edu>
+
  * This code should serve as a basis for developers wishing to
  * use TinyThings as a RERUM proxy for an application for data entry,
  * especially within the Eventities model.
@@ -9,16 +11,15 @@
 
  /**
     Not familiar with modern javascript classes?  https://javascript.info/class
-    Need a list to test with?  http://devstore.rerum.io/v1/id/5c6abfd3e4b022c367220537
+    Need a list to test with?  http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
  */
 
 class Deer {
     /**
     Using this.stuff throughout has scoping issues if you aren't careful.  I found it best to initalize all DEER functions
     inside the constructor so they were properly scoped and could be used like
-         mydeer = new DEER()
+         mydeer = new Deer()
          mydeer.doThis()
-
     I also noticed some serious scoping issues when tying to use it like
     let newperson = mydeer.TEMPLATES.Person
     It made it way easier to rescope all templating functionality into TEMPLATES and scope singular purpose helper functions
@@ -79,14 +80,6 @@ class Deer {
         this.UPDATE_URL = "http://tinydev.rerum.io/app/update"
         this.QUERY_URL = "http://tinydev.rerum.io/app/query"
         this.FOCUS_OBJECT = document.getElementsByTagName("deer-view")[0] || document.getElementById("deer-view")
-
-        //FIXME: This is giving errors I can't seem to get around.
-        /*
-        this.newObjectLoader = new MutationObserver(newObjectRender) //this.newObjectRender(this.TEMPLATES.default)
-        this.newObjectLoader.observe(this.FOCUS_OBJECT, {
-            attributes: true
-        })
-        */
 
         /**
          * Fetch the JSON from a URL
@@ -641,6 +634,14 @@ class Deer {
             return null
         }
 
+        //FIXME: This is giving errors I can't seem to get around.
+        /*
+        this.newObjectLoader = new MutationObserver(this.newObjectRender(this.defaultTemplate)) //this.newObjectRender(this.TEMPLATES.default)
+        this.newObjectLoader.observe(this.FOCUS_OBJECT, {
+            attributes: true
+        })
+        */
+        
         /**
             * Want to be able to do like DEER.TEMPLATES.Person to have it build the HTML form for a person.
             * Remember the functions have to already have been defined above to be added into the template here and
