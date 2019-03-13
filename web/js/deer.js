@@ -650,6 +650,7 @@ class Deer {
                     for(let item in resources){
                         //SO right here we need to determine what type of thing this thing is for rendering.
                         let listItemType = this.determineType(resources[item])
+                        //Remember your scope, 'this' is actually TEMPLATES, so load from templates like
                         let innardsHTML  = await this[listItemType](resources[item])
                         elem += innardsHTML
                     }
