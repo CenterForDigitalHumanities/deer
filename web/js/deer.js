@@ -16,18 +16,12 @@
 
 class Deer {
     /**
-    Using this.stuff throughout has scoping issues if you aren't careful.  I found it best to initalize all DEER functions
-    inside the constructor so they were properly scoped and could be used like
-         mydeer = new Deer()
-         mydeer.doThis()
+    Using this.stuff throughout has scoping issues if you aren't careful.  
     I also noticed some serious scoping issues when tying to use it like
     let newperson = mydeer.TEMPLATES.Person
     It made it way easier to rescope all templating functionality into TEMPLATES and scope singular purpose helper functions
     in their renderers.  Multi purpose helper functions were scoped to TEMPLATES instead of the copy and pasting them throughout
     the renderers.  
-
-    The moral of the story is that you need to master your scope if you want to use `this`.  We have done so here.  
-
     */
     constructor() {
         this.TYPES = {Event:"Event", Person:"Person", Location:"Location", List:"List", Thing:"Thing", Unknown:"Unknown"} //More like an enum
@@ -96,7 +90,6 @@ class Deer {
             * a user could do DEER.renderPerson(personOBj) or DEER.TEMPLATE.Person(personObj).  We can move scope around now
             * freely if this becomes undesirable or unmanagable.  The use of the 'this' keyword required to manage scope this way.
 
-            * !!! DO NOT DEFINE FUNctions under this template object. !!! 
         */
         this.TEMPLATES = {
             /* Templater functions to produce HTML for the types of things we are expecting */
