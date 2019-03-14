@@ -7,11 +7,17 @@ author: Patrick Cuba <cubap@slu.edu>
 <head>
     <title>Deep Codex</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="css/deep-codex.css">
+    <!-- <link rel="stylesheet" href="css/deep-codex.css"> -->
     <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <style>
+        label{
+            display:block;
+        }
+    </style>
 </head>
 
 <body>
+    <div id="sanity"> welcome to DEER </div>
     <div class="container">
         <div id="messages" class="row"></div>
         <div id="main" class="row">
@@ -20,10 +26,17 @@ author: Patrick Cuba <cubap@slu.edu>
         </div>
         <nav id="manifestNav" class="row"></nav>
     </div>
-    <!-- Breaks in some browsers, here is why https://developers.google.com/web/fundamentals/primers/modules -->
-    <!-- https://html.spec.whatwg.org/multipage/scripting.html#scriptingLanguages:javascript-mime-type -->s
-    <script src="js/deer.js" type="module"></script>
-    <script src="js/config.js" type="javascript" ></script>
+    <deer-view></deer-view>
+    <!-- Breaks locally when script type="module", MIME type violation-->
+    <!-- https://html.spec.whatwg.org/multipage/scripting.html#scriptingLanguages:javascript-mime-type -->
+    <script src="js/deer.js" type="text/javascript"></script>
+    <script src="js/config.js" type="text/javascript" ></script>
 </body>
+
+<script>
+    console.log("New Deer")
+    let mydeer = new Deer()
+    mydeer.drawUsingURL("http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf")
+</script>
 
 </html>
