@@ -81,11 +81,46 @@ class Deer {
         this.QUERY_URL = "http://tinydev.rerum.io/app/query"
         this.FOCUS_OBJECT = document.getElementsByTagName("deer-view")[0] || document.getElementById("deer-view")
 
+        //FIXME: This is giving errors I can't seem to get around.
+        /*
+        this.newObjectLoader = new MutationObserver(this.newObjectRender(this.defaultTemplate)) //this.newObjectRender(this.TEMPLATES.default)
+        this.newObjectLoader.observe(this.FOCUS_OBJECT, {
+            attributes: true
+        })
+        */
+
         /**
+            * Want to be able to do like DEER.TEMPLATES.Person to have it build the HTML form for a person.
+            * Remember the functions have to already have been defined above to be added into the template here and
+            * that is what scopes them to DEER and to the TEMPLATE so they can be used throughout.  This is so from the client
+            * a user could do DEER.renderPerson(personOBj) or DEER.TEMPLATE.Person(personObj).  We can move scope around now
+            * freely if this becomes undesirable or unmanagable.  The use of the 'this' keyword required to manage scope this way.
+
+            * !!! DO NOT DEFINE FUNctions under this template object. !!! 
+        */
+        this.TEMPLATES = {
+            /* Templater functions to produce HTML for the types of things we are expecting */
+            Person: this.renderPerson,
+            List: this.renderList,
+            Event: this.renderEvent,
+            Location: this.renderLocation,
+            Thing: this.renderThing,
+            Unknown: this.renderUnknown,
+            json: this.renderJSON,
+            default: this.renderElement,
+            /* Helper fuctions used in more than one of the renderes defined above, scoped here as well as DEER */
+            determineType: this.determineType,
+            TYPES : this.TYPES,
+            renderProp : this.renderProp,
+            getValue : this.getValue,
+            renderDepiction: this.renderDepiction
+        }
+    }
+            /**
          * Fetch the JSON from a URL
          * @param {String} id: http or https URL
          */
-        this.resolveJSON = async function(id) {
+        async resolveJSON(id) {
             let j = {}
             if(id){
                 await fetch(id)
@@ -105,7 +140,7 @@ class Deer {
          * @param {Object} obj complete resource to process
          * @param {Object} attribution creator and generator identities
          */
-        this.create = async function(obj, attribution, evidence) {
+        async create(obj, attribution, evidence) {
             let mint = {
                 "@context": obj["@context"] || this.default.context,
                 "@type": obj["@type"] || this.default.type,
@@ -174,7 +209,7 @@ class Deer {
          * Set this as the DEER object to draw's URL
          * @param {String} url A URL that leads to a JSON object we want to draw
          */
-        this.drawUsingURL = async function(url){
+        async drawUsingURL(url){
             this.suppliedURL = url
             let resolvedCollection = await this.resolveJSON(url)
             this.suppliedObj = resolvedCollection
@@ -186,7 +221,7 @@ class Deer {
          * Take in a new object for DEER to understand as its supplied object for drawing
          * @param {Object} obj Some JSON object to draw to th screen
          */
-        this.drawUsingObject = function(obj){
+        drawUsingObject(obj){
             this.suppliedURL = (obj.id)?obj.id:(obj["@id"])?obj["@id"]:""
             this.suppliedObj = obj //Or should we make a clone instead?
             this.templateType = this.determineType(obj)
@@ -197,7 +232,7 @@ class Deer {
          * Set this as the DEER object to draw's URL
          * @param {String} url The URL of some supplied json object
          */
-        this.supplyURL = async function(url){
+        async supplyURL(url){
             this.suppliedURL = url
             let resolvedCollection = await this.resolveJSON(url)
             this.suppliedObj = resolvedCollection
@@ -208,7 +243,7 @@ class Deer {
          * Set this as the DEER object to draw
          * @param {Object} obj some json object we are hoping to draw to the screen
          */
-        this.supplyObj=function(obj){
+        supplyObj(obj){
             this.suppliedObj = obj
             this.templateType = this.determineType(obj)
             this.resources = [] //??
@@ -219,7 +254,7 @@ class Deer {
          * @see this.drawUsingObject
          * @see this.drawUsingURL
          */
-        this.draw=async function(){
+        async draw(){
             let options = {}
             let html = await this.TEMPLATES[this.templateType](this.suppliedObj, options)
             //Note this won't keep appending templates, it will replace what is there.  
@@ -229,7 +264,7 @@ class Deer {
          * Given an object, try to determine what type it is so we know how to draw it.
          * @param {Object} obj some json object we are hoping has a discernable type
          */
-        this.determineType=function(obj){
+        determineType(obj){
             let t = "Unknown"
             let objType = (obj.type) ? obj.type : (obj["@type"]) ? obj["@type"] : "not found"
 
@@ -274,7 +309,7 @@ class Deer {
         /**
             An error handler for various HTTP traffic scenarios
         */
-        this.handleHTTPError=function(response){
+        handleHTTPError(response){
             if (!response.ok){
                 let status = response.status
                 switch(status){
@@ -309,7 +344,7 @@ class Deer {
          * @param {Object} obj object to write to database
          * @returns {Promise} Fetch write to database resolves in new object state
          */
-        this.upsert=function(obj) {
+        upsert(obj) {
             // TODO: stub header or _id property to force the object ID in MongoDB
             let config = {
                 url: obj["@id"] ? this.UPDATE_URL : this.CREATE_URL,
@@ -335,7 +370,7 @@ class Deer {
          * @param {?} property some obj.thing being passed in
          * @param {String} asType some typeof thing you are expecting back as the value
          */
-        this.getValue=function(property, asType) {
+        getValue(property, asType) {
             // TODO: There must be a best way to do this...
             let prop;
             if(property === undefined){
@@ -398,7 +433,7 @@ class Deer {
          * @param {HTMLElement} elem The DOM Element in which the template will be placed
          * @param {function} tmp Function to return Template literal
          */
-        this.renderElement = async function(elem, tmp) {
+        async renderElement(elem, tmp) {
             while (elem.firstChild) {
                 elem.removeChild(elem.firstChild)
             }
@@ -412,7 +447,7 @@ class Deer {
          * Discovered annotations are attached to the original object and returned.
          * @param {Object} obj Target object to search for description
          */
-        this.expand=async function(obj) {
+        async expand(obj) {
             let findId = obj["@id"]
             let annos = await findByTargetId(findId)
             // TODO: attach evidence to each property value
@@ -460,7 +495,7 @@ class Deer {
          * id passed in. Promise resolves to an array of annotations.
          * @param {String} id URI for the targeted entity
          */
-        this.findByTargetId = async function(id) {
+        async findByTargetId(id) {
             let everything = Object.keys(localStorage).map(JSON.parse(localStorage.getItem(k)))
             let obj = {
                 target: id
@@ -484,7 +519,7 @@ class Deer {
          * Intended for Elements representing an entity for styling.
          * @param {String} className to be set
          */
-        this.setClass=function(className) {
+        setClass(className) {
             // TODO: Config a list of these and run remove(...CLASSES) instead
             this.FOCUS_OBJECT.classList.remove(...this.TYPES)
             this.FOCUS_OBJECT.classList.add(className)
@@ -495,7 +530,7 @@ class Deer {
          * mutationsList for "deer-object" attribute changes.
          * @param {Array} mutationsList of MutationRecord objects
          */
-        this.newObjectRender = async function(mutationsList) {
+        async newObjectRender(mutationsList) {
             for (var mutation of mutationsList) {
                 if (mutation.attributeName === "deer-object") {
                     let id = this.FOCUS_OBJECT.getAttribute("deer-object")
@@ -510,7 +545,7 @@ class Deer {
          * This may also be useful as a # or path.
          * @param {String} id URL or URI that identifies the object
          */
-        this.focusOn = function(id) {
+        focusOn(id) {
             this.FOCUS_OBJECT.setAttribute('deer-object', id)
         }
 
@@ -522,7 +557,7 @@ class Deer {
          * @param {String} typeOverride to force a template
          * @param {any} options specific to the template function
          */
-        this.getTemplate = async function(obj, typeOverride, options) {
+        async getTemplate(obj, typeOverride, options) {
             let templateFunction = function () {}
             let type = typeOverride || obj["@type"] || "default"
             templateFunction = this.TEMPLATES[type]
@@ -537,7 +572,7 @@ class Deer {
          * @param {String} key the name of the key in the obj we are looking for
          * @param {String} label The label to be displayed when drawn
          */
-        this.renderProp=function(obj, key, label) {
+        renderProp(obj, key, label) {
             let prop = obj.key
             //let altLabel = options.altLabel || prop
             let altLabel = label
@@ -555,7 +590,7 @@ class Deer {
          * @param {Object} obj some json to be drawn as JSON
          * @param {Object} options additional properties to draw with the JSON
          */
-        this.renderJSON=function(obj, options) {
+        renderJSON(obj, options) {
             let indent = options.indent || 4
             let replacer = options.replacer || null
             try {
@@ -569,7 +604,7 @@ class Deer {
          * @param {Object} obj some json of type Entity to be drawn
          * @param {Object} options additional properties to draw with the Entity
          */
-        this.renderEntity=function(obj, options = {}) {
+        renderEntity(obj, options = {}) {
             let elem = `<label>${this.getValue(obj[options.label])||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"}</label>`
             let tmp = []
             for (prop in obj) {
@@ -582,7 +617,7 @@ class Deer {
          * @param {Object} obj some json of type Person to be drawn
          * @param {Object} options additional properties to draw with the Person
          */
-        this.renderPerson=function(obj, options) {
+        renderPerson(obj, options) {
             try {
                 let label = this.getValue(obj.label)||this.getValue(obj.name)||this.getValue(obj.label)||"[ unlabeled ]"
                 //let prop = this.renderProp(obj, options.birthDate || "birthDate", "Birth Date") + renderProp(obj, options.deathDate || "deathDate", "Death Date") //Too many errors
@@ -607,7 +642,7 @@ class Deer {
          * @param {Object} obj some json of type Event to be drawn
          * @param {Object} options additional properties to draw with the Event
          */
-        this.renderEvent=function(obj, options) {
+        renderEvent(obj, options) {
             try {
                 let elem = `<h1> EVENT </h1>`
                 return elem
@@ -621,7 +656,7 @@ class Deer {
          * @param {Object} obj some json of type List to be drawn
          * @param {Object} options additional properties to draw with the List
          */
-        this.renderList=async function(obj, options) {
+        async renderList(obj, options) {
             /**
             *   Define rendering helper functions for lists here
             */
@@ -669,7 +704,7 @@ class Deer {
          * @param {Object} obj some json of type Unknown to be drawn
          * @param {Object} options additional properties to draw with the Unknown
          */
-        this.renderUnknown=function(obj, options){
+        renderUnknown(obj, options){
             console.log("RENDER AN UNKNOWN")
             try {
                 let elem = `<label>This list is of an unknown type</label>`
@@ -685,7 +720,7 @@ class Deer {
          * @param {Object} obj some json of type Location to be drawn
          * @param {Object} options additional properties to draw with the Location
          */
-        this.renderLocation=function(obj, options){
+        renderLocation(obj, options){
             try {
                 let elem = `<h1>LOCATION</h1>`
                 return elem
@@ -699,7 +734,7 @@ class Deer {
          * @param {Object} obj some json of type Thing to be drawn
          * @param {Object} options additional properties to draw with the Thing
          */
-        this.renderThing=function(obj, options){
+        renderThing(obj, options){
             try {
                 let elem = `<h1>THING</h1>`
                 return elem
@@ -708,45 +743,9 @@ class Deer {
             }
             return null
         }
-
-        //FIXME: This is giving errors I can't seem to get around.
-        /*
-        this.newObjectLoader = new MutationObserver(this.newObjectRender(this.defaultTemplate)) //this.newObjectRender(this.TEMPLATES.default)
-        this.newObjectLoader.observe(this.FOCUS_OBJECT, {
-            attributes: true
-        })
-        */
-
-        /**
-            * Want to be able to do like DEER.TEMPLATES.Person to have it build the HTML form for a person.
-            * Remember the functions have to already have been defined above to be added into the template here and
-            * that is what scopes them to DEER and to the TEMPLATE so they can be used throughout.  This is so from the client
-            * a user could do DEER.renderPerson(personOBj) or DEER.TEMPLATE.Person(personObj).  We can move scope around now
-            * freely if this becomes undesirable or unmanagable.  The use of the 'this' keyword required to manage scope this way.
-
-            * !!! DO NOT DEFINE FUNctions under this template object. !!! 
-        */
-        this.TEMPLATES = {
-            /* Templater functions to produce HTML for the types of things we are expecting */
-            Person: this.renderPerson,
-            List: this.renderList,
-            Event: this.renderEvent,
-            Location: this.renderLocation,
-            Thing: this.renderThing,
-            Unknown: this.renderUnknown,
-            json: this.renderJSON,
-            default: this.renderElement,
-            /* Helper fuctions used in more than one of the renderes defined above, scoped here as well as DEER */
-            determineType: this.determineType,
-            TYPES : this.TYPES,
-            renderProp : this.renderProp,
-            getValue : this.getValue,
-            renderDepiction: this.renderDepiction
-        }
-
-    }
-
+    
 }
+
 
 
 //export {Deer}
