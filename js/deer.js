@@ -14,6 +14,14 @@
     Need a list to test with?  http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
  */
 
+import {
+    DeerRender as renderer
+} from './deer-render.js'
+import {default as DEER} from './config.js'
+
+const observables = document.querySelectorAll(DEER.VIEW)
+Array.from(observables).forEach(elem=>new renderer(elem))
+
 class Deer {
     /**
     Using this.stuff throughout has scoping issues if you aren't careful.  
@@ -23,7 +31,7 @@ class Deer {
     in their renderers.  Multi purpose helper functions were scoped to TEMPLATES instead of the copy and pasting them throughout
     the renderers.  
     */
-    constructor() {
+    constructor(collectionName) {
         this.TYPES = {Event:"Event", Person:"Person", Location:"Location", List:"List", Thing:"Thing", Unknown:"Unknown"} //More like an enum
         this.defaultTemplate = {
             "@context": "",
@@ -738,7 +746,4 @@ class Deer {
         }
     
 }
-
-
-
-//export {Deer}
+export {Deer}

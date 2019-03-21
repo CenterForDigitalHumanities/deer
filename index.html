@@ -4,39 +4,22 @@ author: Patrick Cuba <cubap@slu.edu>
 -->
 <html>
 
-<head>
-    <title>Deep Codex</title>
-    <meta charset="UTF-8">
-    <!-- <link rel="stylesheet" href="css/deep-codex.css"> -->
-    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
-    <style>
-        label{
-            display:block;
-        }
-    </style>
-</head>
+    <head>
+        <title>Data Encoding and Exhibition for RERUM</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    </head>
 
-<body>
-    <div id="sanity"> welcome to DEER </div>
-    <div class="container">
-        <div id="messages" class="row"></div>
-        <div id="main" class="row">
-            <div id="canvasView" class="col"></div>
-            <div id="objectDescription" class="col"></div>
+    <body>
+        <div class="row">
+            <deer-view class="col" deer-id="http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf" deer-template="entity">
+                http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
+            </deer-view>
+            <deer-view class="col" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7" deer-template="entity">
+                http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
+            </deer-view>
         </div>
-        <nav id="manifestNav" class="row"></nav>
-    </div>
-    <deer-view></deer-view>
-    <!-- Breaks locally when script type="module", MIME type violation-->
-    <!-- https://html.spec.whatwg.org/multipage/scripting.html#scriptingLanguages:javascript-mime-type -->
-    <script src="./js/deer.js" type="text/javascript"></script>
-    <script src="./js/config.js" type="text/javascript" ></script>
-</body>
-
-<script>
-    console.log("New Deer")
-    let mydeer = new Deer()
-    mydeer.drawUsingURL("http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf")
-</script>
-
+        <script src="./js/deer.js" type="module"></script>
+    </body>
+    
 </html>
