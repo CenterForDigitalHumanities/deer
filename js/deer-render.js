@@ -140,19 +140,14 @@ TEMPLATES.entity= function(obj, options = {}) {
  */
 TEMPLATES.person= function(obj, options={}) {
     try {
-        let label = UTILS.getValue(obj.label)||UTILS.getValue(obj.name)||UTILS.getValue(obj.label)||"[ unlabeled ]"
-        //let prop = this.TEMPLATES.prop(obj, options.birthDate || "birthDate", "Birth Date") + TEMPLATES.prop(obj, options.deathDate || "deathDate", "Death Date") //Too many errors
-        let prop = this.TEMPLATES.prop(obj, "birthDate", "Birth Date") + this.TEMPLATES.prop(obj, "deathDate", "Death Date")
-        //let dep = this.renderDepiction(obj, options) TODO need to write this function
-        //let famName = UTILS.getValue(obj[options.familyName])||UTILS.getValue(obj.familyName)||"[ unknown ]"
-        //let givenName = UTILS.getValue(obj[options.givenName])||UTILS.getValue(obj.givenName)||""
-        let famName = UTILS.getValue(obj.familyName)||"[ unknown ]"
-        let givenName = UTILS.getValue(obj.givenName)||""
-        let elem = `<label>Label: ${label}</label>`
-        elem += `<div class="mc-name">Name: ${famName}, ${givenName}</div>`
-        elem += prop
-        //elem += dep 
-        return elem
+        let label = obj[options.label]||obj.name||obj.label
+        let tmpl = `<h2>${(label)?UTILS.getValue(label):"[ unlabeled ]"}</h2>`
+        let prop = TEMPLATES.prop(obj, "birthDate", "Birth Date") + TEMPLATES.prop(obj, "deathDate", "Death Date")
+        let famName = (obj.familyName&&UTILS.getValue(obj.familyName))||"[ unknown ]"
+        let givenName = (obj.givenName&&UTILS.getValue(obj.givenName))||""
+        tmpl += `<div class="mc-name">Name: ${famName}, ${givenName}</div>`
+        tmpl += prop
+        return tmpl
     } catch (err) {
         return null
     }

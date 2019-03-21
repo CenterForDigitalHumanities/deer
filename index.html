@@ -4,22 +4,40 @@ author: Patrick Cuba <cubap@slu.edu>
 -->
 <html>
 
-    <head>
-        <title>Data Encoding and Exhibition for RERUM</title>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="https://unpkg.com/chota@latest">
-    </head>
+<head>
+    <title>Data Encoding and Exhibition for RERUM</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+</head>
 
-    <body>
-        <div class="row">
-            <deer-view class="col" deer-id="http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf" deer-template="entity">
-                http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
-            </deer-view>
-            <deer-view class="col" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7" deer-template="entity">
+<body class="container">
+    <div class="row">
+
+        <div class="col">
+            <h1>View as Person</h1>
+            <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
+                deer-template="person">
                 http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
-            </deer-view>
+            </div>
         </div>
-        <script src="./js/deer.js" type="module"></script>
-    </body>
-    
+
+        <div class="col">
+            <h1>View as Entity</h1>
+            <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
+                deer-template="entity">
+                http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
+            </div>
+        </div>
+
+        <div class="col">
+            <h1>View as Entity</h1>
+            <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf"
+                deer-template="entity">
+                http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
+            </div>
+        </div>
+    </div>
+    <script src="./js/deer.js" type="module"></script>
+</body>
+
 </html>
