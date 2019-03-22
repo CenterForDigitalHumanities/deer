@@ -61,7 +61,7 @@ const TEMPLATES = {}
 
 RENDER.element = function(elem,obj) {
     let template = elem.getAttribute(DEER.TEMPLATE)
-    elem.innerHTML = TEMPLATES[template || "json"](obj)
+    elem.innerHTML = TEMPLATES[template.toLowerCase() || "json"](obj)
 }
 
 /**
@@ -142,11 +142,13 @@ TEMPLATES.person= function(obj, options={}) {
     try {
         let label = obj[options.label]||obj.name||obj.label
         let tmpl = `<h2>${(label)?UTILS.getValue(label):"[ unlabeled ]"}</h2>`
-        let prop = TEMPLATES.prop(obj, "birthDate", "Birth Date") + TEMPLATES.prop(obj, "deathDate", "Death Date")
+        let dob = TEMPLATES.prop(obj, "birthDate", "Birth Date") || ``
+        let dod = TEMPLATES.prop(obj, "deathDate", "Death Date") || ``
         let famName = (obj.familyName&&UTILS.getValue(obj.familyName))||"[ unknown ]"
         let givenName = (obj.givenName&&UTILS.getValue(obj.givenName))||""
-        tmpl += `<div class="mc-name">Name: ${famName}, ${givenName}</div>`
-        tmpl += prop
+        tmpl += (obj.familyName||obj.givenName) ? `<div class="mc-name">Name: ${famName}, ${givenName}</div>` : ``
+        tmpl += dob + dod
+        tmpl += `<a href="#${obj["@id"]}">${name}</a>`
         return tmpl
     } catch (err) {
         return null
@@ -160,8 +162,8 @@ TEMPLATES.person= function(obj, options={}) {
  */
 TEMPLATES.event= function(obj, options={}) {
     try {
-        let elem = `<h1> EVENT </h1>`
-        return elem
+        let tmpl = `<h1> EVENT </h1>`
+        return tmpl
     } catch (err) {
         return null
     }
