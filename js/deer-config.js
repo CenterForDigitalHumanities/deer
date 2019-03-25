@@ -1,4 +1,3 @@
-console.log("CONFIG")
 export default {
     ID: "deer-id",                  // attribute, URI for resource to render
     TYPE: "deer-type",              // attribute, JSON-LD @type
@@ -7,7 +6,8 @@ export default {
     CONTEXT: "deer-context",        // attribute, JSON-LD @context, scoped
     LIST: "deer-list",              // attribute, property with resource array
     COLLECTION: "deer-collection",  // attribute, name of aggregating collection
-    LISTENING: "deer-listening",    // attribute, name of aggregating collection
+    LISTENING: "deer-listening",    // attribute, name of container to watch for clicks
+    LINK: "deer-link",              // attribute, location of href#[deer-id] for <a>s
     VIEW: "deer-view, .deer-view",  // selector, identifies render containers
     FORM: "form[deer-type]",        // selector, identifies data entry containers
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
