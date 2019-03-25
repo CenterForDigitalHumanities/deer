@@ -80,6 +80,38 @@ export default {
         } finally {
             return (prop.length === 1) ? prop[0] : prop
         }
+    },
+    /**
+    An error handler for various HTTP traffic scenarios
+    */
+    handleHTTPError: function(response){
+        if (!response.ok){
+            let status = response.status
+            switch(status){
+                case 400:
+                    console.log("Bad Request")
+                break
+                case 401:
+                    console.log("Request was unauthorized")
+                break
+                case 403:
+                    console.log("Forbidden to make request")
+                break
+                case 404:
+                    console.log("Not found")
+                break
+                case 500:
+                    console.log("Internal server error")
+                break
+                case 503:
+                    console.log("Server down time")
+                break
+                default:
+                    console.log("unahndled HTTP ERROR")
+            }
+            throw Error("HTTP Error: "+response.statusText)
+        }
+        return response
     }
 
 }

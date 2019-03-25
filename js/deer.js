@@ -22,10 +22,6 @@ import {default as DEER} from './deer-config.js'
 const observables = document.querySelectorAll(DEER.VIEW)
 Array.from(observables).forEach(elem=>new renderer(elem))
 
-/**
- * The best way to 
- */
-
 class Deer {
     constructor(collectionName) {
         this.TYPES = {Event:"Event", Person:"Person", Location:"Location", List:"List", Thing:"Thing", Unknown:"Unknown"} //More like an enum
@@ -303,38 +299,7 @@ class Deer {
             
         }
 
-        /**
-            An error handler for various HTTP traffic scenarios
-        */
-        handleHTTPError(response){
-            if (!response.ok){
-                let status = response.status
-                switch(status){
-                    case 400:
-                        console.log("Bad Request")
-                    break;
-                    case 401:
-                        console.log("Request was unauthorized")
-                    break;
-                    case 403:
-                        console.log("Forbidden to make request")
-                    break;
-                    case 404:
-                        console.log("Not found")
-                    break;
-                    case 500:
-                        console.log("Internal server error")
-                    break;
-                    case 503:
-                        console.log("Server down time")
-                    break;
-                    default:
-                        console.log("unahndled HTTP ERROR")
-                }
-                throw Error("HTTP Error: "+response.statusText)
-            }
-            return response
-        }
+
 
         /**
          * Update or create object in database. 
