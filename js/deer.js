@@ -17,20 +17,16 @@
 import {
     DeerRender as renderer
 } from './deer-render.js'
-import {default as DEER} from './config.js'
+import {default as DEER} from './deer-config.js'
 
 const observables = document.querySelectorAll(DEER.VIEW)
 Array.from(observables).forEach(elem=>new renderer(elem))
 
+/**
+ * The best way to 
+ */
+
 class Deer {
-    /**
-    Using this.stuff throughout has scoping issues if you aren't careful.  
-    I also noticed some serious scoping issues when tying to use it like
-    let newperson = mydeer.TEMPLATES.Person
-    It made it way easier to rescope all templating functionality into TEMPLATES and scope singular purpose helper functions
-    in their renderers.  Multi purpose helper functions were scoped to TEMPLATES instead of the copy and pasting them throughout
-    the renderers.  
-    */
     constructor(collectionName) {
         this.TYPES = {Event:"Event", Person:"Person", Location:"Location", List:"List", Thing:"Thing", Unknown:"Unknown"} //More like an enum
         this.defaultTemplate = {

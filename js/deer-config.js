@@ -7,6 +7,7 @@ export default {
     CONTEXT: "deer-context",        // attribute, JSON-LD @context, scoped
     LIST: "deer-list",              // attribute, property with resource array
     COLLECTION: "deer-collection",  // attribute, name of aggregating collection
+    LISTENING: "deer-listening",    // attribute, name of aggregating collection
     VIEW: "deer-view, .deer-view",  // selector, identifies render containers
     FORM: "form[deer-type]",        // selector, identifies data entry containers
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
@@ -22,40 +23,3 @@ export default {
 
     SUPPRESS: ["__rerum","@context"] // properties to ignore
 }
-
-
-// Dummy schema
-// let fields = [{
-// 	label: "test",
-// 	default_value: "filled",
-// 	options: {
-// 		helptext: "",
-// 		type: "number", // memo, text, number, email, url, tel, range, date, month, week, time, datetime, color
-// 		required: false,
-// 		readonly: false,
-// 		min: null, // range, date
-// 		max: null, // range, date
-// 		step: null, // range
-// 		pattern: null // tel
-// 	},
-// 	type: "rr:test" // web ontology from schema (JSON-LD @type)
-// }, {
-// 	label: "multiple",
-// 	default_value: "grommit",
-// 	options: {
-// 		type: "memo"
-// 	},
-// 	type: "cidoc-crm:Stuff"
-// }, {
-// 	label: "multiple",
-// 	default_value: "grommit",
-// 	options: {
-// 		type: "date"
-// 	}
-// }, {
-// 	label: "multiple",
-// 	default_value: "grommit",
-// 	options: {
-// 		type: "text"
-// 	}
-// }]
