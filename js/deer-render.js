@@ -9,7 +9,7 @@
  * @see tiny.rerum.io
  */
 
-import {default as DEER} from './config.js'
+import {default as DEER} from './deer-config.js'
 import {default as UTILS} from './deer-utils.js'
 
 const changeLoader = new MutationObserver(renderChange)
@@ -146,7 +146,7 @@ TEMPLATES.person= function(obj, options={}) {
         let dod = TEMPLATES.prop(obj, "deathDate", "Death Date") || ``
         let famName = (obj.familyName&&UTILS.getValue(obj.familyName))||"[ unknown ]"
         let givenName = (obj.givenName&&UTILS.getValue(obj.givenName))||""
-        tmpl += (obj.familyName||obj.givenName) ? `<div class="mc-name">Name: ${famName}, ${givenName}</div>` : ``
+        tmpl += (obj.familyName||obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
         tmpl += dob + dod
         tmpl += `<a href="#${obj["@id"]}">${name}</a>`
         return tmpl
