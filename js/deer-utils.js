@@ -9,7 +9,7 @@
  * @see tiny.rerum.io
  */
 
-import {default as DEER} from './deer-config.js/index.js'
+import { default as DEER } from './deer-config.js'
 
 export default {
     listFromCollection: function(){

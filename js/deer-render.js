@@ -9,12 +9,12 @@
  * @see tiny.rerum.io
  */
 
-import {default as DEER} from './deer-config.js'
-import {default as UTILS} from './deer-utils.js'
+import { default as UTILS } from './deer-utils.js'
+import { default as DEER } from './deer-config.js'
 
 const changeLoader = new MutationObserver(renderChange)
 
-export class DeerRender {
+export default class DeerRender {
     constructor(elem){
         changeLoader.observe(elem, {
             attributes:true

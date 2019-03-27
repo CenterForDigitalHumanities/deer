@@ -14,10 +14,8 @@
     Need a list to test with?  http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
  */
 
-import {
-    DeerRender as renderer
-} from './deer-render.js'
-import {default as DEER} from './deer-config.js'
+import { default as renderer } from './deer-render.js'
+import { default as DEER } from './deer-config.js'
 
 const observables = document.querySelectorAll(DEER.VIEW)
 Array.from(observables).forEach(elem=>new renderer(elem))
