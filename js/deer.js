@@ -402,78 +402,7 @@ class Deer {
             }
         }
 
-        /**
-         * Take a known object with an id and query for annotations targeting it.
-         * Discovered annotations are attached to the original object and returned.
-         * @param {Object} obj Target object to search for description
-         */
-        async expand(obj) {
-            let findId = obj["@id"]
-            let annos = await findByTargetId(findId)
-            // TODO: attach evidence to each property value
-            // add each value in a predictable way
-            // type properties for possible rendering?
-            for (let i = 0; i < annos.length; i++) {
-                let body = annos[i].body
-                if (!Array.isArray(body)) {
-                    body = [body]
-                }
-                Leaf: for (let j = 0; j < body.length; j++) {
-                    if (body[j].evidence) {
-                        let evId = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence
-                        obj.evidence = await get(evId)
-                    } else {
-                        let val = body[j]
-                        let k = Object.keys(val)[0]
-                        if (!val.Source) {
-                            // include an origin for this property, placehold madsrdf:Source
-                            let aVal = val[k].value || val[k]
-                            val[k] = {
-                                value: aVal,
-                                Source: {
-                                    citationSource: annos[i]["@id"],
-                                    citationNote: annos[i].label || "Composed object from DEER",
-                                    comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
-                                }
-                            }
-                        }
-                        if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
-                            // this is not the most recent available
-                            // TODO: maybe check generator, etc.
-                            continue Leaf
-                        } else {
-                            obj = Object.assign(obj, val)
-                        }
-                    }
-                }
-            }
-            return obj
-        }
-
-        /**
-         * Execute query for any annotations in RERUM which target the
-         * id passed in. Promise resolves to an array of annotations.
-         * @param {String} id URI for the targeted entity
-         */
-        async findByTargetId(id) {
-            let everything = Object.keys(localStorage).map(JSON.parse(localStorage.getItem(k)))
-            let obj = {
-                target: id
-            }
-            let matches = await fetch(this.QUERY_URL, {
-                method: "POST",
-                body: JSON.stringify(obj),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(this.handleHTTPError)
-            .then(response => response.json())
-            let local_matches = everything.filter(o => o.target === id)
-            matches = local_matches.concat(matches)
-            return matches
-        }
-
+        
         /**
          * Removes known "@type" names and sets the one passed in.
          * Intended for Elements representing an entity for styling.

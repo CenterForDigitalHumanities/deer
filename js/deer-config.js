@@ -31,6 +31,6 @@ export default {
      * or an HTML String.
      */
     TEMPLATES: {
-        cat: (obj) => `<img src="http://placekitten.com/200/300">${obj.name}`
+        cat: (obj) => `${obj.name}<img src="http://placekitten.com/200/300">`
     }
 }

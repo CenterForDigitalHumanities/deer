@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
-author: Patrick Cuba <cubap@slu.edu>
--->
+    author: Patrick Cuba <cubap@slu.edu>
+    -->
 <html>
 
 <head>
@@ -14,24 +14,37 @@ author: Patrick Cuba <cubap@slu.edu>
     <div class="row">
 
         <div class="col">
-                <h1>Load from Hash</h1>
-                <div class="col deer-view" id="hashExample"
-                    deer-template="entity">
-                    no hash
-            </div>
-        </div>
-    
-        <div class="col">
-            <h1>View as Person</h1>
-            <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
-                deer-template="person">
-                http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
+            <h1>View as List</h1>
+            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf"
+                deer-list="itemListElement" deer-template="list">
+                http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
             </div>
         </div>
 
         <div class="col">
+            <h1>Load from Hash</h1>
+            <div class="col deer-view bg-light" id="hashExample" deer-template="entity">
+                no hash
+            </div>
+        </div>
+
+        <div class="col">
+            <h1>View as Person</h1>
+            <small>using class .deer-view</small>
+            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
+                deer-template="person">
+                http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
+            </div>
+            <small>using element &lt;deer-view></small>
+            <deer-view class="col bg-light" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
+                deer-template="person">
+                http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
+            </deer-view>
+        </div>
+
+        <div class="col">
             <h1>View as Cat</h1>
-            <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
+            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
                 deer-template="cat">
                 http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
             </div>
@@ -39,15 +52,17 @@ author: Patrick Cuba <cubap@slu.edu>
 
         <div class="col">
             <h1>View as Entity</h1>
-            <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf"
+            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c6abc5ae4b022c3672204d3"
                 deer-template="entity">
-                http://devstore.rerum.io/v1/id/5c7f02e9e4b010f22a4f0adf
+                http://devstore.rerum.io/v1/id/5c6abc5ae4b022c3672204d3
             </div>
         </div>
+
     </div>
+
     <script src="./js/deer.js" type="module"></script>
     <script>
-        window.onhashchange = onload = () => hashExample.setAttribute("deer-id",window.location.hash.substr(1))
+        window.onhashchange = onload = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))
     </script>
 </body>
 

@@ -63,8 +63,15 @@ const RENDER = {}
 const TEMPLATES = {}
 
 RENDER.element = function(elem,obj) {
-    let template = elem.getAttribute(DEER.TEMPLATE) || "json"
-    elem.innerHTML = TEMPLATES[template.toLowerCase()](obj)
+    return UTILS.expand(obj).then(obj=>{
+        let template = TEMPLATES[elem.getAttribute(DEER.TEMPLATE)] || TEMPLATES.json
+        let options = {
+            list: elem.getAttribute(DEER.LIST),
+            link: elem.getAttribute(DEER.LINK),
+            collection: elem.getAttribute(DEER.COLLECTION)
+        }
+        elem.innerHTML = template(obj,options)
+    })
 }
 
 /**
@@ -108,13 +115,12 @@ TEMPLATES.prop= function(obj, key, label) {
  * @param {Object} options additional properties to draw with the Entity
  */
 TEMPLATES.entity= function(obj, options = {}) {
-    let label = obj[options.label]||obj.name||obj.label
-    let tmpl = `<h2>${(label)?UTILS.getValue(label):"[ unlabeled ]"}</h2>`
+    let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
     let list = ``
 
     for (let key in obj) {
         if(DEER.SUPPRESS.indexOf(key)>-1) {continue}
-        let label = obj[key].label || obj[key].name || obj[key].title|| obj[key].type || obj[key]['@type']  || key
+        let label = key
         let value = UTILS.getValue(obj[key])
         try {
             if ((value.image || value.trim()).length > 0) {
@@ -123,10 +129,10 @@ TEMPLATES.entity= function(obj, options = {}) {
         } catch (err) {
             // Some object maybe or untrimmable somesuch
             // is it object/array?
+            list+=`<dt>${label}</dt>`
             if(Array.isArray(value)){
-                list+=`<dt>${label}</dt>`
                 value.forEach((val,index)=>{
-                    let name = val.label || val.name || val.title || val.type || val['@type'] || label+index
+                    let name = UTILS.getLabel(val,(val.type || val['@type'] || label+index))
                     list+= (val["@id"]) ? `<dd><a href="#${val["@id"]}">${name}</a></dd>` : `<dd>${name}</dd>`
                 })
             }
@@ -136,6 +142,20 @@ TEMPLATES.entity= function(obj, options = {}) {
     tmpl += (list.includes("<dd>")) ? `<dl>${list}</dl>` : ``
     return tmpl
 }
+
+TEMPLATES.list= function(obj, options={}) {
+    let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
+    if(options.list){
+        tmpl += `<ul>`
+        obj[options.list].forEach((val,index)=>{
+            let name = UTILS.getLabel(val,(val.type || val['@type'] || label+index))
+            tmpl+= (val["@id"]) ? `<li><a href="#${val["@id"]}">${name}</a></li>` : `<li>${name}</li>`
+        })
+        tmpl += `</ul>`
+    }
+
+    return tmpl
+}
 /**
  * The TEMPLATED renderer to draw JSON to the screen
  * @param {Object} obj some json of type Person to be drawn
@@ -143,8 +163,7 @@ TEMPLATES.entity= function(obj, options = {}) {
  */
 TEMPLATES.person= function(obj, options={}) {
     try {
-        let label = obj[options.label]||obj.name||obj.label
-        let tmpl = `<h2>${(label)?UTILS.getValue(label):"[ unlabeled ]"}</h2>`
+        let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
         let dob = TEMPLATES.prop(obj, "birthDate", "Birth Date") || ``
         let dod = TEMPLATES.prop(obj, "deathDate", "Death Date") || ``
         let famName = (obj.familyName&&UTILS.getValue(obj.familyName))||"[ unknown ]"
@@ -165,7 +184,7 @@ TEMPLATES.person= function(obj, options={}) {
  */
 TEMPLATES.event= function(obj, options={}) {
     try {
-        let tmpl = `<h1> EVENT </h1>`
+        let tmpl = `<h1>${UTILS.getLabel(obj)}</h1>`
         return tmpl
     } catch (err) {
         return null

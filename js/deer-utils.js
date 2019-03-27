@@ -82,6 +82,90 @@ export default {
         }
     },
     /**
+     * Attempt to discover a readable label from the object
+     */
+    get getLabel() {
+        return (obj,noLabel="[ unlabeled ]",options={}) => {
+            if(typeof obj === "string") { return obj }
+            let label = obj[options.label]||obj.name||obj.label||obj.title
+            return (label)?this.getValue(label):noLabel
+        }
+    },
+    /**
+     * Take a known object with an id and query for annotations targeting it.
+     * Discovered annotations are attached to the original object and returned.
+     * @param {Object} obj Target object to search for description
+     */
+    get expand() {
+        return async function(obj) {
+            let findId = obj["@id"]
+            let annos = await this.findByTargetId(findId)
+            // TODO: attach evidence to each property value
+            // add each value in a predictable way
+            // type properties for possible rendering?
+            for (let i = 0; i < annos.length; i++) {
+                let body = annos[i].body
+                if (!body) { continue }
+                if (!Array.isArray(body)) {
+                    body = [body]
+                }
+                Leaf: for (let j = 0; j < body.length; j++) {
+                    if (body[j].evidence) {
+                        let evId = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence
+                        obj.evidence = await fetch(evId).then(response=>response.json()).catch(err=>err)
+                    } else {
+                        let val = body[j]
+                        let k = Object.keys(val)[0]
+                        if (!val.source) {
+                            // include an origin for this property, placehold madsrdf:Source
+                            let aVal = this.getValue(val[k])
+                            val[k] = {
+                                value: aVal,
+                                source: {
+                                    citationSource: annos[i]["@id"],
+                                    citationNote: annos[i].label || "Composed object from DEER",
+                                    comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                                }
+                            }
+                        }
+                        if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
+                            // this is not the most recent available
+                            // TODO: maybe check generator, etc.
+                            continue Leaf
+                        } else {
+                            obj = Object.assign(obj, val)
+                        }
+                    }
+                }
+            }
+            return obj
+        }
+    },
+    /**
+     * Execute query for any annotations in RERUM which target the
+     * id passed in. Promise resolves to an array of annotations.
+     * @param {String} id URI for the targeted entity
+     */
+    findByTargetId: async function(id) {
+        let everything = Object.keys(localStorage).map(k=>JSON.parse(localStorage.getItem(k)))
+        let obj = {
+            target: id
+        }
+        let matches = await fetch(DEER.URLS.QUERY, {
+            method: "POST",
+            body: JSON.stringify(obj),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then(this.handleHTTPError)
+        .then(response => response.json()).catch((err)=>err)
+        let local_matches = everything.filter(o => o.target === id)
+        matches = local_matches.concat(matches)
+        return matches
+    },
+
+    /**
     An error handler for various HTTP traffic scenarios
     */
     handleHTTPError: function(response){
