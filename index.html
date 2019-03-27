@@ -14,6 +14,14 @@ author: Patrick Cuba <cubap@slu.edu>
     <div class="row">
 
         <div class="col">
+                <h1>Load from Hash</h1>
+                <div class="col deer-view" id="hashExample"
+                    deer-template="entity">
+                    no hash
+            </div>
+        </div>
+    
+        <div class="col">
             <h1>View as Person</h1>
             <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
                 deer-template="person">
@@ -22,9 +30,9 @@ author: Patrick Cuba <cubap@slu.edu>
         </div>
 
         <div class="col">
-            <h1>View as Entity</h1>
+            <h1>View as Cat</h1>
             <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7"
-                deer-template="entity">
+                deer-template="cat">
                 http://devstore.rerum.io/v1/id/5c93dfcce4b0a44e13e614d7
             </div>
         </div>
@@ -38,6 +46,9 @@ author: Patrick Cuba <cubap@slu.edu>
         </div>
     </div>
     <script src="./js/deer.js" type="module"></script>
+    <script>
+        window.onhashchange = onload = () => hashExample.setAttribute("deer-id",window.location.hash.substr(1))
+    </script>
 </body>
 
 </html>

@@ -21,5 +21,16 @@ export default {
         SINCE: "http://devstore.rerum.io/v1/since"
     },
 
-    SUPPRESS: ["__rerum","@context"] // properties to ignore
+    SUPPRESS: ["__rerum","@context"], // properties to ignore
+
+    /**
+     * Add any custom templates here through import or copy paste.
+     * Templates added here will overwrite the defaults in deer-render.js.
+     * 
+     * Each property must be lower-cased and return a template literal
+     * or an HTML String.
+     */
+    TEMPLATES: {
+        cat: (obj) => `<img src="http://placekitten.com/200/300">${obj.name}`
+    }
 }

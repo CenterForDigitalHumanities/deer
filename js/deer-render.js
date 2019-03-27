@@ -24,7 +24,10 @@ export default class DeerRender {
         this.elem = elem
 
         try {
-            fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj))
+            if(!this.id){
+                throw new Error(this.id+" is not a valid id.")
+            }
+            fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj)).catch(err=>err)
         } catch(err){}
     }
 }
@@ -60,8 +63,8 @@ const RENDER = {}
 const TEMPLATES = {}
 
 RENDER.element = function(elem,obj) {
-    let template = elem.getAttribute(DEER.TEMPLATE)
-    elem.innerHTML = TEMPLATES[template.toLowerCase() || "json"](obj)
+    let template = elem.getAttribute(DEER.TEMPLATE) || "json"
+    elem.innerHTML = TEMPLATES[template.toLowerCase()](obj)
 }
 
 /**
@@ -169,3 +172,5 @@ TEMPLATES.event= function(obj, options={}) {
     }
     return null
 }
+
+Object.assign(TEMPLATES,DEER.TEMPLATES)
