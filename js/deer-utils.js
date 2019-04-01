@@ -81,5 +81,4 @@ export default {
             return (prop.length === 1) ? prop[0] : prop
         }
     }
-
 }
