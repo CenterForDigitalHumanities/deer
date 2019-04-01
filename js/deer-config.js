@@ -3,6 +3,7 @@ export default {
     TYPE: "deer-type",              // attribute, JSON-LD @type
     TEMPLATE: "deer-template",      // attribute, enum for custom template
     KEY: "deer-key",                // attribute, key to use for annotation
+    LABEL: "title",                 // attribute, alternate label for properties
     CONTEXT: "deer-context",        // attribute, JSON-LD @context, scoped
     LIST: "deer-list",              // attribute, property with resource array
     COLLECTION: "deer-collection",  // attribute, name of aggregating collection
@@ -24,7 +25,8 @@ export default {
     EVENTS: {
         CREATED: "deer-created",
         UPDATED: "deer-updated",
-        LOADED: "deer-loaded"
+        LOADED: "deer-loaded",
+        CLICKED: "deer-clicked"
     },
 
     SUPPRESS: ["__rerum","@context"], // properties to ignore
@@ -36,7 +38,5 @@ export default {
      * Each property must be lower-cased and return a template literal
      * or an HTML String.
      */
-    TEMPLATES: {
-        cat: (obj) => `${obj.name}<img src="http://placekitten.com/200/300">`
-    }
+    TEMPLATES: {}
 }

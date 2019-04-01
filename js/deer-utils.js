@@ -204,8 +204,8 @@ export default {
     /**
      * Broadcast a message about DEER
      */
-    broadcast: function(type, element, object){
-        let e = new CustomEvent(type, {detail: object})
+    broadcast: function(event={}, type, element, obj={}){
+        let e = new CustomEvent(type, {detail: Object.assign(obj,{target:event.target}),bubbles:true})
         element.dispatchEvent(e)
     }
 

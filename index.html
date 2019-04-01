@@ -8,15 +8,21 @@
     <title>Data Encoding and Exhibition for RERUM</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <style>
+        .card header {
+            font-style: italic;
+        }
+    </style>
 </head>
 
-<body class="container">
+<body>
     <div class="is-full-screen bg-dark text-light" id="badge">
         <div class="is-vertical-align is-center is-full-width" style="flex:1;flex-direction:column;">
             <h1 style="font-size:12rem;">DEER</h1><br>
             <p><em>Data Entry and Exhibition for Rerum</em></p>
             <a href="https://github.com/CenterForDigitalHumanities" target="_blank">
-                <img alt="@CenterForDigitalHumanities" class="avatar" height="48" src="https://avatars3.githubusercontent.com/u/13770519?v=4&amp;s=96" width="48">
+                <img alt="@CenterForDigitalHumanities" class="avatar" height="48"
+                    src="https://avatars3.githubusercontent.com/u/13770519?v=4&amp;s=96" width="48">
             </a>
             <small>
                 Walter J. Ong,
@@ -25,137 +31,330 @@
         </div>
     </div>
 
-<section class="row">
-    <p class="col-2 hide-sm"></p>
-    <p class="col-8">
-        Walter J. Ong, <small>S.J.</small> Center for Digital Humanities, in support of  
-        <a href="//rerum.io" target="_blank">RERUM</a> annotations, offers this simple project for quickly
-        creating exhibitions of annotated collections.
-    </p>
-</section>
 
-<section class="row">
-    <h2>Installing DEER</h2>
-    <p class="col-12">To install the script on your project, use the <code>deer.js</code> or <code>deer-render.js</code> on your page.</p>
-    <small class="col-12"><pre>&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha/deer.js" type="module">&lt;/script>
-&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha/deer-render.js" type="module">&lt;/script></pre></small>
-    <p class="col-12">
-        <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project" target="_blank">
-            View the wiki
-        </a>
-        or read on for details.       
-    </p>
-</section>
+    <div class="container">
 
-<section class="row">
-    <h2>Templates</h2>
-    <p class="col-12">
-        Use the <code>&lt;deer-view></code> element or <code>.deer-view</code> class to automatically connect the DEER
-        renderer to your page.
-    </p>
-    <small class="col-12"><pre>&lt;deer-view deer-id="https://example.com/id/001">&lt;/deer-view></pre></small>
-    <p class="col-12">
-        The DEER module will automatically detect these elements and watch the <code>deer-id</code> attribute,
-        rendering the resolved object inside. There are several templates available to you or you can 
-        <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Extending-DEER-with-Templates">create your own</a>.
-    </p>
+        <section class="row" id="tagline" style="position:relative;">
+            <p class="col-2 hide-sm"></p>
+            <p class="col-8">
+                Walter J. Ong, <small>S.J.</small> Center for Digital Humanities, in support of
+                <a href="//rerum.io" target="_blank">RERUM</a> annotations, offers this simple project for quickly
+                creating exhibitions of annotated collections.
+            </p>
+        </section>
 
-    <h4>JSON template (default)</h4>
-    <p class="col-12">DEER will construct an object combining the resolved <code>deer-id</code> value with the results of
-    a query for annotations targeting it. The JSON template simply displays the result.</p>
+        <section class="row">
+            <h2>Installing DEER</h2>
+            <p class="col-12">To install the script on your project, use the <code>deer.js</code> or
+                <code>deer-render.js</code> on your page.</p>
+            <small class="col-12">
+                <pre>&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha/deer.js" type="module">&lt;/script>
+&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha/deer-render.js" type="module">&lt;/script></pre>
+            </small>
+            <p class="col-12">
+                <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project"
+                    target="_blank">
+                    View the wiki
+                </a>
+                or read on for details.
+            </p>
+        </section>
 
-    <pre class="col-6">&lt;deer-view 
+        <section class="row">
+            <h2>Templates</h2>
+            <p class="col-12">
+                Use the <code>&lt;deer-view></code> element or <code>.deer-view</code> class to automatically connect
+                the DEER
+                renderer to your page.
+            </p>
+            <small class="col-12">
+                <pre>&lt;deer-view deer-id="https://example.com/id/001">&lt;/deer-view></pre></small>
+            <p class="col-12">
+                The DEER module will automatically detect these elements and watch the <code>deer-id</code> attribute,
+                rendering the resolved object inside. There are several templates available to you or you can
+                <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Extending-DEER-with-Templates">create
+                    your own</a>.
+            </p>
+
+            <h4>JSON template (default)</h4>
+            <p class="col-12">DEER will construct an object combining the resolved <code>deer-id</code> value with the
+                results of
+                a query for annotations targeting it. The JSON template simply displays the result.</p>
+
+            <div class="card col-6">
+                <header>JSON Template</header>
+                <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"></deer-view>
+            </div>
+
+            <pre class="col-6">&lt;deer-view 
     deer-template="json"
-    deer-id="https://example.com/id/001">
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
 &lt;/deer-view></pre>
 
-    <div class="card col-6">
-        <header>JSON Template</header>
-        <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"></deer-view>
-    </div>
+            <h4>Entity template</h4>
+            <p class="col-12">The entity template attempts to render the object properties as a definition list,
+                as is typically displayed as metadata or Dublin Core terms.
+            </p>
 
-    <h4>Entity template</h4>
-    <p class="col-12">The entity template attempts to render the object properties as a definition list, 
-        as is typically displayed as metadata or Dublin Core terms.
-    </p>
+            <div class="card col-6">
+                <header>Entity Template</header>
+                <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
+                    deer-template="entity"></div>
+            </div>
 
-    <pre class="col-6">&lt;deer-view 
+            <pre class="col-6">&lt;deer-view 
     deer-template="entity"
-    deer-id="https://example.com/id/001">
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
 &lt;/deer-view></pre>
 
-    <div class="card col-6">
-        <header>Entity Template</header>
-        <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="entity"></div>
-    </div>
-    
-    <h4>Person template</h4>
-    <p class="col-12">The person template attempts to render the object properties as a person's profile.</p>
+            <h4>Person template</h4>
+            <p class="col-12">The person template attempts to render the object properties as a person's profile.</p>
 
-    <pre class="col-6">&lt;deer-view 
+            <div class="card col-6">
+                <header>Person Template</header>
+                <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
+                    deer-template="person"></div>
+            </div>
+
+            <pre class="col-6">&lt;deer-view 
     deer-template="person"
-    deer-id="https://example.com/id/001">
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
 &lt;/deer-view></pre>
 
-    <div class="card col-6">
-        <header>Person Template</header>
-        <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="person"></div>
+            <h4>List template</h4>
+            <p class="col-12">The list template shows items connected in an aggregation. The same template can be used
+                for static
+                and dynamic lists as explained <a
+                    href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project#rendering-a-list-or-collection"
+                    target="_blank">
+                    in the wiki</a>.
+            </p>
+
+            <div class="card col-6">
+                <header>List Template</header>
+                <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c"
+                    deer-list="itemListElement" deer-template="list"></div>
+            </div>
+
+            <pre class="col-6">&lt;deer-view 
+    deer-template="list"
+    deer-list="itemListElement"
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+&lt;/deer-view></pre>
+
+            <h4>Property template</h4>
+            <p class="col-12">A simple template for showing a single property.</p>
+
+            <div class="card col-6">
+                <header>Property Template</header>
+                <div class="deer-view" title="Sample Prop" deer-key="name"
+                    deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="prop"></div>
+            </div>
+
+            <pre class="col-6">&lt;deer-view 
+    title="Sample Prop" 
+    deer-key="name"
+    deer-template="prop"
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
+&lt;/deer-view></pre>
+        </section>
+
+        <section class="row">
+            <h2>Customization</h2>
+            <p class="col-12">Though the default options may be limited, it is simple for a developer to extend existing
+                templates or create a new one from scratch. The complete instructions can be found
+                <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Extending-DEER-with-Templates"
+                    target="_blank">in the wiki</a>.
+            </p>
+
+            <h4>Custom template</h4>
+            <p class="col-12">A simple template made to show a cat.</p>
+
+            <div class="card col-6">
+                <header>Cat Template</header>
+                <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
+                    deer-template="cat"></div>
+            </div>
+
+            <pre class="col-6">&lt;deer-view 
+    deer-template="cat"
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
+&lt;/deer-view></pre>
+
+            <h4>Configuration</h4>
+            <p class="col-12">The <code>deer-config.js</code> file contains all the defaults for using DEER.
+                Any developer wishing to rename watched attributes, to attach new templates, and more can extend
+                this configuration object when initializing DEER.</p>
+
+        </section>
+
+        <section class="row">
+
+            <h2>Interactions</h2>
+
+            <p class="col-12">Developers can extend regular application logic to update and connect their interfaces by
+                using the <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Events-in-DEER"
+                    target="_blank">DEER Event system</a>
+                or rely on a few simple interactions for the bulk of users needs.
+            </p>
+
+            <h4>Using <code>deer-link</code></h4>
+            <p class="col-12">In any <code>&lt;deer-view></code> element, the <code>deer-link</code>
+                attribute instructs the templates how to attach links to the rendered object.
+                For lists, each item with an <code>@id</code> property will include an anchor tag
+                hyperlinking to the <code>deer-link</code> URL joined with the <code>@id</code>. This
+                example simply changes the hash on the current page.
+            </p>
+
+            <div class="card col-6">
+                <header>List Template with Links</header>
+                <div class="deer-view" deer-link="#" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c"
+                    deer-list="itemListElement" deer-template="list"></div>
+            </div>
+
+            <pre class="col-6">&lt;deer-view 
+    deer-template="list"
+    deer-list="itemListElement"
+    deer-link="#"
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+&lt;/deer-view></pre>
+
+            <h4>Listening to the Hash</h4>
+            <p class="col-12">Building on the example above, it is possible to load new objects into elements
+                by watching the hash and updating the <code>deer-id</code> attribute. The DEER observer will rerender
+                the contents immediately.
+            </p>
+
+            <small class="col-12">
+                <pre>window.onhashchange = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))</pre>
+            </small>
+
+
+            <div class="card col-6">
+                <header>List Template with Links</header>
+                <div class="deer-view" deer-link="#" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c"
+                    deer-list="itemListElement" deer-template="list"></div>
+                <footer class="text-primary"><img src="https://icongr.am/fontawesome/bolt.svg?size=18"> Click on a link in the list to update the rendered element on the right.</footer>
+            </div>
+
+            <div class="card col-6">
+                <header>Load from Hash</header>
+                <div class="col deer-view" id="hashExample" deer-template="entity">
+                    no hash
+                </div>
+            </div>
+
+            <h4>Listening to Events</h4>
+            <p class="col-12">Another option that is more transparent to the user and allows for more flexibility is
+                to use the <code>deer-listening</code> attribute to tell one <code>&lt;deer-view></code> element to
+                watch another for clicks and load the render the resulting object.
+            </p>
+
+            <div class="card col-6">
+                <header>List Template with Links</header>
+                <div id="exampleListen" class="deer-view"
+                    deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement"
+                    deer-template="list"></div>
+                <footer class="text-primary">
+                    <img src="https://icongr.am/fontawesome/bolt.svg?size=18"> Click on a list item to update the "listening" <code>&lt;deer-view></code> elements below
+                </footer>
+            </div>
+
+            <pre class="col-6">&lt;deer-view 
+    id="exampleListen"
+    deer-template="list"
+    deer-list="itemListElement"
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+&lt;/deer-view>
+
+&lt;deer-view 
+    deer-template="person"
+    deer-listening="exampleListen">
+&lt;/deer-view></pre>
+
+            <div class="card col-6">
+                <header>Listening with a Person Template</header>
+                <div class="deer-view" deer-listening="exampleListen" deer-template="person"></div>
+            </div>
+
+            <div class="card col-6">
+                <header>Listening with an Entity Template</header>
+                <div class="col deer-view" deer-listening="exampleListen" deer-template="entity"></div>
+            </div>
+
+        </section>
+
+        <pre class="col-6">&lt;deer-view 
+    deer-template="list"
+    deer-list="itemListElement"
+    deer-link="#"
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+&lt;/deer-view></pre>
+
+        <div class="card col-6">
+            <header>List Template with Links</header>
+            <div class="deer-view" deer-link="#" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c"
+                deer-list="itemListElement" deer-template="list"></div>
+        </div>
+
+        </section>
+
+
+        <div class="row">
+
+            <div class="col">
+                <h1>View as List</h1>
+                <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c"
+                    deer-list="itemListElement" deer-template="list">
+                    http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c
+                </div>
+            </div>
+
+
+
+            <div class="col">
+                <h1>View as Person</h1>
+                <small>using class .deer-view</small>
+                <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
+                    deer-template="person">
+                    http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
+                </div>
+                <small>using element &lt;deer-view></small>
+                <deer-view class="col bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
+                    deer-template="person">
+                    http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
+                </deer-view>
+            </div>
+
+            <div class="col">
+                <h1>View as Cat</h1>
+                <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
+                    deer-template="cat">
+                    http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
+                </div>
+            </div>
+
+            <div class="col">
+                <h1>View as Entity</h1>
+                <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
+                    deer-template="entity">
+                    http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
+                </div>
+            </div>
+
+        </div>
+
     </div>
-    
-    <div class="row">
 
-        <div class="col">
-            <h1>View as List</h1>
-            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c"
-                deer-list="itemListElement" deer-template="list">
-                http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c
-            </div>
-        </div>
-
-        <div class="col">
-            <h1>Load from Hash</h1>
-            <div class="col deer-view bg-light" id="hashExample" deer-template="entity">
-                no hash
-            </div>
-        </div>
-
-        <div class="col">
-            <h1>View as Person</h1>
-            <small>using class .deer-view</small>
-            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
-                deer-template="person">
-                http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
-            </div>
-            <small>using element &lt;deer-view></small>
-            <deer-view class="col bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
-                deer-template="person">
-                http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
-            </deer-view>
-        </div>
-
-        <div class="col">
-            <h1>View as Cat</h1>
-            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
-                deer-template="cat">
-                http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
-            </div>
-        </div>
-
-        <div class="col">
-            <h1>View as Entity</h1>
-            <div class="col deer-view bg-light" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"
-                deer-template="entity">
-                http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706
-            </div>
-        </div>
-
-    </div>
-
-    <script src="./releases/alpha/deer.js" type="module"></script>
+    <!-- <script src="./releases/alpha/deer.js" type="module"></script> -->
+    <script src="./js/deer.js" type="module"></script>
     <script>
         window.onhashchange = onload = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))
 
-        document.onscroll = () => badge.style.opacity = 1-window.scrollY/window.innerHeight*2
+        document.onscroll = () => {
+            badge.style.opacity = 1 - window.scrollY / window.innerHeight * 2
+            tagline.style.top = window.scrollY / window.innerHeight * -5 + "em"
+        }
     </script>
 </body>
 

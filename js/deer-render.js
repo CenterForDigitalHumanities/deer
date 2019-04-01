@@ -11,11 +11,14 @@
 
 import { default as UTILS } from './deer-utils.js'
 import { default as DEER } from './deer-config.js'
+Object.assign(DEER.TEMPLATES,{
+    cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
+})
 
 const changeLoader = new MutationObserver(renderChange)
 
 export default class DeerRender {
-    constructor(elem){
+    constructor(elem, DEER){
         changeLoader.observe(elem, {
             attributes:true
         })
@@ -23,20 +26,27 @@ export default class DeerRender {
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
 
-        let listensTo = elem.getAttribute(DEER.LISTENING)
-        if(listensTo){
-            elem.addEventListener('deer-load',e=>{
-                let loadId = e.detail["@id"]
-                if(loadId===listensTo) { elem.setAttribute("deer-id",loadId) }
-            })
-        }
-
         try {
             if(!this.id){
-                throw new Error(this.id+" is not a valid id.")
+                let err = new Error(this.id+" is not a valid id.")
+                err.code = "NO_ID"
+                throw err
             }
             fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj)).catch(err=>err)
-        } catch(err){}
+        } catch(err){
+            let message = err
+            switch(err.code){
+                case "NO_ID": message=`` // No DEER.ID, so leave it blank
+            }
+            elem.innerHTML = message
+        }
+
+        let listensTo = elem.getAttribute(DEER.LISTENING)
+        if(listensTo){
+            elem.addEventListener(DEER.EVENTS.CLICKED,e=> {if(e.detail.target.closest(DEER.VIEW).getAttribute("id")===listensTo) elem.setAttribute(DEER.ID,e.detail.target.closest('['+DEER.ID+']').getAttribute(DEER.ID))})
+            window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
+        }
+    
     }
 }
 
@@ -72,7 +82,7 @@ async function renderChange(mutationsList) {
             case DEER.LISTENING:
                 let listensTo = mutation.target.getAttribute(DEER.LISTENING)
                 if(listensTo){
-                    mutation.target.addEventListener('deer-load',e=>{
+                    mutation.target.addEventListener('deer-clicked',e=>{
                         let loadId = e.detail["@id"]
                         if(loadId===listensTo) { mutation.target.setAttribute("deer-id",loadId) }
                     })
@@ -82,18 +92,20 @@ async function renderChange(mutationsList) {
 }
 
 const RENDER = {}
-const TEMPLATES = {}
 
 RENDER.element = function(elem,obj) {
+
     return UTILS.expand(obj).then(obj=>{
-        let template = TEMPLATES[elem.getAttribute(DEER.TEMPLATE)] || TEMPLATES.json
+        let template = DEER.TEMPLATES[elem.getAttribute(DEER.TEMPLATE)] || DEER.TEMPLATES.json
         let options = {
             list: elem.getAttribute(DEER.LIST),
             link: elem.getAttribute(DEER.LINK),
-            collection: elem.getAttribute(DEER.COLLECTION)
+            collection: elem.getAttribute(DEER.COLLECTION),
+            key: elem.getAttribute(DEER.KEY),
+            label: elem.getAttribute(DEER.LABEL)
         }
         elem.innerHTML = template(obj,options)
-        UTILS.broadcast(DEER.EVENTS.LOADED,elem,obj)
+        UTILS.broadcast(undefined,DEER.EVENTS.LOADED,elem,obj)
     })
 }
 
@@ -102,7 +114,7 @@ RENDER.element = function(elem,obj) {
  * @param {Object} obj some json to be drawn as JSON
  * @param {Object} options additional properties to draw with the JSON
  */
-TEMPLATES.json = function(obj, options={}) {
+DEER.TEMPLATES.json = function(obj, options={}) {
     let indent = options.indent || 4
     let replacer = (k,v) => {
         if(DEER.SUPPRESS.indexOf(k) !== -1) return
@@ -121,15 +133,12 @@ TEMPLATES.json = function(obj, options={}) {
  * @param {String} key the name of the key in the obj we are looking for
  * @param {String} label The label to be displayed when drawn
  */
-TEMPLATES.prop= function(obj, key, label) {
+DEER.TEMPLATES.prop= function(obj, options = {}) {
+    let key = options.key || "@id"
     let prop = obj[key]
-    //let altLabel = options.altLabel || prop
-    let altLabel = label
-    //let prefix = (options.prefix || "deer") + "-"
-    let prefix = "deer-"
+    let label = options.label || UTILS.getLabel(obj,prop)
     try {
-        let pattern = new RegExp("(" + prefix + ")+", "g")
-        return `<span class="${(prefix+prop).trim().replace(/\s+/g,"-").replace(/:/g,"-").replace(pattern,prefix).normalize("NFC").toLowerCase()}">${altLabel || prop}: ${UTILS.getValue(obj[prop]) || "[ undefined ]"}</span>`
+        return `<span class="${prop}">${label}: ${UTILS.getValue(prop) || "[ undefined ]"}</span>`
     } catch (err) {
         return null
     }
@@ -140,7 +149,7 @@ TEMPLATES.prop= function(obj, key, label) {
  * @param {Object} obj some json of type Entity to be drawn
  * @param {Object} options additional properties to draw with the Entity
  */
-TEMPLATES.entity= function(obj, options = {}) {
+DEER.TEMPLATES.entity= function(obj, options = {}) {
     let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
     let list = ``
 
@@ -174,13 +183,13 @@ TEMPLATES.entity= function(obj, options = {}) {
     return tmpl
 }
 
-TEMPLATES.list= function(obj, options={}) {
+DEER.TEMPLATES.list= function(obj, options={}) {
     let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
     if(options.list){
         tmpl += `<ul>`
         obj[options.list].forEach((val,index)=>{
             let name = UTILS.getLabel(val,(val.type || val['@type'] || label+index))
-            tmpl+= (val["@id"]) ? `<li><a href="#${val["@id"]}">${name}</a></li>` : `<li>${name}</li>`
+            tmpl+= (val["@id"] && options.link) ? `<li ${DEER.ID}="${val["@id"]}"><a href="${options.link}${val["@id"]}">${name}</a></li>` : `<li ${DEER.ID}="${val["@id"]}">${name}</li>`
         })
         tmpl += `</ul>`
     }
@@ -192,11 +201,11 @@ TEMPLATES.list= function(obj, options={}) {
  * @param {Object} obj some json of type Person to be drawn
  * @param {Object} options additional properties to draw with the Person
  */
-TEMPLATES.person= function(obj, options={}) {
+DEER.TEMPLATES.person= function(obj, options={}) {
     try {
         let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
-        let dob = TEMPLATES.prop(obj, "birthDate", "Birth Date") || ``
-        let dod = TEMPLATES.prop(obj, "deathDate", "Death Date") || ``
+        let dob = DEER.TEMPLATES.prop(obj, {key:"birthDate", title:"Birth Date"}) || ``
+        let dod = DEER.TEMPLATES.prop(obj, {key:"deathDate", title:"Death Date"}) || ``
         let famName = (obj.familyName&&UTILS.getValue(obj.familyName))||"[ unknown ]"
         let givenName = (obj.givenName&&UTILS.getValue(obj.givenName))||""
         tmpl += (obj.familyName||obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
@@ -213,7 +222,7 @@ TEMPLATES.person= function(obj, options={}) {
  * @param {Object} obj some json of type Event to be drawn
  * @param {Object} options additional properties to draw with the Event
  */
-TEMPLATES.event= function(obj, options={}) {
+DEER.TEMPLATES.event= function(obj, options={}) {
     try {
         let tmpl = `<h1>${UTILS.getLabel(obj)}</h1>`
         return tmpl
@@ -222,5 +231,3 @@ TEMPLATES.event= function(obj, options={}) {
     }
     return null
 }
-
-Object.assign(TEMPLATES,DEER.TEMPLATES)

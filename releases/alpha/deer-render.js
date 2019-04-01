@@ -90,7 +90,9 @@ RENDER.element = function(elem,obj) {
         let options = {
             list: elem.getAttribute(DEER.LIST),
             link: elem.getAttribute(DEER.LINK),
-            collection: elem.getAttribute(DEER.COLLECTION)
+            collection: elem.getAttribute(DEER.COLLECTION),
+            key: elem.getAttribute(DEER.KEY),
+            label: elem.getAttribute(DEER.LABEL)
         }
         elem.innerHTML = template(obj,options)
         UTILS.broadcast(DEER.EVENTS.LOADED,elem,obj)
@@ -121,7 +123,9 @@ TEMPLATES.json = function(obj, options={}) {
  * @param {String} key the name of the key in the obj we are looking for
  * @param {String} label The label to be displayed when drawn
  */
-TEMPLATES.prop= function(obj, key, label) {
+TEMPLATES.prop= function(obj, options = {}) {
+    let key = options.key || "@id"
+    let label = options.label || UTILS.getLabel(obj)
     let prop = obj[key]
     //let altLabel = options.altLabel || prop
     let altLabel = label
@@ -195,8 +199,8 @@ TEMPLATES.list= function(obj, options={}) {
 TEMPLATES.person= function(obj, options={}) {
     try {
         let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
-        let dob = TEMPLATES.prop(obj, "birthDate", "Birth Date") || ``
-        let dod = TEMPLATES.prop(obj, "deathDate", "Death Date") || ``
+        let dob = TEMPLATES.prop(obj, {"deer-key":"birthDate", title:"Birth Date"}) || ``
+        let dod = TEMPLATES.prop(obj, {"deer-key":"deathDate", title:"Death Date"}) || ``
         let famName = (obj.familyName&&UTILS.getValue(obj.familyName))||"[ unknown ]"
         let givenName = (obj.givenName&&UTILS.getValue(obj.givenName))||""
         tmpl += (obj.familyName||obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
