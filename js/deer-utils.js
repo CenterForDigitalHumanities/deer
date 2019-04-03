@@ -208,5 +208,4 @@ export default {
         let e = new CustomEvent(type, {detail: Object.assign(obj,{target:event.target}),bubbles:true})
         element.dispatchEvent(e)
     }
-
 }
