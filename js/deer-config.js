@@ -13,6 +13,9 @@ export default {
     FORM: "form[deer-type]",        // selector, identifies data entry containers
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
     EVIDENCE: "nv-evidence",        // attribute, URI for supporting evidence
+    
+    INPUTS: "input, textarea, dataset, select", // selector, identifies inputs with .value
+    ENTITYNAME: "deer-key['name']", // selector, value to grab for form entity label
 
     URLS: {
         BASE_ID: "http://devstore.rerum.io/v1",
@@ -30,6 +33,7 @@ export default {
     },
 
     SUPPRESS: ["__rerum","@context"], // properties to ignore
+    ATTRIBUTION: "testMachine",     // replace with user to attribute assertions
 
     /**
      * Add any custom templates here through import or copy paste.
