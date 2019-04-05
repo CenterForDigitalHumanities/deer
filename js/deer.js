@@ -2,6 +2,7 @@
  * @module DEER Data Encoding and Exhibition for RERUM (DEER)
  * @author Patrick Cuba <cubap@slu.edu>
  * @author Bryan Haberberger <bryan.j.haberberger@slu.edu>
+ * @version 0.7
 
  * This code should serve as a basis for developers wishing to
  * use TinyThings as a RERUM proxy for an application for data entry,
