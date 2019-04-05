@@ -43,7 +43,11 @@ export default class DeerRender {
 
         let listensTo = elem.getAttribute(DEER.LISTENING)
         if(listensTo){
-            elem.addEventListener(DEER.EVENTS.CLICKED,e=> {if(e.detail.target.closest(DEER.VIEW).getAttribute("id")===listensTo) elem.setAttribute(DEER.ID,e.detail.target.closest('['+DEER.ID+']').getAttribute(DEER.ID))})
+            elem.addEventListener(DEER.EVENTS.CLICKED,e=> {
+                try{
+                    if(e.detail.target.closest(DEER.VIEW+","+DEER.FORM).getAttribute("id")===listensTo) elem.setAttribute(DEER.ID,e.detail.target.closest('['+DEER.ID+']').getAttribute(DEER.ID))
+                } catch (err) {}
+            })
             window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
         }
     

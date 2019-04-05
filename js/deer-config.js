@@ -14,8 +14,8 @@ export default {
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
     EVIDENCE: "nv-evidence",        // attribute, URI for supporting evidence
     
-    INPUTS: "input, textarea, dataset, select", // selector, identifies inputs with .value
-    ENTITYNAME: "deer-key['name']", // selector, value to grab for form entity label
+    INPUTS: ["input","textarea","dataset","select"], // array of selectors, identifies inputs with .value
+    ENTITYNAME: "[deer-key='name']", // selector, value to grab for form entity label
 
     URLS: {
         BASE_ID: "http://devstore.rerum.io/v1",
@@ -42,5 +42,7 @@ export default {
      * Each property must be lower-cased and return a template literal
      * or an HTML String.
      */
-    TEMPLATES: {}
+    TEMPLATES: {
+        cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
+    }
 }

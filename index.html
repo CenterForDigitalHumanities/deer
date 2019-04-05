@@ -284,8 +284,52 @@
 
         </section>
 
-        <section>
-            Great!
+        <section class="row">
+            <h2>Forms</h2>
+            <p class="col-12">
+                Adding new entities and annotations is a simple process ([wiki](https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project#create-an-entity)).
+                Update your <code>&lt;form></code> with <code>deer-type</code> and <code>deer-key</code> attributes.
+            </p>
+            
+            <pre class="col-12">&lt;form deer-type="Thing" deer-context="http://schema.org" deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+    &lt;label>Label:&lt;/label>
+    &lt;input type="text" deer-key="name" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+    &lt;input type="hidden" deer-key="creator" value="DEER Demo">
+    &lt;input type="date" deer-key="date" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+    &lt;select>
+        &lt;option>Example choice&lt;/option>
+        &lt;option>Unknown to DEER&lt;/option>
+        &lt;option>Use as usual&lt;/option>
+    &lt;/select>
+    &lt;textarea deer-key="description" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">&lt;/textarea>
+    &lt;input type="submit">
+&lt;/form></pre>
+            
+            <div class="card col-6">
+                <header>Thing Form</header>
+                <form deer-type="Thing" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5ca66684e4b0a44e13e61b7c" id="formExample">
+                    <label>Label:</label>
+                    <input type="text" deer-key="name">
+                    <input type="hidden" deer-key="creator" value="demoAgent">
+                    <label>Date:</label>
+                    <input type="date" deer-key="date">
+                    <label>A &lt;select> with no effect:</label>
+                    <select>
+                        <option>Example choice</option>
+                        <option>Unknown to DEER</option>
+                        <option>Use as usual</option>
+                    </select>
+                    <label>Description:</label>
+                    <textarea deer-key="description"></textarea>
+                    <input type="submit">
+                </form>
+            </div>
+
+            <div class="card col-6">
+                <header>Listening to the Form</header>
+                <div class="col deer-view" deer-listening="formExample" deer-template="entity"></div>
+            </div>
+
         </section>
 
     <!-- <script src="./releases/alpha/deer.js" type="module"></script> -->

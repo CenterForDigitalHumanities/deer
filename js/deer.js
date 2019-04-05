@@ -16,6 +16,7 @@
 
 import { default as renderer } from './deer-render.js'
 import { default as DEER } from './deer-config.js'
+import { default as record } from './deer-record.js'
 Object.assign(DEER.TEMPLATES,{
     cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
 })
