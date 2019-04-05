@@ -12,22 +12,36 @@
 import { default as UTILS } from './deer-utils.js'
 import { default as DEER } from './deer-config.js'
 
-const observables = document.querySelectorAll(DEER.FORM)
-Array.from(observables).forEach(elem=>new DeerReport(elem))
-
 export default class DeerReport {
     constructor(elem,deer=DEER) {
+
         this.$dirty = false
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
         this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
-        this.inputs = document.querySelectorAll(DEER.INPUTS)
-
-        elem.onsubmit = this.processRecord
-
-        // TODO: preload the values in the keys and add observer for @id changes
+        this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
+        
+        elem.onsubmit = this.processRecord.bind(this)
+        
+        if (this.id) {
+            UTILS.expand({"@id":this.id})
+            .then((function(obj){
+                Object.keys(obj).forEach((function(key){
+                    try {
+                        for(let el of Array.from(this.inputs)) {
+                            if(el.getAttribute(DEER.KEY)===key){
+                                el.value = UTILS.getValue(obj[key])
+                                el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
+                                break
+                            }
+                        }
+                    } catch(err){ console.log(err) }
+                }).bind(this))
+            }).bind(this))
+            .then(()=>elem.click())
+        }
     }
     
     processRecord(event) {
@@ -39,21 +53,23 @@ export default class DeerReport {
         try {
             record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
         } catch(err){}
-        let action = "CREATE"
+        let formAction
         if (this.id) {
             record["@id"] = this.id
-            action = "UPDATE"
+            formAction = Promise.resolve(record)
+        } else {
+            formAction = fetch(DEER.URLS.CREATE, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                body: JSON.stringify(record)
+            })
+            .then(response => response.json())
+            .then(data => data.new_obj_state)
+            UTILS.broadcast(undefined,DEER.EVENTS.CREATED,this.elem,record)
         }
-        fetch(DEER.URLS[action], {
-            method: (this.id) ? "PUT" : "POST",
-            headers: {
-                "Content-Type": "application/json; charset=utf-8"
-            },
-            body: JSON.stringify(record)
-        })
-        .then(response => response.json())
-        .then(function(response) {
-            let entity = response.new_obj_state
+        formAction.then((function(entity) {
             let annotations = Array.from(this.inputs).map(input => {
                 let inputId = input.getAttribute(DEER.SOURCE)
                 let action = (inputId) ? "UPDATE" : "CREATE"
@@ -70,7 +86,7 @@ export default class DeerReport {
                 if(ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
                 let name = input.getAttribute("title")
                 if(name) { annotation.body[input.getAttribute(DEER.KEY)].name = name }
-                fetch(DEER.URLS[action], {
+                return fetch(DEER.URLS[action], {
                     method: (inputId) ? "PUT" : "POST",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8"
@@ -81,10 +97,10 @@ export default class DeerReport {
                 .then(anno=>input.setAttribute(DEER.SOURCE,anno.new_obj_state["@id"]))
             })
             return Promise.all(annotations).then(()=>entity)
-        })
+        }).bind(this))
         .then(entity => {
             this.elem.setAttribute(DEER.ID,entity["@id"])
-            UTILS.broadcast(undefined,DEER.EVENTS[action+"D"],this.elem,entity)
+            new DeerReport(this.elem)
         })
     }
 }
@@ -96,7 +112,7 @@ export default class DeerReport {
  * @param {Object} obj complete resource to process
  * @param {Object} attribution creator and generator identities
  */
-async create(obj, attribution, evidence) {
+async function create(obj, attribution, evidence) {
     let mint = {
         "@context": obj["@context"] || this.default.context,
         "@type": obj["@type"] || this.default.type,
@@ -107,14 +123,14 @@ async create(obj, attribution, evidence) {
         mint.evidence = evidence
     }
     const newObj = await fetch(CREATE_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json; charset=utf-8"
-            },
-            body: JSON.stringify(mint)
-        })
-        .then(this.handleHTTPError)
-        .then(response => response.json())
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify(mint)
+    })
+    .then(this.handleHTTPError)
+    .then(response => response.json())
     const listID = localStorage.getItem("CURRENT_LIST_ID") || this.DEFAULT_LIST_ID
     let list = await get(listID)
     const objID = newObj.new_obj_state["@id"]
@@ -124,15 +140,15 @@ async create(obj, attribution, evidence) {
     })
     try {
         list = await fetch(UPDATE_URL, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8"
-                },
-                body: JSON.stringify(list)
-            })
-            .then(this.handleHTTPError)
-            .then(response => response.json().new_obj_state)
-            .catch(err => Promise.reject(err))
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify(list)
+        })
+        .then(this.handleHTTPError)
+        .then(response => response.json().new_obj_state)
+        .catch(err => Promise.reject(err))
     } catch (err) {}
     localStorage.setItem(list["@id"], JSON.stringify(list))
     localStorage.setItem("CURRENT_LIST_ID", list["@id"])
@@ -161,3 +177,6 @@ async create(obj, attribution, evidence) {
     let temp = await Promise.all(annotations.map(upsert))
     return newObj.new_obj_state
 }
+
+const observables = document.querySelectorAll(DEER.FORM)
+Array.from(observables).forEach(elem => new DeerReport(elem))

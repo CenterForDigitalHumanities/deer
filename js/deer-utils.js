@@ -96,13 +96,14 @@ export default {
      * Discovered annotations are attached to the original object and returned.
      * @param {Object} obj Target object to search for description
      */
-    get expand() {
-        return async function(obj) {
-            let findId = obj["@id"]
-            let annos = await this.findByTargetId(findId)
-            // TODO: attach evidence to each property value
-            // add each value in a predictable way
-            // type properties for possible rendering?
+    expand(obj) {
+        let findId = obj["@id"]
+        let getValue = this.getValue
+        return this.findByTargetId(findId)
+        // TODO: attach evidence to each property value
+        // add each value in a predictable way
+        // type properties for possible rendering?
+        .then(function(annos){
             for (let i = 0; i < annos.length; i++) {
                 let body
                 try {
@@ -114,35 +115,36 @@ export default {
                 }
                 Leaf: for (let j = 0; j < body.length; j++) {
                     if (body[j].evidence) {
-                        let evId = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence
-                        obj.evidence = await fetch(evId).then(response=>response.json()).catch(err=>err)
+                        obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence
                     } else {
-                        let val = body[j]
-                        let k = Object.keys(val)[0]
-                        if (!val.source) {
-                            // include an origin for this property, placehold madsrdf:Source
-                            let aVal = this.getValue(val[k])
-                            val[k] = {
-                                value: aVal,
-                                source: {
-                                    citationSource: annos[i]["@id"],
-                                    citationNote: annos[i].label || "Composed object from DEER",
-                                    comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                        try{
+                            let val = body[j]
+                            let k = Object.keys(val)[0]
+                            if (!val.source) {
+                                // include an origin for this property, placehold madsrdf:Source
+                                let aVal = getValue(val[k])
+                                val[k] = {
+                                    value: aVal,
+                                    source: {
+                                        citationSource: annos[i]["@id"],
+                                        citationNote: annos[i].label || "Composed object from DEER",
+                                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                                    }
                                 }
                             }
-                        }
-                        if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
-                            // this is not the most recent available
-                            // TODO: maybe check generator, etc.
-                            continue Leaf
-                        } else {
-                            obj = Object.assign(obj, val)
-                        }
+                            if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
+                                // this is not the most recent available
+                                // TODO: maybe check generator, etc.
+                                continue Leaf
+                            } else {
+                                obj = Object.assign(obj, val)
+                            }
+                        } catch(err){}
                     }
                 }
             }
             return obj
-        }
+        })
     },
     /**
      * Execute query for any annotations in RERUM which target the
@@ -161,8 +163,8 @@ export default {
                 "Content-Type": "application/json"
             }
         })
-        .then(this.handleHTTPError)
-        .then(response => response.json()).catch((err)=>console.log(err))
+        .then(response=>response.json())
+        .catch((err)=>console.log(err))
         let local_matches = everything.filter(o => o.target === id)
         matches = local_matches.concat(matches)
         return matches
