@@ -13,6 +13,9 @@ export default {
     FORM: "form[deer-type]",        // selector, identifies data entry containers
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
     EVIDENCE: "nv-evidence",        // attribute, URI for supporting evidence
+    
+    INPUTS: ["input","textarea","dataset","select"], // array of selectors, identifies inputs with .value
+    ENTITYNAME: "[deer-key='name']",// selector, value to grab for form entity label
 
     URLS: {
         BASE_ID: "http://devstore.rerum.io/v1",
@@ -25,10 +28,12 @@ export default {
     EVENTS: {
         CREATED: "deer-created",
         UPDATED: "deer-updated",
-        LOADED: "deer-loaded"
+        LOADED: "deer-loaded",
+        CLICKED: "deer-clicked"
     },
 
-    SUPPRESS: ["__rerum","@context"], // properties to ignore
+    SUPPRESS: ["__rerum","@context"],   // properties to ignore
+    ATTRIBUTION: "testMachine",         // replace with user to attribute assertions
 
     /**
      * Add any custom templates here through import or copy paste.
@@ -38,6 +43,6 @@ export default {
      * or an HTML String.
      */
     TEMPLATES: {
-        cat: (obj) => `${obj.name}<img src="http://placekitten.com/200/300">`
+        cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
     }
 }

@@ -12,6 +12,12 @@
         .card header {
             font-style: italic;
         }
+        section {
+            overflow: hidden;
+        }
+        em code {
+            font-style: normal;
+        }
     </style>
 </head>
 
@@ -45,11 +51,10 @@
 
         <section class="row">
             <h2>Installing DEER</h2>
-            <p class="col-12">To install the script on your project, use the <code>deer.js</code> or
-                <code>deer-render.js</code> on your page.</p>
+            <p class="col-12">To install the script on your project, use the <code>deer.js</code> 
+                on your page.</p>
             <small class="col-12">
-                <pre>&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha/deer.js" type="module">&lt;/script>
-&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha/deer-render.js" type="module">&lt;/script></pre>
+                <pre>&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha/deer.js" type="module">&lt;/script></pre>
             </small>
             <p class="col-12">
                 <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project"
@@ -287,14 +292,14 @@
         <section class="row">
             <h2>Forms</h2>
             <p class="col-12">
-                Adding new entities and annotations is a simple process ([wiki](https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project#create-an-entity)).
+                Adding new entities and annotations is a simple process (<a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project#create-an-entity" target="_blank">wiki</a>).
                 Update your <code>&lt;form></code> with <code>deer-type</code> and <code>deer-key</code> attributes.
             </p>
             
             <pre class="col-12">&lt;form deer-type="Thing" deer-context="http://schema.org" deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
     &lt;label>Label:&lt;/label>
     &lt;input type="text" deer-key="name" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
-    &lt;input type="hidden" deer-key="creator" value="DEER Demo">
+    &lt;input type="hidden" deer-key="creator" value="demoAgent">
     &lt;input type="date" deer-key="date" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
     &lt;select>
         &lt;option>Example choice&lt;/option>
@@ -308,21 +313,44 @@
             <div class="card col-6">
                 <header>Thing Form</header>
                 <form deer-type="Thing" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5ca66684e4b0a44e13e61b7c" id="formExample">
-                    <label>Label:</label>
-                    <input type="text" deer-key="name">
-                    <input type="hidden" deer-key="creator" value="demoAgent">
-                    <label>Date:</label>
-                    <input type="date" deer-key="date">
-                    <label>A &lt;select> with no effect:</label>
-                    <select>
-                        <option>Example choice</option>
-                        <option>Unknown to DEER</option>
-                        <option>Use as usual</option>
-                    </select>
-                    <label>Description:</label>
-                    <textarea deer-key="description"></textarea>
-                    <input type="submit">
+                    <div class="row">
+                        <div class="col">
+                            <label>Label:</label>
+                            <input type="text" deer-key="name">
+                            <input type="hidden" deer-key="creator" value="demoAgent">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label>Date:</label>
+                            <input type="date" deer-key="date">
+                        </div>
+                        <div class="col">
+                            <label>A &lt;select> with no effect:</label>
+                            <select>
+                                <option>Example choice</option>
+                                <option>Unknown to DEER</option>
+                                <option>Use as usual</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label>Description:</label>
+                            <textarea deer-key="description"></textarea>
+                        </div>
+                    </div>                    
+                    <div class="row">
+                        <input type="submit" class="col">
+                    </div>
                 </form>
+                <p>
+                    This form preloads with recent annotations on this entity. The card
+                    to the right updates with every change as well, even if someone else
+                    has made the changes.
+                </p>
+                <small><em>The <code>&lt;select></code> has no <code>deer-key</code> attribute, so no
+                annotation is made. This can be used for local application logic before saving.</em></small>
             </div>
 
             <div class="card col-6">

@@ -1,5 +1,5 @@
 /**
- * @module DEER Data Encoding and Exhibition for RERUM
+ * @module DeerRender Data Encoding and Exhibition for RERUM
  * @author Patrick Cuba <cubap@slu.edu>
  * @author Bryan Haberberger <bryan.j.haberberger@slu.edu>
 
@@ -10,22 +10,21 @@
  */
 
 import { default as UTILS } from './deer-utils.js'
-import { default as DEER } from './deer-config.js'
-Object.assign(DEER.TEMPLATES,{
-    cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
-})
+import { default as config } from './deer-config.js'
 
 const changeLoader = new MutationObserver(renderChange)
+var DEER = config
 
 export default class DeerRender {
-    constructor(elem, DEER){
+    constructor(elem, deer=config){
+        DEER = deer
         changeLoader.observe(elem, {
             attributes:true
         })
         this.$dirty = false
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
-
+        
         try {
             if(!this.id){
                 let err = new Error(this.id+" is not a valid id.")
@@ -50,7 +49,7 @@ export default class DeerRender {
             })
             window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
         }
-    
+        
     }
 }
 
@@ -60,37 +59,37 @@ export default class DeerRender {
  * @param {Array} mutationsList of MutationRecord objects
  */
 async function renderChange(mutationsList) {
-	for (var mutation of mutationsList) {
-		switch (mutation.attributeName) {
+    for (var mutation of mutationsList) {
+        switch (mutation.attributeName) {
             case DEER.ID:
-                let id = mutation.target.getAttribute(DEER.ID)
-                if (id === "null") return
-                let obj = {}
-                try {
-                    obj = JSON.parse(localStorage.getItem(id))
-                } catch (err) {}
-                if (!obj || !(obj.items || obj.images || obj.sequences)) {
-                    obj = await fetch(id).then(response => response.json()).catch(error => error)
-                    if (obj) {
-                        localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
-                    } else {
-                        return false
-                    }
+            let id = mutation.target.getAttribute(DEER.ID)
+            if (id === "null") return
+            let obj = {}
+            try {
+                obj = JSON.parse(localStorage.getItem(id))
+            } catch (err) {}
+            if (!obj || !(obj.items || obj.images || obj.sequences)) {
+                obj = await fetch(id).then(response => response.json()).catch(error => error)
+                if (obj) {
+                    localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
+                } else {
+                    return false
                 }
+            }
             case DEER.COLLECTION:
             case DEER.LIST:
             case DEER.KEY:
             case DEER.LINK:
-                RENDER.element(mutation.target,obj)
-                break
+            RENDER.element(mutation.target,obj)
+            break
             case DEER.LISTENING:
-                let listensTo = mutation.target.getAttribute(DEER.LISTENING)
-                if(listensTo){
-                    mutation.target.addEventListener('deer-clicked',e=>{
-                        let loadId = e.detail["@id"]
-                        if(loadId===listensTo) { mutation.target.setAttribute("deer-id",loadId) }
-                    })
-                }
+            let listensTo = mutation.target.getAttribute(DEER.LISTENING)
+            if(listensTo){
+                mutation.target.addEventListener('deer-clicked',e=>{
+                    let loadId = e.detail["@id"]
+                    if(loadId===listensTo) { mutation.target.setAttribute("deer-id",loadId) }
+                })
+            }
 		}
 	}
 }
@@ -98,7 +97,7 @@ async function renderChange(mutationsList) {
 const RENDER = {}
 
 RENDER.element = function(elem,obj) {
-
+    
     return UTILS.expand(obj).then(obj=>{
         let template = DEER.TEMPLATES[elem.getAttribute(DEER.TEMPLATE)] || DEER.TEMPLATES.json
         let options = {
@@ -148,7 +147,7 @@ DEER.TEMPLATES.prop= function(obj, options = {}) {
     }
 }
 
- /**
+/**
  * The TEMPLATED renderer to draw an JSON to the screen as some HTML template
  * @param {Object} obj some json of type Entity to be drawn
  * @param {Object} options additional properties to draw with the Entity
@@ -156,7 +155,7 @@ DEER.TEMPLATES.prop= function(obj, options = {}) {
 DEER.TEMPLATES.entity= function(obj, options = {}) {
     let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
     let list = ``
-
+    
     for (let key in obj) {
         if(DEER.SUPPRESS.indexOf(key)>-1) {continue}
         let label = key
@@ -197,7 +196,7 @@ DEER.TEMPLATES.list= function(obj, options={}) {
         })
         tmpl += `</ul>`
     }
-
+    
     return tmpl
 }
 /**
@@ -235,3 +234,9 @@ DEER.TEMPLATES.event= function(obj, options={}) {
     }
     return null
 }
+
+export function initializeDeerViews(config) {
+    const views = document.querySelectorAll(config.VIEW)
+    Array.from(views).forEach(elem=>new DeerRender(elem,config))
+}
+
