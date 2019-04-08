@@ -54,7 +54,7 @@ export default {
         }
         // JSON-LD says no nested arrays, but we know people.
         if (Array.isArray(prop)) {
-            prop = prop.map(this.getValue)
+            prop = prop.map(this.getValue.bind(this))
         }
         try {
             switch (asType.toUpperCase()) {

@@ -32,7 +32,7 @@ export default {
         // TODO: There must be a best way to do this...
         let prop;
         if (Array.isArray(property)) {
-            prop = property.map(this.getValue)
+            prop = property.map(this.getValue.bind(this))
         }
         if (typeof property === "object") {
             // TODO: JSON-LD insists on "@value", but this is simplified in a lot
@@ -54,7 +54,7 @@ export default {
         }
         // JSON-LD says no nested arrays, but we know people.
         if (Array.isArray(prop)) {
-            prop = prop.map(this.getValue)
+            prop = prop.map(this.getValue.bind(this))
         }
         try {
             switch (asType.toUpperCase()) {
