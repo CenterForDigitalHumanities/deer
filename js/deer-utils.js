@@ -13,8 +13,13 @@
 import { default as DEER } from './deer-config.js'
 
 export default {
-    listFromCollection: function(){
-        return fetch(DEER.URLS.QUERY, {
+    listFromCollection: function(collectionId){
+        let queryObj = {
+            body: {
+                targetCollection: collectionId
+            }
+        }
+            return fetch(DEER.URLS.QUERY, {
             method: "POST",
             body: JSON.stringify(queryObj)
         }).then(response => response.json())
