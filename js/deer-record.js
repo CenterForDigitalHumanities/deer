@@ -16,7 +16,7 @@ import { default as config } from './deer-config.js'
 var DEER = config
 
 export default class DeerReport {
-    constructor(elem,deer=config) {
+    constructor(elem,deer={}) {
         DEER = Object.assign(config,deer)
         this.$dirty = false
         this.id = elem.getAttribute(DEER.ID)

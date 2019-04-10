@@ -200,7 +200,7 @@ DEER.TEMPLATES.event= function(obj, options={}) {
 }
 
 export default class DeerRender {
-    constructor(elem, deer=config){
+    constructor(elem, deer={}){
         DEER = Object.assign(config,deer)
         changeLoader.observe(elem, {
             attributes:true
