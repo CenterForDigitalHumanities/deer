@@ -26,6 +26,10 @@ async function renderChange(mutationsList) {
     for (var mutation of mutationsList) {
         switch (mutation.attributeName) {
             case DEER.ID:
+            case DEER.COLLECTION:
+            case DEER.LIST:
+            case DEER.KEY:
+            case DEER.LINK:
             let id = mutation.target.getAttribute(DEER.ID)
             if (id === "null") return
             let obj = {}
@@ -40,10 +44,6 @@ async function renderChange(mutationsList) {
                     return false
                 }
             }
-            case DEER.COLLECTION:
-            case DEER.LIST:
-            case DEER.KEY:
-            case DEER.LINK:
             RENDER.element(mutation.target,obj)
             break
             case DEER.LISTENING:
