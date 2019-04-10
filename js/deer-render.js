@@ -246,6 +246,7 @@ export default class DeerRender {
                             name: this.collection,
                             itemListElement: list
                         }
+                        this.elem.setAttribute(DEER.LIST,"itemListElement")
                         try {
                             listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
                         } catch (err) {}
