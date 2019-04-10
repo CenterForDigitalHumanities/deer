@@ -17,7 +17,13 @@ var DEER = config
 
 export default class DeerReport {
     constructor(elem,deer={}) {
-        DEER = Object.assign(config,deer)
+        for(let key of DEER) {
+            if(typeof DEER[key] === "string") {
+                DEER[key] = deer[key] || config[key]
+            } else {
+                DEER[key] = Object.assign(config[key],deer[key])
+            }
+        }
         this.$dirty = false
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
