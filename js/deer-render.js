@@ -17,74 +17,6 @@ import { default as config } from './deer-config.js'
 const changeLoader = new MutationObserver(renderChange)
 var DEER = config
 
-export default class DeerRender {
-    constructor(elem, deer=config){
-        DEER = Object.assign(config,deer)
-        changeLoader.observe(elem, {
-            attributes:true
-        })
-        this.$dirty = false
-        this.id = elem.getAttribute(DEER.ID)
-        this.collection = elem.getAttribute(DEER.COLLECTION)
-        this.elem = elem
-        
-        try {
-            if(!(this.id||this.collection)){
-                let err = new Error(this.id+" is not a valid id.")
-                err.code = "NO_ID"
-                throw err
-            } else {
-                if(this.id) {
-                    fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj)).catch(err=>err)
-                } else if (this.collection) {
-                    let queryObj = {
-                        body: {
-                            targetCollection: this.collection
-                        }
-                    }
-                    fetch(DEER.URLS.QUERY, {
-                        method: "POST",
-                        mode: "cors",
-                        body: JSON.stringify(queryObj)
-                    }).then(response => response.json())
-                    .then(pointers => {
-                        let list = []
-                        pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
-                        return Promise.all(list)
-                    })
-                    .then(list => {
-                        let listObj = {
-                            name: this.collection,
-                            itemListElement: list
-                        }
-                        try {
-                            listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
-                        } catch (err) {}
-                        RENDER.element(this.elem,listObj)
-                    })
-                }
-            }
-        } catch(err){
-            let message = err
-            switch(err.code){
-                case "NO_ID": message=`` // No DEER.ID, so leave it blank
-            }
-            elem.innerHTML = message
-        }
-
-        let listensTo = elem.getAttribute(DEER.LISTENING)
-        if(listensTo){
-            elem.addEventListener(DEER.EVENTS.CLICKED,e=> {
-                try{
-                    if(e.detail.target.closest(DEER.VIEW+","+DEER.FORM).getAttribute("id")===listensTo) elem.setAttribute(DEER.ID,e.detail.target.closest('['+DEER.ID+']').getAttribute(DEER.ID))
-                } catch (err) {}
-            })
-            window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
-        }
-        
-    }
-}
-
 /**
  * Observer callback for rendering newly loaded objects. Checks the
  * mutationsList for "deep-object" attribute changes.
@@ -265,6 +197,74 @@ DEER.TEMPLATES.event= function(obj, options={}) {
         return null
     }
     return null
+}
+
+export default class DeerRender {
+    constructor(elem, deer=config){
+        DEER = Object.assign(config,deer)
+        changeLoader.observe(elem, {
+            attributes:true
+        })
+        this.$dirty = false
+        this.id = elem.getAttribute(DEER.ID)
+        this.collection = elem.getAttribute(DEER.COLLECTION)
+        this.elem = elem
+        
+        try {
+            if(!(this.id||this.collection)){
+                let err = new Error(this.id+" is not a valid id.")
+                err.code = "NO_ID"
+                throw err
+            } else {
+                if(this.id) {
+                    fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj)).catch(err=>err)
+                } else if (this.collection) {
+                    let queryObj = {
+                        body: {
+                            targetCollection: this.collection
+                        }
+                    }
+                    fetch(DEER.URLS.QUERY, {
+                        method: "POST",
+                        mode: "cors",
+                        body: JSON.stringify(queryObj)
+                    }).then(response => response.json())
+                    .then(pointers => {
+                        let list = []
+                        pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
+                        return Promise.all(list)
+                    })
+                    .then(list => {
+                        let listObj = {
+                            name: this.collection,
+                            itemListElement: list
+                        }
+                        try {
+                            listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
+                        } catch (err) {}
+                        RENDER.element(this.elem,listObj)
+                    })
+                }
+            }
+        } catch(err){
+            let message = err
+            switch(err.code){
+                case "NO_ID": message=`` // No DEER.ID, so leave it blank
+            }
+            elem.innerHTML = message
+        }
+
+        let listensTo = elem.getAttribute(DEER.LISTENING)
+        if(listensTo){
+            elem.addEventListener(DEER.EVENTS.CLICKED,e=> {
+                try{
+                    if(e.detail.target.closest(DEER.VIEW+","+DEER.FORM).getAttribute("id")===listensTo) elem.setAttribute(DEER.ID,e.detail.target.closest('['+DEER.ID+']').getAttribute(DEER.ID))
+                } catch (err) {}
+            })
+            window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
+        }
+        
+    }
 }
 
 export function initializeDeerViews(config) {
