@@ -201,7 +201,7 @@ DEER.TEMPLATES.event= function(obj, options={}) {
 
 export default class DeerRender {
     constructor(elem, deer={}){
-        for(let key of DEER) {
+        for(let key in DEER) {
             if(typeof DEER[key] === "string") {
                 DEER[key] = deer[key] || config[key]
             } else {
