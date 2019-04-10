@@ -26,17 +26,16 @@ async function renderChange(mutationsList) {
     for (var mutation of mutationsList) {
         switch (mutation.attributeName) {
             case DEER.ID:
-            case DEER.COLLECTION:
-            case DEER.LIST:
             case DEER.KEY:
             case DEER.LINK:
+            case DEER.LIST:
             let id = mutation.target.getAttribute(DEER.ID)
-            if (id === "null") return
+            if (id === "null" || mutation.target.getAttribute(DEER.COLLECTION)) return
             let obj = {}
             try {
                 obj = JSON.parse(localStorage.getItem(id))
             } catch (err) {}
-            if (!obj || !(obj.items || obj.images || obj.sequences)) {
+            if (!obj["@id"]) {
                 obj = await fetch(id).then(response => response.json()).catch(error => error)
                 if (obj) {
                     localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
