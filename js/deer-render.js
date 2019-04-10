@@ -63,7 +63,8 @@ const RENDER = {}
 RENDER.element = function(elem,obj) {
     
     return UTILS.expand(obj).then(obj=>{
-        let template = DEER.TEMPLATES[elem.getAttribute(DEER.TEMPLATE)] || DEER.TEMPLATES.json
+        let tmplName = elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")
+        let template = DEER.TEMPLATES[tmplName] || DEER.TEMPLATES.json
         let options = {
             list: elem.getAttribute(DEER.LIST),
             link: elem.getAttribute(DEER.LINK),
