@@ -42,7 +42,7 @@ export default class DeerRender {
                             targetCollection: this.collection
                         }
                     }
-                    fetch(URLS.QUERY, {
+                    fetch(DEER.URLS.QUERY, {
                         method: "POST",
                         mode: "cors",
                         body: JSON.stringify(queryObj)
