@@ -25,15 +25,45 @@ export default class DeerRender {
         })
         this.$dirty = false
         this.id = elem.getAttribute(DEER.ID)
+        this.collection = elem.getAttribute(DEER.COLLECTION)
         this.elem = elem
         
         try {
-            if(!this.id){
+            if(!(this.id||this.collection)){
                 let err = new Error(this.id+" is not a valid id.")
                 err.code = "NO_ID"
                 throw err
+            } else {
+                if(this.id) {
+                    fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj)).catch(err=>err)
+                } else if (this.collection) {
+                    let queryObj = {
+                        body: {
+                            targetCollection: this.collection
+                        }
+                    }
+                    fetch(URLS.QUERY, {
+                        method: "POST",
+                        mode: "cors",
+                        body: JSON.stringify(queryObj)
+                    }).then(response => response.json())
+                    .then(function (pointers) {
+                        let list = []
+                        pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
+                        return Promise.all(list)
+                    })
+                    .then(function (list) {
+                        let listObj = {
+                            name: this.collection,
+                            itemListElement: list
+                        }
+                        try {
+                            listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
+                        } catch (err) {}
+                        RENDER.element(this.elem,listObj)
+                    })
+                }
             }
-            fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj)).catch(err=>err)
         } catch(err){
             let message = err
             switch(err.code){
