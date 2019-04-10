@@ -19,7 +19,7 @@ var DEER = config
 
 export default class DeerRender {
     constructor(elem, deer=config){
-        DEER = deer
+        DEER = Object.assign(config,deer)
         changeLoader.observe(elem, {
             attributes:true
         })

@@ -17,7 +17,7 @@ var DEER = config
 
 export default class DeerReport {
     constructor(elem,deer=config) {
-        DEER = deer
+        DEER = Object.assign(config,deer)
         this.$dirty = false
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
