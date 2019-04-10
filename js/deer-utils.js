@@ -104,6 +104,7 @@ export default {
      */
     expand(obj) {
         let findId = obj["@id"]
+        if(!findId) return obj
         let getValue = this.getValue
         return this.findByTargetId(findId)
         // TODO: attach evidence to each property value
