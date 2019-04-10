@@ -47,12 +47,12 @@ export default class DeerRender {
                         mode: "cors",
                         body: JSON.stringify(queryObj)
                     }).then(response => response.json())
-                    .then(function (pointers) {
+                    .then(pointers => {
                         let list = []
                         pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
                         return Promise.all(list)
                     })
-                    .then(function (list) {
+                    .then(list => {
                         let listObj = {
                             name: this.collection,
                             itemListElement: list
