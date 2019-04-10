@@ -104,7 +104,7 @@ export default {
      */
     expand(obj) {
         let findId = obj["@id"]
-        if(!findId) return new Promise().resolve(obj)
+        if(!findId) return Promise.resolve(obj)
         let getValue = this.getValue
         return this.findByTargetId(findId)
         // TODO: attach evidence to each property value
