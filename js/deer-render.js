@@ -72,6 +72,17 @@ RENDER.element = function(elem,obj) {
             label: elem.getAttribute(DEER.LABEL)
         }
         elem.innerHTML = template(obj,options)
+        let newViews = elem.querySelectorAll(config.VIEW)
+        if(newViews.length>0) {
+            Array.from(views).forEach(elem=>new DeerRender(elem,config))
+        }
+        let newForms = elem.querySelectorAll(config.FORM)
+        if(newForms.length > 0) {
+            try {
+                Array.from(forms).forEach(elem => new DeerReport(elem,config))
+            } catch(err) {}
+        }
+
         UTILS.broadcast(undefined,DEER.EVENTS.LOADED,elem,obj)
     })
 }
