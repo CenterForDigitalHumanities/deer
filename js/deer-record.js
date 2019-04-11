@@ -189,4 +189,5 @@ async function create(obj, attribution, evidence) {
 export function initializeDeerForms(config) {
     const forms = document.querySelectorAll(config.FORM)
     Array.from(forms).forEach(elem => new DeerReport(elem,config))
+    document.addEventListener(DEER.EVENTS.NEW_FORM,e => Array.from(e.detail.set).forEach(elem=>new DeerReport(elem,config)))
 }

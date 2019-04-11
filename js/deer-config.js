@@ -29,6 +29,8 @@ export default {
         CREATED: "deer-created",
         UPDATED: "deer-updated",
         LOADED: "deer-loaded",
+        NEW_VIEW: "deer-view",
+        NEW_FORM: "deer-form",
         CLICKED: "deer-clicked"
     },
 
