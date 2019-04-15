@@ -91,6 +91,10 @@ export default class DeerReport {
                 annotation.body[input.getAttribute(DEER.KEY)] = {
                     value: input.value
                 }
+                // TODO: maybe we need a deer-value to assign things here... or some option...
+                if(input.getAttribute(DEER.KEY)==="targetCollection"){
+                    annotation.body.targetCollection = input.value
+                }
                 let ev = input.getAttribute(DEER.EVIDENCE) || this.evidence
                 if(ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
                 let name = input.getAttribute("title")
