@@ -79,7 +79,7 @@ export default class DeerReport {
             UTILS.broadcast(undefined,DEER.EVENTS.CREATED,this.elem,record)
         }
         formAction.then((function(entity) {
-            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS)).map(input => {
+            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).map(input => {
                 let inputId = input.getAttribute(DEER.SOURCE)
                 let action = (inputId) ? "UPDATE" : "CREATE"
                 let annotation = {
