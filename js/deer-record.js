@@ -32,6 +32,10 @@ export default class DeerReport {
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
         
+        if(this.type === null) {
+            throw Error("No ["+DEER.TYPE+"] on form.")
+        }
+
         elem.onsubmit = this.processRecord.bind(this)
         
         if (this.id) {
