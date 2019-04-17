@@ -56,9 +56,9 @@ export default class DeerReport {
     processRecord(event) {
         event.preventDefault()      
         let record = {
-            "@context": this.context,
             "@type": this.type
         }
+        if(this.context) { record["@context"] = this.context }
         try {
             record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
         } catch(err){}
