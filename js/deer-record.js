@@ -32,14 +32,13 @@ export default class DeerReport {
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
         
-        if(this.type === null) {
-            throw Error("No ["+DEER.TYPE+"] on form.")
-        }
-
         elem.onsubmit = this.processRecord.bind(this)
         
         if (this.id) {
+            //Do we want to expand for all types?
             UTILS.expand({"@id":this.id})
+            //What if there are no annotations on it and the things I need to know are already in the object?
+            //Expand only returned an object like {"@id": "http://an/id"} instead of resolving it, which is what I expected. 
             .then((function(obj){
                 Object.keys(obj).forEach((function(key){
                     try {
@@ -196,6 +195,7 @@ async function create(obj, attribution, evidence) {
 
 export function initializeDeerForms(config) {
     const forms = document.querySelectorAll(config.FORM)
+    const formArray = Array.from(forms)
     Array.from(forms).forEach(elem => new DeerReport(elem,config))
     document.addEventListener(DEER.EVENTS.NEW_FORM,e => Array.from(e.detail.set).forEach(elem=>new DeerReport(elem,config)))
 }
