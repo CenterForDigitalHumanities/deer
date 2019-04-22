@@ -48,7 +48,7 @@ async function renderChange(mutationsList) {
             case DEER.LISTENING:
             let listensTo = mutation.target.getAttribute(DEER.LISTENING)
             if(listensTo){
-                mutation.target.addEventListener('deer-clicked',e=>{
+                mutation.target.addEventListener(DEER.EVENTS.CLICKED,e=>{
                     let loadId = e.detail["@id"]
                     if(loadId===listensTo) { mutation.target.setAttribute("deer-id",loadId) }
                 })
@@ -253,7 +253,8 @@ export default class DeerRender {
                     .then(pointers => {
                         let list = []
                         pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
-                        return Promise.all(list).then(l=>l.filter(i=>!i.hasOwnProperty("__deleted")))
+                         return Promise.all(list).then(l=>l.filter(i=>!i.hasOwnProperty("__deleted")))
+
                     })
                     .then(list => {
                         let listObj = {
@@ -283,7 +284,13 @@ export default class DeerRender {
                     if(e.detail.target.closest(DEER.VIEW+","+DEER.FORM).getAttribute("id")===listensTo) elem.setAttribute(DEER.ID,e.detail.target.closest('['+DEER.ID+']').getAttribute(DEER.ID))
                 } catch (err) {}
             })
-            window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
+            try{
+                window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
+            }
+            catch (err) {
+                console.error("There is no HTML element with id "+listensTo+" to attach an event to");
+            }
+            
         }
         
     }
