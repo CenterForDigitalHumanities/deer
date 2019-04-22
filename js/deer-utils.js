@@ -37,8 +37,8 @@ export default {
         // TODO: There must be a best way to do this...
         let prop;
         if(property===undefined || property === ""){
+            console.error("Value of property to lookup is missing!")
             return undefined
-            console.error("Cannot get value from property: It does not exist.")
         }
         if (Array.isArray(property)) {
             prop = property.map(this.getValue.bind(this))
