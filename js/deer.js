@@ -13,13 +13,8 @@
 // Identify an alternate config location or only overwrite some items below.
 import { default as DEER } from './deer-config.js'
 
-// Render is probably needed by all items, but can be removed.
-// CDN at https://centerfordigitalhumanities.github.io/deer/releases/
-import { initializeDeerViews } from 'https://centerfordigitalhumanities.github.io/deer/js/deer-render.js'
-
-// Record is only needed for saving or updating items.
-// CDN at https://centerfordigitalhumanities.github.io/deer/releases/
-import { initializeDeerForms } from 'https://centerfordigitalhumanities.github.io/deer/js/deer-record.js'
+// Identify a UTILS package
+import { default as UTILS } from './deer-utils.js'
 
 // Overwrite or add certain values to the configuration to customize.
 
@@ -33,6 +28,8 @@ DEER.URLS = {
     QUERY: "http://tinydev.rerum.io/app/query",
     SINCE: "http://devstore.rerum.io/v1/since"
 }
+//Assign utility functions as the DEER level which a user can overwrite or extend if they choose.
+DEER.UTILS = UTILS
 
 // Render is probably needed by all items, but can be removed.
 // CDN at https://centerfordigitalhumanities.github.io/deer/releases/
@@ -45,3 +42,7 @@ import { default as record, initializeDeerForms } from './deer-record.js'
 // fire up the element detection as needed
 initializeDeerViews(DEER) 
 initializeDeerForms(DEER)
+
+//For other devs to use DEER without altering these files, we need to export DEER 
+export {DEER}
+

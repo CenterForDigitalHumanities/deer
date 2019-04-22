@@ -36,6 +36,9 @@ export default {
     getValue: function(property, alsoPeek = [], asType) {
         // TODO: There must be a best way to do this...
         let prop;
+        if(property===undefined || property === ""){
+            return "[Unknown]"
+        }
         if (Array.isArray(property)) {
             prop = property.map(this.getValue.bind(this))
         }
@@ -50,11 +53,13 @@ export default {
                 if (property.hasOwnProperty(k)) {
                     prop = property[k]
                     break
-                } else {
+                } 
+                else {
                     prop = property
                 }
             }
-        } else {
+        } 
+        else {
             prop = property
         }
         // JSON-LD says no nested arrays, but we know people.
@@ -90,6 +95,8 @@ export default {
     /**
      * Attempt to discover a readable label from the object
      */
+     /*
+     @Deprecated?  
     get getLabel() {
         return (obj,noLabel="[ unlabeled ]",options={}) => {
             if(typeof obj === "string") { return obj }
@@ -97,57 +104,112 @@ export default {
             return (label)?this.getValue(label):noLabel
         }
     },
+    */
+    /**
+     * Attempt to discover a readable label from the object
+     */
+     getLabel: function(obj,noLabel="[ unlabeled ]",options={}) {
+        if(typeof obj === "string") { return obj }
+        let label = obj[options.label]||obj.name||obj.label||obj.title
+        return (label)?this.getValue(label):noLabel
+        
+    },
     /**
      * Take a known object with an id and query for annotations targeting it.
      * Discovered annotations are attached to the original object and returned.
      * @param {Object} obj Target object to search for description
      */
-    expand(obj) {
+    async expand(obj) {
         let findId = obj["@id"]
         if(!findId) return Promise.resolve(obj)
         let getValue = this.getValue
+        // If an expand like {"@id":"idToExapnd"} where idToExpand has no annotations, {"@id":"idToExapnd"} is returned unresolved...
+        // At minimum, this function should resolve the object to properly expand it unless we have a local copy that isn't dirty.
+        //TODO catch a fetch failure?
+        obj = await fetch(findId).then(response=>response.json())
         return this.findByTargetId(findId)
         // TODO: attach evidence to each property value
         // add each value in a predictable way
         // type properties for possible rendering?
         .then(function(annos){
+            
             for (let i = 0; i < annos.length; i++) {
                 let body
+                let anno = annos[i]
                 try {
-                    body = annos[i].body
+                    body = anno.body
                 } catch(err){ continue }
                 if (!body) { continue }
                 if (!Array.isArray(body)) {
                     body = [body]
                 }
+                //^^ FIXME what if it doesn't have anno.body?  What if it is anno.resource or anno.value?
+                let annoLabel = anno.label ? anno.label : anno.title ? anno.title : anno.purpose ? anno.purpose : "untitledAnno"
                 Leaf: for (let j = 0; j < body.length; j++) {
+                    //expand() is not doing what I expect.  If it finds evidence here, it does not continuing building
+                    // out the obj.  
                     if (body[j].evidence) {
                         obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence
-                    } else {
-                        try{
-                            let val = body[j]
-                            let k = Object.keys(val)[0]
-                            if (!val.source) {
-                                // include an origin for this property, placehold madsrdf:Source
-                                let aVal = getValue(val[k])
-                                val[k] = {
-                                    value: aVal,
-                                    source: {
-                                        citationSource: annos[i]["@id"],
-                                        citationNote: annos[i].label || "Composed object from DEER",
-                                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
-                                    }
-                                }
+                    } 
+                    //else {
+                    try{
+                        let valToAssign = {}
+                        let discoveredBody
+                        if(typeof body[j] === "object"){
+                            //Then it is like {some:"data", value:"What we want"} hopefully
+                            let alsoPeek = ["@value", "value", "$value", "val"]
+                            let foundVal = false;
+                            for (let k of alsoPeek) {
+                                if (body[j].hasOwnProperty(k)) {
+                                    foundVal = true;
+                                    break
+                                } 
                             }
-                            if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
-                                // this is not the most recent available
-                                // TODO: maybe check generator, etc.
-                                continue Leaf
-                            } else {
-                                obj = Object.assign(obj, val)
+                            if (foundVal){
+                                discoveredBody = body[j]
                             }
-                        } catch(err){}
-                    }
+                            else{
+                                //I don't think we will be able to pull a value from this down the line...
+                                discoveredBody = body[j]
+                            }
+                        }
+                        else{
+                            //Presumably it is a string which is the value we were looking for
+                            discoveredBody = body[j]
+                        }
+                        
+                        if (typeof discoveredBody === "string" || !discoveredBody.source) {
+                            // include an origin for this property, placehold madsrdf:Source
+                            let source = {
+                                citationSource: annos[i]["@id"],
+                                citationNote: annos[i].label || "Composed object from DEER",
+                                comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                            }
+                            if(typeof discoveredBody === "string"){
+                                //Then the value we discovered is a string and we want it to be an object with value and source
+                                valToAssign["value"] = discoveredBody
+                                valToAssign["source"] = source
+
+                            }
+                            else{
+                                //Then the value we discovered is already an object, we want it to have a source
+                                discoveredBody["source"] = source
+                                valToAssign = discoveredBody
+                            }
+                        }
+                        if (annos[i].__rerum && annos[i].__rerum.history.next.length) {
+                            // this is not the most recent available
+                            // TODO: maybe check generator, etc.
+                            continue Leaf
+                        } 
+                        else {
+                            let assignObj = {}
+                            //Now we can assign these annos targeting this object like objTargeted[annoLabel] = annoValueObject
+                            assignObj[annoLabel] = valToAssign //Notice valToAssign is never a string even if the original value was.
+                            obj = Object.assign(obj, assignObj)
+                        }
+                    } catch(err){}
+                    //}
                 }
             }
             return obj
