@@ -59,9 +59,9 @@ export default class DeerReport {
     processRecord(event) {
         event.preventDefault()      
         let record = {
-            "@context": this.context,
             "@type": this.type
         }
+        if(this.context) { record["@context"] = this.context }
         try {
             record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
         } catch(err){}
@@ -196,10 +196,6 @@ async function create(obj, attribution, evidence) {
 export function initializeDeerForms(config) {
     const forms = document.querySelectorAll(config.FORM)
     const formArray = Array.from(forms)
-    for(let i=0; i< formArray.length; i++){
-        let formElem = formArray[i];
-        new DeerReport(formElem,config)   
-    }
     Array.from(forms).forEach(elem => new DeerReport(elem,config))
     document.addEventListener(DEER.EVENTS.NEW_FORM,e => Array.from(e.detail.set).forEach(elem=>new DeerReport(elem,config)))
 }

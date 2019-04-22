@@ -92,7 +92,6 @@ RENDER.element = function(elem,obj) {
  * @param {Object} options additional properties to draw with the JSON
  */
 DEER.TEMPLATES.json = function(obj, options={}) {
-    console.log("json template")
     let indent = options.indent || 4
     let replacer = (k,v) => {
         if(DEER.SUPPRESS.indexOf(k) !== -1) return
@@ -112,7 +111,6 @@ DEER.TEMPLATES.json = function(obj, options={}) {
  * @param {String} label The label to be displayed when drawn
  */
 DEER.TEMPLATES.prop= function(obj, options = {}) {
-    console.log("prop template")
     let key = options.key || "@id"
     let prop = obj[key]
     let label = options.label || UTILS.getLabel(obj,prop)
@@ -129,7 +127,6 @@ DEER.TEMPLATES.prop= function(obj, options = {}) {
  * @param {Object} options additional properties to draw with the Entity
  */
 DEER.TEMPLATES.entity= function(obj, options = {}) {
-    console.log("entity template")
     let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
     let list = ``
     
@@ -164,7 +161,6 @@ DEER.TEMPLATES.entity= function(obj, options = {}) {
 }
 
 DEER.TEMPLATES.list= function(obj, options={}) {
-    console.log("list template")
     let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
     if(options.list){
         tmpl += `<ul>`
@@ -183,7 +179,6 @@ DEER.TEMPLATES.list= function(obj, options={}) {
  * @param {Object} options additional properties to draw with the Person
  */
 DEER.TEMPLATES.person= function(obj, options={}) {
-    console.log("person template")
     try {
         let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
         let dob = DEER.TEMPLATES.prop(obj, {key:"birthDate", title:"Birth Date"}) || ``
@@ -205,7 +200,6 @@ DEER.TEMPLATES.person= function(obj, options={}) {
  * @param {Object} options additional properties to draw with the Event
  */
 DEER.TEMPLATES.event= function(obj, options={}) {
-    console.log("event template")
     try {
         let tmpl = `<h1>${UTILS.getLabel(obj)}</h1>`
         return tmpl
@@ -254,7 +248,8 @@ export default class DeerRender {
                     .then(pointers => {
                         let list = []
                         pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
-                        return Promise.all(list)
+                         return Promise.all(list).then(l=>l.filter(i=>!i.hasOwnProperty("__deleted")))
+
                     })
                     .then(list => {
                         let listObj = {
@@ -284,10 +279,11 @@ export default class DeerRender {
                     if(e.detail.target.closest(DEER.VIEW+","+DEER.FORM).getAttribute("id")===listensTo) elem.setAttribute(DEER.ID,e.detail.target.closest('['+DEER.ID+']').getAttribute(DEER.ID))
                 } catch (err) {}
             })
-            if(window[listensTo] !== undefined){
-                //Make sure it at least exists in the window.  DEER should not break because an element doesn't exist it was to put an event listener on. 
-                //@FIXME: Should probably make sure it is of type HTMLElement as well, users suck
+            try{
                 window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
+            }
+            catch (err) {
+                console.error("There is no HTML element with id "+listensTo+" to attach an event to");
             }
             
         }
