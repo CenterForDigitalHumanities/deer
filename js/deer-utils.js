@@ -102,56 +102,59 @@ export default {
      * Discovered annotations are attached to the original object and returned.
      * @param {Object} obj Target object to search for description
      */
-    expand(obj) {
+    async expand(obj) {
         let findId = obj["@id"]
         if(!findId) return Promise.resolve(obj)
         let getValue = this.getValue
-        return this.findByTargetId(findId)
-        // TODO: attach evidence to each property value
-        // add each value in a predictable way
-        // type properties for possible rendering?
-        .then(function(annos){
-            for (let i = 0; i < annos.length; i++) {
-                let body
-                try {
-                    body = annos[i].body
-                } catch(err){ continue }
-                if (!body) { continue }
-                if (!Array.isArray(body)) {
-                    body = [body]
+        const annos = await this.findByTargetId(findId);
+        for (let i = 0; i < annos.length; i++) {
+            let body;
+            try {
+                body = annos[i].body;
+            }
+            catch (err) {
+                continue;
+            }
+            if (!body) {
+                continue;
+            }
+            if (!Array.isArray(body)) {
+                body = [body];
+            }
+            Leaf: for (let j = 0; j < body.length; j++) {
+                if (body[j].evidence) {
+                    obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence;
                 }
-                Leaf: for (let j = 0; j < body.length; j++) {
-                    if (body[j].evidence) {
-                        obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence
-                    } else {
-                        try{
-                            let val = body[j]
-                            let k = Object.keys(val)[0]
-                            if (!val.source) {
-                                // include an origin for this property, placehold madsrdf:Source
-                                let aVal = getValue(val[k])
-                                val[k] = {
-                                    value: aVal,
-                                    source: {
-                                        citationSource: annos[i]["@id"],
-                                        citationNote: annos[i].label || "Composed object from DEER",
-                                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
-                                    }
+                else {
+                    try {
+                        let val = body[j];
+                        let k = Object.keys(val)[0];
+                        if (!val.source) {
+                            // include an origin for this property, placehold madsrdf:Source
+                            let aVal = getValue(val[k]);
+                            val[k] = {
+                                value: aVal,
+                                source: {
+                                    citationSource: annos[i]["@id"],
+                                    citationNote: annos[i].label || "Composed object from DEER",
+                                    comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
                                 }
-                            }
-                            if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
-                                // this is not the most recent available
-                                // TODO: maybe check generator, etc.
-                                continue Leaf
-                            } else {
-                                obj = Object.assign(obj, val)
-                            }
-                        } catch(err){}
+                            };
+                        }
+                        if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
+                            // this is not the most recent available
+                            // TODO: maybe check generator, etc.
+                            continue Leaf;
+                        }
+                        else {
+                            obj = Object.assign(obj, val);
+                        }
                     }
+                    catch (err_1) { }
                 }
             }
-            return obj
-        })
+        }
+        return obj;
     },
     /**
      * Execute query for any annotations in RERUM which target the
