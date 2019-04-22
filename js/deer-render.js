@@ -69,9 +69,12 @@ RENDER.element = function(elem,obj) {
             link: elem.getAttribute(DEER.LINK),
             collection: elem.getAttribute(DEER.COLLECTION),
             key: elem.getAttribute(DEER.KEY),
-            label: elem.getAttribute(DEER.LABEL)
+            label: elem.getAttribute(DEER.LABEL),
+            config: DEER
         }
-        elem.innerHTML = template(obj,options)
+        let templateResponse = template(obj,options)
+
+        elem.innerHTML = (typeof templateResponse.html==="string") ? templateResponse.html : templateResponse
 
         let newViews = elem.querySelectorAll(config.VIEW)
         if(newViews.length>0) {
@@ -81,6 +84,8 @@ RENDER.element = function(elem,obj) {
         if(newForms.length > 0) {
             UTILS.broadcast(undefined,DEER.EVENTS.NEW_FORM,elem,{set:newForms})
         }
+
+        if (typeof templateResponse.then === "function") { templateResponse.then(elem,obj,options) }
 
         UTILS.broadcast(undefined,DEER.EVENTS.LOADED,elem,obj)
     })
