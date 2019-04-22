@@ -113,7 +113,7 @@ export default {
         if (!findId) return Promise.resolve(obj)
         let getValue = this.getValue
         return fetch(findId).then(response => response.json())
-            .then(obj => findByTargetId(findId)
+            .then(obj => this.findByTargetId(findId)
                 .then(function (annos) {
                     for (let i = 0; i < annos.length; i++) {
                         let body
