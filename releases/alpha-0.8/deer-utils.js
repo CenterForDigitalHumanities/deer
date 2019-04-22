@@ -13,24 +13,33 @@
 import { default as DEER } from './deer-config.js'
 
 export default {
-    listFromCollection: function(){
+    listFromCollection: function (collectionId) {
+        let queryObj = {
+            body: {
+                targetCollection: collectionId
+            }
+        }
         return fetch(DEER.URLS.QUERY, {
             method: "POST",
             body: JSON.stringify(queryObj)
         }).then(response => response.json())
-        .then(function (pointers) {
-            let list = []
-            pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
-            return Promise.all(list)
-        })
-        .then(function (list) {
-            return list
-        })
+            .then(function (pointers) {
+                let list = []
+                pointers.map(tc => list.push(fetch(tc.target).then(response => response.json())))
+                return Promise.all(list)
+            })
+            .then(function (list) {
+                return list
+            })
     },
-    listFromContainer: function(){},
-    getValue: function(property, alsoPeek = [], asType) {
+    listFromContainer: function () { },
+    getValue: function (property, alsoPeek = [], asType) {
         // TODO: There must be a best way to do this...
         let prop;
+        if (property === undefined || property === "") {
+            console.error("Value of property to lookup is missing!")
+            return undefined
+        }
         if (Array.isArray(property)) {
             prop = property.map(this.getValue.bind(this))
         }
@@ -45,11 +54,13 @@ export default {
                 if (property.hasOwnProperty(k)) {
                     prop = property[k]
                     break
-                } else {
+                }
+                else {
                     prop = property
                 }
             }
-        } else {
+        }
+        else {
             prop = property
         }
         // JSON-LD says no nested arrays, but we know people.
@@ -86,10 +97,10 @@ export default {
      * Attempt to discover a readable label from the object
      */
     get getLabel() {
-        return (obj,noLabel="[ unlabeled ]",options={}) => {
-            if(typeof obj === "string") { return obj }
-            let label = obj[options.label]||obj.name||obj.label||obj.title
-            return (label)?this.getValue(label):noLabel
+        return (obj, noLabel = "[ unlabeled ]", options = {}) => {
+            if (typeof obj === "string") { return obj }
+            let label = obj[options.label] || obj.name || obj.label || obj.title
+            return (label) ? this.getValue(label) : noLabel
         }
     },
     /**
@@ -97,63 +108,68 @@ export default {
      * Discovered annotations are attached to the original object and returned.
      * @param {Object} obj Target object to search for description
      */
-    expand(obj) {
+    async expand(obj) {
         let findId = obj["@id"]
+        if (!findId) return Promise.resolve(obj)
         let getValue = this.getValue
-        return this.findByTargetId(findId)
-        // TODO: attach evidence to each property value
-        // add each value in a predictable way
-        // type properties for possible rendering?
-        .then(function(annos){
-            for (let i = 0; i < annos.length; i++) {
-                let body
-                try {
-                    body = annos[i].body
-                } catch(err){ continue }
-                if (!body) { continue }
-                if (!Array.isArray(body)) {
-                    body = [body]
-                }
-                Leaf: for (let j = 0; j < body.length; j++) {
-                    if (body[j].evidence) {
-                        obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence
-                    } else {
-                        try{
-                            let val = body[j]
-                            let k = Object.keys(val)[0]
-                            if (!val.source) {
-                                // include an origin for this property, placehold madsrdf:Source
-                                let aVal = getValue(val[k])
-                                val[k] = {
-                                    value: aVal,
-                                    source: {
-                                        citationSource: annos[i]["@id"],
-                                        citationNote: annos[i].label || "Composed object from DEER",
-                                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+        return fetch(findId).then(response => response.json())
+            .then(obj => findByTargetId(findId)
+                .then(function (annos) {
+                    for (let i = 0; i < annos.length; i++) {
+                        let body
+                        try {
+                            body = annos[i].body
+                        } catch (err) { continue }
+                        if (!body) { continue }
+                        if (!Array.isArray(body)) {
+                            body = [body]
+                        }
+                        Leaf: for (let j = 0; j < body.length; j++) {
+                            if (body[j].evidence) {
+                                obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence;
+                            }
+                            else {
+                                try {
+                                    let val = body[j];
+                                    let k = Object.keys(val)[0];
+                                    if (!val.source) {
+                                        // include an origin for this property, placehold madsrdf:Source
+                                        let aVal = getValue(val[k]);
+                                        val[k] = {
+                                            value: aVal,
+                                            source: {
+                                                citationSource: annos[i]["@id"],
+                                                citationNote: annos[i].label || "Composed object from DEER",
+                                                comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                                            }
+                                        };
+                                    }
+                                    if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
+                                        // this is not the most recent available
+                                        // TODO: maybe check generator, etc.
+                                        continue Leaf;
+                                    }
+                                    else {
+                                        obj = Object.assign(obj, val);
                                     }
                                 }
+                                catch (err_1) { }
                             }
-                            if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
-                                // this is not the most recent available
-                                // TODO: maybe check generator, etc.
-                                continue Leaf
-                            } else {
-                                obj = Object.assign(obj, val)
-                            }
-                        } catch(err){}
+                        }
                     }
-                }
-            }
-            return obj
-        })
+                    return obj
+                })).catch(err => {
+                    console.log("Error expanding object:" + err)
+                    return obj
+                })
     },
     /**
      * Execute query for any annotations in RERUM which target the
      * id passed in. Promise resolves to an array of annotations.
      * @param {String} id URI for the targeted entity
      */
-    findByTargetId: async function(id) {
-        let everything = Object.keys(localStorage).map(k=>JSON.parse(localStorage.getItem(k)))
+    findByTargetId: async function (id) {
+        let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
         let obj = {
             target: id
         }
@@ -164,8 +180,8 @@ export default {
                 "Content-Type": "application/json"
             }
         })
-        .then(response=>response.json())
-        .catch((err)=>console.log(err))
+            .then(response => response.json())
+            .catch((err) => console.log(err))
         let local_matches = everything.filter(o => o.target === id)
         matches = local_matches.concat(matches)
         return matches
@@ -174,32 +190,32 @@ export default {
     /**
      * An error handler for various HTTP traffic scenarios
      */
-    handleHTTPError: function(response){
-        if (!response.ok){
+    handleHTTPError: function (response) {
+        if (!response.ok) {
             let status = response.status
-            switch(status){
+            switch (status) {
                 case 400:
                     console.log("Bad Request")
-                break
+                    break
                 case 401:
                     console.log("Request was unauthorized")
-                break
+                    break
                 case 403:
                     console.log("Forbidden to make request")
-                break
+                    break
                 case 404:
                     console.log("Not found")
-                break
+                    break
                 case 500:
                     console.log("Internal server error")
-                break
+                    break
                 case 503:
                     console.log("Server down time")
-                break
+                    break
                 default:
                     console.log("unahndled HTTP ERROR")
             }
-            throw Error("HTTP Error: "+response.statusText)
+            throw Error("HTTP Error: " + response.statusText)
         }
         return response
     },
@@ -207,8 +223,8 @@ export default {
     /**
      * Broadcast a message about DEER
      */
-    broadcast: function(event={}, type, element, obj={}){
-        let e = new CustomEvent(type, {detail: Object.assign(obj,{target:event.target}),bubbles:true})
+    broadcast: function (event = {}, type, element, obj = {}) {
+        let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
         element.dispatchEvent(e)
     }
 }

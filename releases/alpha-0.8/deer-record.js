@@ -16,8 +16,14 @@ import { default as config } from './deer-config.js'
 var DEER = config
 
 export default class DeerReport {
-    constructor(elem,deer=config) {
-        DEER = deer
+    constructor(elem,deer={}) {
+        for(let key in DEER) {
+            if(typeof DEER[key] === "string") {
+                DEER[key] = deer[key] || config[key]
+            } else {
+                DEER[key] = Object.assign(config[key],deer[key])
+            }
+        }
         this.$dirty = false
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
@@ -29,7 +35,10 @@ export default class DeerReport {
         elem.onsubmit = this.processRecord.bind(this)
         
         if (this.id) {
+            //Do we want to expand for all types?
             UTILS.expand({"@id":this.id})
+            //What if there are no annotations on it and the things I need to know are already in the object?
+            //Expand only returned an object like {"@id": "http://an/id"} instead of resolving it, which is what I expected. 
             .then((function(obj){
                 Object.keys(obj).forEach((function(key){
                     try {
@@ -50,9 +59,9 @@ export default class DeerReport {
     processRecord(event) {
         event.preventDefault()      
         let record = {
-            "@context": this.context,
             "@type": this.type
         }
+        if(this.context) { record["@context"] = this.context }
         try {
             record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
         } catch(err){}
@@ -73,7 +82,7 @@ export default class DeerReport {
             UTILS.broadcast(undefined,DEER.EVENTS.CREATED,this.elem,record)
         }
         formAction.then((function(entity) {
-            let annotations = Array.from(this.inputs).map(input => {
+            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).map(input => {
                 let inputId = input.getAttribute(DEER.SOURCE)
                 let action = (inputId) ? "UPDATE" : "CREATE"
                 let annotation = {
@@ -84,6 +93,10 @@ export default class DeerReport {
                 if(inputId) { annotation["@id"] = inputId }
                 annotation.body[input.getAttribute(DEER.KEY)] = {
                     value: input.value
+                }
+                // TODO: maybe we need a deer-value to assign things here... or some option...
+                if(input.getAttribute(DEER.KEY)==="targetCollection"){
+                    annotation.body.targetCollection = input.value
                 }
                 let ev = input.getAttribute(DEER.EVIDENCE) || this.evidence
                 if(ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
@@ -182,5 +195,7 @@ async function create(obj, attribution, evidence) {
 
 export function initializeDeerForms(config) {
     const forms = document.querySelectorAll(config.FORM)
+    const formArray = Array.from(forms)
     Array.from(forms).forEach(elem => new DeerReport(elem,config))
+    document.addEventListener(DEER.EVENTS.NEW_FORM,e => Array.from(e.detail.set).forEach(elem=>new DeerReport(elem,config)))
 }
