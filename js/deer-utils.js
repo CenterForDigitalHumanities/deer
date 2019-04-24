@@ -111,7 +111,7 @@ export default {
     async expand(obj) {
         let findId = obj["@id"] || obj.id || obj
         if (typeof findId !== "string") {
-            console.error("Unable to find URI in object:",obj)
+            console.warn("Unable to find URI in object:",obj)
             return obj
         }
         let getValue = this.getValue
