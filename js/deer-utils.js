@@ -109,8 +109,11 @@ export default {
      * @param {Object} obj Target object to search for description
      */
     async expand(obj) {
-        let findId = obj["@id"]
-        if (!findId) return Promise.resolve(obj)
+        let findId = obj["@id"] || obj.id || obj
+        if (typeof findId !== "string") {
+            console.error("Unable to find URI in object:",obj)
+            return obj
+        }
         let getValue = this.getValue
         return fetch(findId).then(response => response.json())
             .then(obj => this.findByTargetId(findId)
