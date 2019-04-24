@@ -170,9 +170,11 @@ export default {
      */
     findByTargetId: async function (id) {
         let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
-        let obj = {
-            target: id
-        }
+        let obj = {"$or":[]}
+        obj["$or"].push({"target":id})
+        obj["$or"].push({"target.id" : id})
+        obj["$or"].push({"target.@id" : id})
+        //obj["$or"].push({"target.source" : id})
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",
             body: JSON.stringify(obj),
