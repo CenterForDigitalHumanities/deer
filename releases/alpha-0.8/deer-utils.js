@@ -106,11 +106,14 @@ export default {
     /**
      * Take a known object with an id and query for annotations targeting it.
      * Discovered annotations are attached to the original object and returned.
-     * @param {Object} obj Target object to search for description
+     * @param {Object} entity Target object to search for description
      */
-    async expand(obj) {
-        let findId = obj["@id"]
-        if (!findId) return Promise.resolve(obj)
+    async expand(entity) {
+        let findId = entity["@id"] || entity.id || entity
+        if (typeof findId !== "string") {
+            console.warn("Unable to find URI in object:",entity)
+            return entity
+        }
         let getValue = this.getValue
         return fetch(findId).then(response => response.json())
             .then(obj => this.findByTargetId(findId)
