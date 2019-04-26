@@ -183,7 +183,9 @@ export default {
             //Entries that are not strings are not supported.  Ignore those entries.  
             //TODO: should we we let the user know we had to ignore something here?
             if(typeof target === "string"){
-                obj["$or"].push({target:id})
+                let o = {}
+                o[target] = id
+                obj["$or"].push(o)
             }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
