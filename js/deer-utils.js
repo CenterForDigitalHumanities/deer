@@ -167,14 +167,35 @@ export default {
      * Execute query for any annotations in RERUM which target the
      * id passed in. Promise resolves to an array of annotations.
      * @param {String} id URI for the targeted entity
+     * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-    findByTargetId: async function (id) {
+    findByTargetId: async function (id, targetStyle) {
         let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
+        //Backwards compatible without the new parameter
+        if(targetStyle === undefined){
+            targetStyle = []
+        }
+        //Users pass the craziest things...
+        if (!Array.isArray(targetStyle)) {
+            if(typeof targetStyle === "string"){
+                targetStyle = [targetStyle]
+            }
+            else{
+                //certainly your key isn't a number.  keys arent objects.  what are you doing?
+                targetStyle = []
+            }
+        }
+        else{
+            /*
+             * It was an Array, let's hope it was an array of strings.  If not, it won't hurt much
+             * of anything unless it ends up creating an invalid DEER.URLS.QUERY, like {"@``":id}. 
+            */
+        }
+        targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
         let obj = {"$or":[]}
-        obj["$or"].push({"target":id})
-        obj["$or"].push({"target.id" : id})
-        obj["$or"].push({"target.@id" : id})
-        //obj["$or"].push({"target.source" : id})
+        for (let target of targetStyle) {
+            obj["$or"].push({target:id})
+        }
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",
             body: JSON.stringify(obj),
