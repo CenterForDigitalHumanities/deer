@@ -169,26 +169,16 @@ export default {
      * @param {String} id URI for the targeted entity
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-    findByTargetId: async function (id, targetStyle) {
+    findByTargetId: async function (id, targetStyle=[]) {
         let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
-        //Backwards compatible without the new parameter
-        if(targetStyle === undefined){
-            targetStyle = []
-        }
-        //Users pass the craziest things...
         if (!Array.isArray(targetStyle)) {
-            if(typeof targetStyle === "string"){
-                targetStyle = [targetStyle]
-            }
-            else{
-                //certainly your key isn't a number.  keys arent objects.  what are you doing?
-                targetStyle = []
-            }
+            targetStyle = [targetStyle]
         }
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
         let obj = {"$or":[]}
         for (let target of targetStyle) {
-            //If you passed an Array and it wasn't a Array of strings, I don't trust you.  Ignore. 
+            //Entries that are not strings are not supported.  Ignore those entries.  
+            //TODO: should we we let the user know we had to ignore something here?
             if(typeof target === "string"){
                 obj["$or"].push({target:id})
             }
