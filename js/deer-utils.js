@@ -170,11 +170,21 @@ export default {
      * Execute query for any annotations in RERUM which target the
      * id passed in. Promise resolves to an array of annotations.
      * @param {String} id URI for the targeted entity
+     * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-    findByTargetId: async function (id) {
+    findByTargetId: async function (id, targetStyle=[]) {
         let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
-        let obj = {
-            target: id
+        if (!Array.isArray(targetStyle)) {
+            targetStyle = [targetStyle]
+        }
+        targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
+        let obj = {"$or":[]}
+        for (let target of targetStyle) {
+            //Entries that are not strings are not supported.  Ignore those entries.  
+            //TODO: should we we let the user know we had to ignore something here?
+            if(typeof target === "string"){
+                obj["$or"].push({target:id})
+            }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",
