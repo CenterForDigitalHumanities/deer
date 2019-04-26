@@ -185,16 +185,13 @@ export default {
                 targetStyle = []
             }
         }
-        else{
-            /*
-             * It was an Array, let's hope it was an array of strings.  If not, it won't hurt much
-             * of anything unless it ends up creating an invalid DEER.URLS.QUERY, like {"@``":id}. 
-            */
-        }
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
         let obj = {"$or":[]}
         for (let target of targetStyle) {
-            obj["$or"].push({target:id})
+            //If you passed an Array and it wasn't a Array of strings, I don't trust you.  Ignore. 
+            if(typeof target === "string"){
+                obj["$or"].push({target:id})
+            }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",
