@@ -153,7 +153,25 @@ export default {
                                         continue Leaf;
                                     }
                                     else {
-                                        obj = Object.assign(obj, val);
+                                        // Assign this to the main object.
+                                        if(obj[k]) {
+                                            // It may be already there as an Array with some various labels
+                                            if (Array.isArray(obj[k])){
+                                                let deepMatch = false
+                                                for(const e of obj[k]) {
+                                                    if(e.name===val.name){
+                                                        deepMatch = true
+                                                        break
+                                                    }
+                                                }
+                                                if(!deepMatch) { obj[k].push(val) }
+                                            } else if (obj[k].name !== val.name) { // often undefined
+                                                obj[k] = [obj[k],val]
+                                            }
+                                        } else {
+                                            // or just tack it on
+                                            obj = Object.assign(obj, val);
+                                        }
                                     }
                                 }
                                 catch (err_1) { }
