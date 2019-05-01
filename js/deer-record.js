@@ -13,7 +13,46 @@
 import { default as UTILS } from './deer-utils.js'
 import { default as config } from './deer-config.js'
 
+const changeLoader = new MutationObserver(renderChange)
 var DEER = config
+
+/**
+ * Observer callback for rendering newly loaded objects. Checks the
+ * mutationsList for "deep-object" attribute changes.
+ * @param {Array} mutationsList of MutationRecord objects
+ */
+async function renderChange(mutationsList) {
+    for (var mutation of mutationsList) {
+        switch (mutation.attributeName) {
+            case DEER.ID:
+            let id = mutation.target.getAttribute(DEER.ID)
+            if (id === "null") return
+            let obj = {}
+            try {
+                obj = JSON.parse(localStorage.getItem(id))
+            } catch (err) {}
+            if (!obj||!obj["@id"]) {
+                obj = await fetch(id).then(response => response.json()).catch(error => error)
+                if (obj) {
+                    localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
+                } else {
+                    return false
+                }
+            }
+            new DeerReport(mutation.target,DEER)
+            // TODO: This is too heavy. Create a "populateFormFields" method and call it instead.
+            break
+            case DEER.LISTENING:
+            let listensTo = mutation.target.getAttribute(DEER.LISTENING)
+            if(listensTo){
+                mutation.target.addEventListener(DEER.EVENTS.CLICKED,e=>{
+                    let loadId = e.detail["@id"]
+                    if(loadId===listensTo) { mutation.target.setAttribute("deer-id",loadId) }
+                })
+            }
+		}
+	}
+}
 
 export default class DeerReport {
     constructor(elem,deer={}) {
@@ -31,6 +70,10 @@ export default class DeerReport {
         this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
+
+        changeLoader.observe(elem, {
+            attributes:true
+        })
         
         elem.onsubmit = this.processRecord.bind(this)
         
