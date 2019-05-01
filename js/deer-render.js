@@ -252,7 +252,7 @@ export default class DeerRender {
                     }).then(response => response.json())
                     .then(pointers => {
                         let list = []
-                        pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json())))
+                        pointers.map(tc => list.push(fetch(tc.target).then(response=>response.json().catch(err=>{__deleted:console.log(err)}))))
                          return Promise.all(list).then(l=>l.filter(i=>!i.hasOwnProperty("__deleted")))
 
                     })
