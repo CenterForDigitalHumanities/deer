@@ -63,7 +63,7 @@ export default class DeerReport {
                 DEER[key] = Object.assign(config[key],deer[key])
             }
         }
-        this.$dirty = false
+        this.$isDirty = false
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
@@ -71,10 +71,13 @@ export default class DeerReport {
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
 
+        Array.from(this.inputs).forEach(inp=>inpt.addEventListener('input', () => inpt.$isDirty = true))
+
         changeLoader.observe(elem, {
             attributes:true
         })
         
+        elem.oninput = event => this.$isDirty = true
         elem.onsubmit = this.processRecord.bind(this)
         
         if (this.id) {
@@ -87,7 +90,19 @@ export default class DeerReport {
                     try {
                         for(let el of Array.from(this.inputs)) {
                             if(el.getAttribute(DEER.KEY)===key){
-                                el.value = UTILS.getValue(obj[key])
+                                let assertedValue = UTILS.getValue(obj[key])
+                                if(Array.isArray(assertedValue)) {
+                                    for (const v of assertedValue) {
+                                        if(!el.value && (["string","number"].indexOf(typeof v)!==-1)){
+                                            el.value = v
+                                        }
+                                        if(typeof v === "object") {
+                                            
+                                        }
+                                    }
+                                } else {
+                                    el.value = UTILS.getValue(obj[key])
+                                }
                                 if(obj[key].source) {
                                     el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
                                 }
@@ -102,7 +117,10 @@ export default class DeerReport {
     }
     
     processRecord(event) {
-        event.preventDefault()      
+        event.preventDefault()  
+        if (!this.$isDirty) {
+            console.warn(event.target.id+" form submitted unchanged.")
+        }
         let record = {
             "@type": this.type
         }
