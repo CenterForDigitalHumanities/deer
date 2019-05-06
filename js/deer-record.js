@@ -88,7 +88,9 @@ export default class DeerReport {
                         for(let el of Array.from(this.inputs)) {
                             if(el.getAttribute(DEER.KEY)===key){
                                 el.value = UTILS.getValue(obj[key])
-                                el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
+                                if(obj[key].source) {
+                                    el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
+                                }
                                 break
                             }
                         }
