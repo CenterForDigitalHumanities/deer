@@ -71,7 +71,7 @@ export default class DeerReport {
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
 
-        Array.from(this.inputs).forEach(inp=>inpt.addEventListener('input', () => inpt.$isDirty = true))
+        Array.from(this.inputs).forEach(inpt=>inpt.addEventListener('input', () => inpt.$isDirty = true))
 
         changeLoader.observe(elem, {
             attributes:true
