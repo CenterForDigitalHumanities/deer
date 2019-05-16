@@ -95,7 +95,7 @@ export default class DeerReport {
                                     for (const v of assertedValue) {
                                         if(!el.value && (["string","number"].indexOf(typeof v)!==-1)){
                                             el.value = v
-                                            el.dispatchEvent(new Event('input'));
+                                            el.dispatchEvent(new Event('paste'));
                                         }
                                         if(typeof v === "object") {
                                             
@@ -103,7 +103,7 @@ export default class DeerReport {
                                     }
                                 } else {
                                     el.value = UTILS.getValue(obj[key])
-                                    el.dispatchEvent(new Event('input'));
+                                    el.dispatchEvent(new Event('paste'));
                                 }
                                 if(obj[key].source) {
                                     el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
