@@ -170,7 +170,7 @@ DEER.TEMPLATES.list= function(obj, options={}) {
     if(options.list){
         tmpl += `<ul>`
         obj[options.list].forEach((val,index)=>{
-            let name = UTILS.getLabel(val,(val.type || val['@type'] || label+index))
+            let name = UTILS.getLabel(val,(val.type || val['@type'] || index))
             tmpl+= (val["@id"] && options.link) ? `<li ${DEER.ID}="${val["@id"]}"><a href="${options.link}${val["@id"]}">${name}</a></li>` : `<li ${DEER.ID}="${val["@id"]}">${name}</li>`
         })
         tmpl += `</ul>`
