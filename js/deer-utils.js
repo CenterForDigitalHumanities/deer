@@ -178,10 +178,10 @@ export default {
                             }
                         }
                     }
-                    return obj
+                    return obj || {}
                 })).catch(err => {
                     console.log("Error expanding object:" + err)
-                    return obj
+                    return obj || {}
                 })
     },
     /**
