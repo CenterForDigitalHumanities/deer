@@ -98,7 +98,8 @@ export default {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
             if(Array.isArray(label)) {
-                label = label.map(l => this.getValue(this.getLabel(l)))
+                label = [...new Set(label.map(l => this.getValue(this.getLabel(l))))]
+
             }
             return label || noLabel
         }
