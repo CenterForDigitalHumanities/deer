@@ -138,7 +138,7 @@ DEER.TEMPLATES.entity= function(obj, options = {}) {
     for (let key in obj) {
         if(DEER.SUPPRESS.indexOf(key)>-1) {continue}
         let label = key
-        let value = UTILS.getValue(obj[key])
+        let value = UTILS.getValue(obj[key],key)
         try {
             if ((value.image || value.trim()).length > 0) {
                 list += (label === "depiction") ? `<img title="${label}" src="${value.image || value}" deer-source="${obj[key].source}">` : `<dt deer-source="${obj[key].source}">${label}</dt><dd>${value.image || value}</dd>`
