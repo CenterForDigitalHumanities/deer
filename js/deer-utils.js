@@ -42,30 +42,27 @@ export default {
         }
         if (Array.isArray(property)) {
             prop = property.map(this.getValue.bind(this))
-        }
-        if (typeof property === "object") {
-            // TODO: JSON-LD insists on "@value", but this is simplified in a lot
-            // of contexts. Reading that is ideal in the future.
-            if (!Array.isArray(alsoPeek)) {
-                alsoPeek = [alsoPeek]
-            }
-            alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
-            for (let k of alsoPeek) {
-                if (property.hasOwnProperty(k)) {
-                    prop = property[k]
-                    break
+        } else {
+            if (typeof property === "object") {
+                // TODO: JSON-LD insists on "@value", but this is simplified in a lot
+                // of contexts. Reading that is ideal in the future.
+                if (!Array.isArray(alsoPeek)) {
+                    alsoPeek = [alsoPeek]
                 }
-                else {
-                    prop = property
+                alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
+                for (let k of alsoPeek) {
+                    if (property.hasOwnProperty(k)) {
+                        prop = property[k]
+                        break
+                    }
+                    else {
+                        prop = property
+                    }
                 }
             }
-        }
-        else {
-            prop = property
-        }
-        // JSON-LD says no nested arrays, but we know people.
-        if (Array.isArray(prop)) {
-            prop = prop.map(this.getValue.bind(this))
+            else {
+                prop = property
+            }
         }
         try {
             switch (asType.toUpperCase()) {
@@ -100,7 +97,11 @@ export default {
         return (obj, noLabel = "[ unlabeled ]", options = {}) => {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
-            return (label) ? this.getValue(label) : noLabel
+            if(Array.isArray(label)) {
+                label = [...new Set(label.map(l => this.getValue(this.getLabel(l))))]
+
+            }
+            return label || noLabel
         }
     },
     /**
