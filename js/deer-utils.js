@@ -42,30 +42,27 @@ export default {
         }
         if (Array.isArray(property)) {
             prop = property.map(this.getValue.bind(this))
-        }
-        if (typeof property === "object") {
-            // TODO: JSON-LD insists on "@value", but this is simplified in a lot
-            // of contexts. Reading that is ideal in the future.
-            if (!Array.isArray(alsoPeek)) {
-                alsoPeek = [alsoPeek]
-            }
-            alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
-            for (let k of alsoPeek) {
-                if (property.hasOwnProperty(k)) {
-                    prop = property[k]
-                    break
+        } else {
+            if (typeof property === "object") {
+                // TODO: JSON-LD insists on "@value", but this is simplified in a lot
+                // of contexts. Reading that is ideal in the future.
+                if (!Array.isArray(alsoPeek)) {
+                    alsoPeek = [alsoPeek]
                 }
-                else {
-                    prop = property
+                alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
+                for (let k of alsoPeek) {
+                    if (property.hasOwnProperty(k)) {
+                        prop = property[k]
+                        break
+                    }
+                    else {
+                        prop = property
+                    }
                 }
             }
-        }
-        else {
-            prop = property
-        }
-        // JSON-LD says no nested arrays, but we know people.
-        if (Array.isArray(prop)) {
-            prop = prop.map(this.getValue.bind(this))
+            else {
+                prop = property
+            }
         }
         try {
             switch (asType.toUpperCase()) {
