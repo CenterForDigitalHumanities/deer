@@ -97,7 +97,10 @@ export default {
         return (obj, noLabel = "[ unlabeled ]", options = {}) => {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
-            return (label) ? this.getValue(label) : noLabel
+            if(Array.isArray(label)) {
+                label.forEach(l => this.getValue(this.getLabel(label)))
+            }
+            return label || noLabel
         }
     },
     /**
