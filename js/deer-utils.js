@@ -98,7 +98,7 @@ export default {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
             if(Array.isArray(label)) {
-                label.forEach(l => this.getValue(this.getLabel(label)))
+                label.forEach(l => this.getValue(this.getLabel(l)))
             }
             return label || noLabel
         }
