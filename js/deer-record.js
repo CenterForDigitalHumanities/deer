@@ -122,6 +122,7 @@ export default class DeerReport {
         if (!this.$isDirty) {
             console.warn(event.target.id+" form submitted unchanged.")
         }
+        if(this.elem.getAttribute(DEER.FORMTYPE))
         let record = {
             "@type": this.type
         }
@@ -183,6 +184,46 @@ export default class DeerReport {
             this.elem.setAttribute(DEER.ID,entity["@id"])
             new DeerReport(this.elem)
         })
+    }
+
+    simpleUpsert(event) {
+        let record = {
+            "@type": this.type
+        }
+        if(this.context) { record["@context"] = this.context }
+        if(this.evidence) { record.evidence = this.evidence }
+        try {
+            record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
+        } catch(err){}
+        Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).map(input => {
+            let key = input.getAttribute(DEER.KEY)
+            let val = input.value
+            let title = input.getAttribute("title")
+            let evidence = input.getAttribute(DEER.EVIDENCE)
+
+            if(title || evidence) {
+                val = { "@value" : val }
+                if(title) val.name = title
+                if(evidence) val.evidence = evidence
+            }
+
+            record[key] = (record.hasOwnProperty(key)) 
+                ? ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val])
+                : val
+            }).bind(this)
+
+            let inputId = input.getAttribute(DEER.ID)
+            let action = (inputId) ? "UPDATE" : "CREATE"
+
+            return fetch(DEER.URLS[action]+"?overwrite=true", {
+                method: (inputId) ? "PUT" : "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                body: JSON.stringify(record)
+            })
+            .then(response=>response.json())
+            .then(obj=>input.setAttribute(DEER.ID,obj.new_obj_state["@id"]))
     }
 }
 
