@@ -22,9 +22,8 @@
 </head>
 
 <body>
-    <div class="is-full-screen" id="badge" style="background-image: url('deer.jpg');background-size: contain;background-position: center;">
+    <div class="is-full-screen" id="badge" style="background-image: url('./images/deerlogo_banner.jpg'); background-position: center center; opacity: -0.408451; background-repeat: no-repeat; background-color: rgb(35, 31, 32);">
     </div>
-
 
     <div class="container">
 
@@ -366,8 +365,10 @@
         window.onhashchange = onload = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))
 
         document.onscroll = () => {
-            badge.style.opacity = 1 - window.scrollY / window.innerHeight * 2
-            tagline.style.top = window.scrollY / window.innerHeight * -5 + "em"
+            let y = window.scrollY
+            let h = window.innerHeight
+            badge.style.opacity = 1 - y / h * 2
+            tagline.style.top = y / h * -5 + "em"
         }
     </script>
 </body>
