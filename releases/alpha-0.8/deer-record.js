@@ -13,7 +13,46 @@
 import { default as UTILS } from './deer-utils.js'
 import { default as config } from './deer-config.js'
 
+const changeLoader = new MutationObserver(renderChange)
 var DEER = config
+
+/**
+ * Observer callback for rendering newly loaded objects. Checks the
+ * mutationsList for "deep-object" attribute changes.
+ * @param {Array} mutationsList of MutationRecord objects
+ */
+async function renderChange(mutationsList) {
+    for (var mutation of mutationsList) {
+        switch (mutation.attributeName) {
+            case DEER.ID:
+            let id = mutation.target.getAttribute(DEER.ID)
+            if (id === "null") return
+            let obj = {}
+            try {
+                obj = JSON.parse(localStorage.getItem(id))
+            } catch (err) {}
+            if (!obj||!obj["@id"]) {
+                obj = await fetch(id).then(response => response.json()).catch(error => error)
+                if (obj) {
+                    localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
+                } else {
+                    return false
+                }
+            }
+            new DeerReport(mutation.target,DEER)
+            // TODO: This is too heavy. Create a "populateFormFields" method and call it instead.
+            break
+            case DEER.LISTENING:
+            let listensTo = mutation.target.getAttribute(DEER.LISTENING)
+            if(listensTo){
+                mutation.target.addEventListener(DEER.EVENTS.CLICKED,e=>{
+                    let loadId = e.detail["@id"]
+                    if(loadId===listensTo) { mutation.target.setAttribute("deer-id",loadId) }
+                })
+            }
+		}
+	}
+}
 
 export default class DeerReport {
     constructor(elem,deer={}) {
@@ -24,14 +63,21 @@ export default class DeerReport {
                 DEER[key] = Object.assign(config[key],deer[key])
             }
         }
-        this.$dirty = false
+        this.$isDirty = false
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
         this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
+
+        Array.from(this.inputs).forEach(inpt=>inpt.addEventListener('input', () => inpt.$isDirty = true))
+
+        changeLoader.observe(elem, {
+            attributes:true
+        })
         
+        elem.oninput = event => this.$isDirty = true
         elem.onsubmit = this.processRecord.bind(this)
         
         if (this.id) {
@@ -44,20 +90,39 @@ export default class DeerReport {
                     try {
                         for(let el of Array.from(this.inputs)) {
                             if(el.getAttribute(DEER.KEY)===key){
-                                el.value = UTILS.getValue(obj[key])
-                                el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
+                                let assertedValue = UTILS.getValue(obj[key])
+                                if(Array.isArray(assertedValue)) {
+                                    for (const v of assertedValue) {
+                                        if(!el.value && (["string","number"].indexOf(typeof v)!==-1)){
+                                            el.value = v
+                                        }
+                                        if(typeof v === "object") {
+                                            
+                                        }
+                                    }
+                                } else {
+                                    el.value = UTILS.getValue(obj[key])
+                                }
+                                if(obj[key].source) {
+                                    el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
+                                }
                                 break
                             }
                         }
                     } catch(err){ console.log(err) }
                 }).bind(this))
+                UTILS.broadcast(undefined,DEER.EVENTS.LOADED,elem,obj)
             }).bind(this))
             .then(()=>elem.click())
         }
     }
     
     processRecord(event) {
-        event.preventDefault()      
+        event.preventDefault()  
+        if (!this.$isDirty) {
+            console.warn(event.target.id+" form submitted unchanged.")
+        }
+        if(this.elem.getAttribute(DEER.FORMTYPE))
         let record = {
             "@type": this.type
         }
@@ -81,8 +146,9 @@ export default class DeerReport {
             .then(data => data.new_obj_state)
             UTILS.broadcast(undefined,DEER.EVENTS.CREATED,this.elem,record)
         }
+
         formAction.then((function(entity) {
-            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).map(input => {
+            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).filter(el=>Boolean(el.$isDirty)).map(input => {
                 let inputId = input.getAttribute(DEER.SOURCE)
                 let action = (inputId) ? "UPDATE" : "CREATE"
                 let annotation = {
@@ -118,6 +184,46 @@ export default class DeerReport {
             this.elem.setAttribute(DEER.ID,entity["@id"])
             new DeerReport(this.elem)
         })
+    }
+
+    simpleUpsert(event) {
+        let record = {
+            "@type": this.type
+        }
+        if(this.context) { record["@context"] = this.context }
+        if(this.evidence) { record.evidence = this.evidence }
+        try {
+            record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
+        } catch(err){}
+        Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).map(input => {
+            let key = input.getAttribute(DEER.KEY)
+            let val = input.value
+            let title = input.getAttribute("title")
+            let evidence = input.getAttribute(DEER.EVIDENCE)
+
+            if(title || evidence) {
+                val = { "@value" : val }
+                if(title) val.name = title
+                if(evidence) val.evidence = evidence
+            }
+
+            record[key] = (record.hasOwnProperty(key)) 
+                ? ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val])
+                : val
+            }).bind(this)
+
+            let inputId = input.getAttribute(DEER.ID)
+            let action = (inputId) ? "UPDATE" : "CREATE"
+
+            return fetch(DEER.URLS[action]+"?overwrite=true", {
+                method: (inputId) ? "PUT" : "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                body: JSON.stringify(record)
+            })
+            .then(response=>response.json())
+            .then(obj=>input.setAttribute(DEER.ID,obj.new_obj_state["@id"]))
     }
 }
 
