@@ -122,7 +122,9 @@ export default class DeerReport {
         if (!this.$isDirty) {
             console.warn(event.target.id+" form submitted unchanged.")
         }
-        if(this.elem.getAttribute(DEER.FORMTYPE))
+        if(this.elem.getAttribute(DEER.FORMTYPE)) {
+            return this.simpleUpsert(event).bind(this)
+        }
         let record = {
             "@type": this.type
         }
