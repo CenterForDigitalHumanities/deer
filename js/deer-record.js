@@ -122,7 +122,7 @@ export default class DeerReport {
         if (!this.$isDirty) {
             console.warn(event.target.id+" form submitted unchanged.")
         }
-        if(this.elem.getAttribute(DEER.FORMTYPE)) {
+        if(this.elem.getAttribute(DEER.FORMTYPE)==="simple") {
             return this.simpleUpsert(event).bind(this)
         }
         let record = {
@@ -212,7 +212,7 @@ export default class DeerReport {
             record[key] = (record.hasOwnProperty(key)) 
                 ? ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val])
                 : val
-            }).bind(this)
+            })
 
             let inputId = input.getAttribute(DEER.ID)
             let action = (inputId) ? "UPDATE" : "CREATE"
