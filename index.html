@@ -388,54 +388,54 @@
     &lt;input type="submit">
 &lt;/form></pre>
                         
-            <div class="card col-6">
-                <header>Thing Form</header>
-                <form deer-type="Thing" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" id="simpleFormExample">
-                    <div class="row">
-                        <div class="col">
-                            <label>Label:</label>
-                            <input type="text" deer-key="name">
-                            <input type="hidden" deer-key="creator" value="demoAgent">
+                        <div class="card col-6">
+                            <header>Thing Form</header>
+                            <form deer-type="Thing" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" id="simpleFormExample">
+                                <div class="row">
+                                    <div class="col">
+                                        <label>Label:</label>
+                                        <input type="text" deer-key="name">
+                                        <input type="hidden" deer-key="creator" value="demoAgent">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label>Date:</label>
+                                        <input type="date" deer-key="date">
+                                    </div>
+                                    <div class="col">
+                                        <label>A &lt;select> with no effect:</label>
+                                        <select>
+                                            <option>Example choice</option>
+                                            <option>Unknown to DEER</option>
+                                            <option>Use as usual</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <label>Description:</label>
+                                        <textarea deer-key="description"></textarea>
+                                    </div>
+                                </div>                    
+                                <div class="row">
+                                    <input type="submit" class="col">
+                                </div>
+                            </form>
+                            <p>
+                                This form preloads with the most recent object. The card
+                                to the right updates with every change as well.
+                            </p>
+                            <small><em>The <code>&lt;select></code> has no <code>deer-key</code> attribute, so no
+                            annotation is made. This can be used for local application logic before saving.</em></small>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <label>Date:</label>
-                            <input type="date" deer-key="date">
+            
+                        <div class="card col-6">
+                            <header>Updating Simple Objects</header>
+                            <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" deer-template="entity"></div>
+                            <small><em>The <code>first</code> property is on the base object, so it remains, even though the 
+                            form does not edit or update the value.</em></small>
                         </div>
-                        <div class="col">
-                            <label>A &lt;select> with no effect:</label>
-                            <select>
-                                <option>Example choice</option>
-                                <option>Unknown to DEER</option>
-                                <option>Use as usual</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <label>Description:</label>
-                            <textarea deer-key="description"></textarea>
-                        </div>
-                    </div>                    
-                    <div class="row">
-                        <input type="submit" class="col">
-                    </div>
-                </form>
-                <p>
-                    This form preloads with the most recent object. The card
-                    to the right updates with every change as well.
-                </p>
-                <small><em>The <code>&lt;select></code> has no <code>deer-key</code> attribute, so no
-                annotation is made. This can be used for local application logic before saving.</em></small>
-            </div>
-
-            <div class="card col-6">
-                <header>Updating Simple Objects</header>
-                <div class="col deer-view" deer-id="http://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" deer-template="entity"></div>
-                <small><em>The <code>first</code> property is on the base object, so it remains, even though the 
-                form does not edit or update the value.</em></small>
-            </div>
         </section>
 
         <footer class="is-full-width is-center" style="flex:1;flex-direction:column;">
