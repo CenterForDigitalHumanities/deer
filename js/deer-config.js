@@ -11,7 +11,7 @@ export default {
     LINK: "deer-link",              // attribute, location of href#[deer-id] for <a>s
     VIEW: "deer-view, .deer-view",  // selector, identifies render containers
     FORM: "form[deer-type]",        // selector, identifies data entry containers
-    FORMTYPE: "deer-form-type",//attribute, specialty form types ('entity' by default)
+    ITEMTYPE: "deer-item-type",     //attribute, specialty forms ('entity' by default)
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
     EVIDENCE: "nv-evidence",        // attribute, URI for supporting evidence
     

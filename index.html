@@ -347,7 +347,7 @@
 
             <h4>Simple Forms</h4>
             <p class="col-12">Sometimes all you need is a simple form. If you add the attribute 
-                <code>deer-form-type="simple"</code> to your form, instead of designating each field
+                <code>deer-item-type="simple"</code> to your form, instead of designating each field
                 into an annotation, DEER will save it to a simple object with properties. This should
                 be reserved for objects that do not require a history of modification or attribution as
                 when you do this within the DEER framework, several compromises must be made:
@@ -374,7 +374,7 @@
                 </ol>
             </p>
 
-            <pre class="col-12">&lt;form deer-type="Thing" deer-form-type="simple" deer-context="http://schema.org">
+            <pre class="col-12">&lt;form deer-type="Thing" deer-item-type="simple" deer-context="http://schema.org">
     &lt;label>Label:&lt;/label>
     &lt;input type="text" deer-key="name">
     &lt;input type="hidden" deer-key="creator" value="demoAgent">
@@ -390,7 +390,7 @@
                         
             <div class="card col-6">
                 <header>Thing Form</header>
-                <form deer-type="Thing" deer-form-type="simple" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" id="simpleFormExample">
+                <form deer-type="Thing" deer-item-type="simple" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" id="simpleFormExample">
                     <div class="row">
                         <div class="col">
                             <label>Label:</label>
