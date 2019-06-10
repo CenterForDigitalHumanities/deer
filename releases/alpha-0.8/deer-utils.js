@@ -42,27 +42,30 @@ export default {
         }
         if (Array.isArray(property)) {
             prop = property.map(this.getValue.bind(this))
-        } else {
-            if (typeof property === "object") {
-                // TODO: JSON-LD insists on "@value", but this is simplified in a lot
-                // of contexts. Reading that is ideal in the future.
-                if (!Array.isArray(alsoPeek)) {
-                    alsoPeek = [alsoPeek]
+        }
+        if (typeof property === "object") {
+            // TODO: JSON-LD insists on "@value", but this is simplified in a lot
+            // of contexts. Reading that is ideal in the future.
+            if (!Array.isArray(alsoPeek)) {
+                alsoPeek = [alsoPeek]
+            }
+            alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
+            for (let k of alsoPeek) {
+                if (property.hasOwnProperty(k)) {
+                    prop = property[k]
+                    break
                 }
-                alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
-                for (let k of alsoPeek) {
-                    if (property.hasOwnProperty(k)) {
-                        prop = property[k]
-                        break
-                    }
-                    else {
-                        prop = property
-                    }
+                else {
+                    prop = property
                 }
             }
-            else {
-                prop = property
-            }
+        }
+        else {
+            prop = property
+        }
+        // JSON-LD says no nested arrays, but we know people.
+        if (Array.isArray(prop)) {
+            prop = prop.map(this.getValue.bind(this))
         }
         try {
             switch (asType.toUpperCase()) {
@@ -97,11 +100,7 @@ export default {
         return (obj, noLabel = "[ unlabeled ]", options = {}) => {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
-            if(Array.isArray(label)) {
-                label = [...new Set(label.map(l => this.getValue(this.getLabel(l))))]
-
-            }
-            return label || noLabel
+            return (label) ? this.getValue(label) : noLabel
         }
     },
     /**
@@ -154,25 +153,7 @@ export default {
                                         continue Leaf;
                                     }
                                     else {
-                                        // Assign this to the main object.
-                                        if(obj[k]) {
-                                            // It may be already there as an Array with some various labels
-                                            if (Array.isArray(obj[k])){
-                                                let deepMatch = false
-                                                for(const e of obj[k]) {
-                                                    if(e.name===val.name){
-                                                        deepMatch = true
-                                                        break
-                                                    }
-                                                }
-                                                if(!deepMatch) { obj[k].push(val) }
-                                            } else if (obj[k].name !== val.name) { // often undefined
-                                                obj[k] = [obj[k],val]
-                                            }
-                                        } else {
-                                            // or just tack it on
-                                            obj = Object.assign(obj, val);
-                                        }
+                                        obj = Object.assign(obj, val);
                                     }
                                 }
                                 catch (err_1) { }
@@ -182,30 +163,18 @@ export default {
                     return obj
                 })).catch(err => {
                     console.log("Error expanding object:" + err)
-                    return err
+                    return obj
                 })
     },
     /**
      * Execute query for any annotations in RERUM which target the
      * id passed in. Promise resolves to an array of annotations.
      * @param {String} id URI for the targeted entity
-     * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-    findByTargetId: async function (id, targetStyle=[]) {
+    findByTargetId: async function (id) {
         let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
-        if (!Array.isArray(targetStyle)) {
-            targetStyle = [targetStyle]
-        }
-        targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
-        let obj = {"$or":[]}
-        for (let target of targetStyle) {
-            //Entries that are not strings are not supported.  Ignore those entries.  
-            //TODO: should we we let the user know we had to ignore something here?
-            if(typeof target === "string"){
-                let o = {}
-                o[target] = id
-                obj["$or"].push(o)
-            }
+        let obj = {
+            target: id
         }
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",

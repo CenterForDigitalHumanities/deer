@@ -215,12 +215,16 @@ export default class DeerReport {
             record[key] = (record.hasOwnProperty(key)) 
                 ? ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val])
                 : val
-            })
 
             let formId = this.elem.getAttribute(DEER.ID)
-            let action = (formId) ? "UPDATE" : "CREATE"
+            let action = "CREATE"
 
-            return fetch(DEER.URLS[action]+"?overwrite=true", {
+            if (formId) {
+                action = "OVERWRITE"
+                record["@id"] = formId
+            }
+
+            return fetch(DEER.URLS[action], {
                 method: (formId) ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json; charset=utf-8"

@@ -215,7 +215,6 @@ export default class DeerReport {
             record[key] = (record.hasOwnProperty(key)) 
                 ? ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val])
                 : val
-            })
 
             let formId = this.elem.getAttribute(DEER.ID)
             let action = "CREATE"
