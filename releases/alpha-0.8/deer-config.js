@@ -11,6 +11,7 @@ export default {
     LINK: "deer-link",              // attribute, location of href#[deer-id] for <a>s
     VIEW: "deer-view, .deer-view",  // selector, identifies render containers
     FORM: "form[deer-type]",        // selector, identifies data entry containers
+    ITEMTYPE: "deer-item-type",     //attribute, specialty forms ('entity' by default)
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
     EVIDENCE: "nv-evidence",        // attribute, URI for supporting evidence
     
@@ -21,6 +22,7 @@ export default {
         BASE_ID: "http://devstore.rerum.io/v1",
         CREATE: "http://tinydev.rerum.io/app/create",
         UPDATE: "http://tinydev.rerum.io/app/update",
+        OVERWRITE: "http://tinydev.rerum.io/app/overwrite",
         QUERY: "http://tinydev.rerum.io/app/query",
         SINCE: "http://devstore.rerum.io/v1/since"
     },

@@ -122,8 +122,11 @@ export default class DeerReport {
         if (!this.$isDirty) {
             console.warn(event.target.id+" form submitted unchanged.")
         }
-        if(this.elem.getAttribute(DEER.FORMTYPE)) {
-            return this.simpleUpsert(event).bind(this)
+        if(this.elem.getAttribute(DEER.ITEMTYPE)==="simple") {
+            return this.simpleUpsert(event).bind(this).then(entity => {
+                this.elem.setAttribute(DEER.ID,entity["@id"])
+                new DeerReport(this.elem)
+            })
         }
         let record = {
             "@type": this.type
@@ -212,13 +215,17 @@ export default class DeerReport {
             record[key] = (record.hasOwnProperty(key)) 
                 ? ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val])
                 : val
-            }).bind(this)
 
-            let inputId = input.getAttribute(DEER.ID)
-            let action = (inputId) ? "UPDATE" : "CREATE"
+            let formId = this.elem.getAttribute(DEER.ID)
+            let action = "CREATE"
 
-            return fetch(DEER.URLS[action]+"?overwrite=true", {
-                method: (inputId) ? "PUT" : "POST",
+            if (formId) {
+                action = "OVERWRITE"
+                record["@id"] = formId
+            }
+
+            return fetch(DEER.URLS[action], {
+                method: (formId) ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json; charset=utf-8"
                 },
