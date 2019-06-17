@@ -233,6 +233,7 @@ export default class DeerReport {
             })
             .then(response=>response.json())
             .then(obj=>input.setAttribute(DEER.ID,obj.new_obj_state["@id"]))
+        })
     }
 }
 
