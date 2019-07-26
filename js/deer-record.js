@@ -114,6 +114,8 @@ export default class DeerReport {
                 UTILS.broadcast(undefined,DEER.EVENTS.LOADED,elem,obj)
             }).bind(this))
             .then(()=>elem.click())
+        } else {
+            Array.from(this.inputs).filter(el=>el.type==="hidden").forEach(inpt=>inpt.$isDirty = true)
         }
     }
     
