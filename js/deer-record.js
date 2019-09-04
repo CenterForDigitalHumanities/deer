@@ -79,6 +79,8 @@ export default class DeerReport {
         
         elem.oninput = event => this.$isDirty = true
         elem.onsubmit = this.processRecord.bind(this)
+
+
         
         if (this.id) {
             //Do we want to expand for all types?
@@ -91,18 +93,45 @@ export default class DeerReport {
                         for(let el of Array.from(this.inputs)) {
                             if(el.getAttribute(DEER.KEY)===key){
                                 let assertedValue = UTILS.getValue(obj[key])
-                                if(Array.isArray(assertedValue)) {
+                                /*
+                                  http://devstore.rerum.io/v1/id/5d70029de4b07f0c56c0f4fd
+                                  http://devstore.rerum.io/v1/id/5d700c0de4b07f0c56c0f4ff
+                                */
+
+                            
+                                //We are expecting that the obj[key] is an annotation object that is some sort of list or set.
+                                let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
+                                let assertedArrayOfValues = []
+                                if(typeof assertedValue === "object"){
+                                    assertedArrayOfValues = UTILS.getArrayFromContainerObj(assertedValue)
+                                }
+                                else if(Array.isArray(assertedValue)) {
                                     for (const v of assertedValue) {
-                                        if(!el.value && (["string","number"].indexOf(typeof v)!==-1)){
-                                            el.value = v
+                                        if((["string","number"].indexOf(typeof v)!==-1)){
+                                            assertedArrayOfValues.push(v)
                                         }
                                         if(typeof v === "object") {
-                                            
+                                            //TODO how should we handle?
                                         }
                                     }
-                                } else {
-                                    el.value = UTILS.getValue(obj[key])
+                                    if(assertedArrayOfValues.length){
+                                        el.value = assertedArrayOfValues.join(delim)
+                                    }
                                 }
+                                else{
+                                    //We were really expecting something else here, there is a type mismatch.
+                                    if((["string","number"].indexOf(typeof assertedValue)!==-1)){
+                                        el.value = UTILS.getValue(obj[key])
+                                    }
+                                }
+                                
+
+                                //We are expecting this be some kind of string or number that we can pull straight out.
+                                
+                                else{
+                                    //We were really expecting something else here, there is a type mismatch.
+                                }
+                            
                                 if(obj[key].source) {
                                     el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
                                 }

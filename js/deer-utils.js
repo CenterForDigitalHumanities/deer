@@ -33,6 +33,10 @@ export default {
             })
     },
     listFromContainer: function () { },
+
+    //TODO
+    //Write a helper to getArrayFromContainerObj(obj, asType)
+
     getValue: function (property, alsoPeek = [], asType) {
         // TODO: There must be a best way to do this...
         let prop;

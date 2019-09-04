@@ -14,6 +14,8 @@ export default {
     ITEMTYPE: "deer-item-type",     //attribute, specialty forms ('entity' by default)
     SOURCE: "deer-source",          // attribute, URI for asserting annotation
     EVIDENCE: "nv-evidence",        // attribute, URI for supporting evidence
+    ARRAYDELIMETER: "deer-array-delimeter", //attribute, denotes delimeter to use for array.join()
+    ARRAYTYPE : "deer-array-type", //attribute, defines whether this array is a list or a set
     
     INPUTS: ["input","textarea","dataset","select"], // array of selectors, identifies inputs with .value
     ENTITYNAME: "[deer-key='name']",// selector, value to grab for form entity label
@@ -38,6 +40,7 @@ export default {
 
     SUPPRESS: ["__rerum","@context"],   // properties to ignore
     ATTRIBUTION: "testMachine",         // replace with user to attribute assertions
+    DELIMETERDEFAULT: ",",
 
     /**
      * Add any custom templates here through import or copy paste.
