@@ -86,59 +86,54 @@ export default class DeerReport {
             //Do we want to expand for all types?
             UTILS.expand({"@id":this.id})
             //What if there are no annotations on it and the things I need to know are already in the object?
-            //Expand only returned an object like {"@id": "http://an/id"} instead of resolving it, which is what I expected. 
             .then((function(obj){
-                Object.keys(obj).forEach((function(key){
-                    try {
-                        for(let el of Array.from(this.inputs)) {
-                            if(el.getAttribute(DEER.KEY)===key){
-                                let assertedValue = UTILS.getValue(obj[key])
-                
-                            
-                                /*
-                                    We are expecting that obj is the body:{} of an annotation containing a 'value' of some kind.
-                                    That value needs to be displayed in the <input> HTML elelment.  Since it is a JSON object, the value
-                                    can be a string, number, array[strings, numbers, arrays, objects], or an object.
-                                    We need to end up with a string we can put into the <input> area.
+                //Seemed to have an unnecessary loop here, broke it out.  
+                try {
+                    for(let el of Array.from(this.inputs)) {
+                        //TODO: Duplicate deer-key inputs are populated.  Should we detect duplicates and give a warning?
+                        let key=el.getAttribute(DEER.KEY)
+                        if(key && obj.hasOwnProperty(key)){
+                            let assertedValue = UTILS.getValue(obj[key])
+                            /*
+                                We are expecting that obj is the body:{} of an annotation containing a body:{key:{}} that has a body{key:{value:??}} of some kind.
+                                That value needs to be displayed in the <input> HTML elelment.  Since it is a JSON object, the value
+                                can be a string, number, array[strings, numbers, arrays, objects], or an object.
+                                We need to end up with a string we can put into the <input> area.
 
-                                    A json object is a soft error, we will not display it.
-                                    This means we also ignore objects inside of arrays.
-                                    We also ignore arrays inside of arrays.
+                                A json object is a soft error, we will not display it.
+                                This means we also ignore objects inside of arrays.
+                                We also ignore arrays inside of arrays.
 
-                                */
-                                let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
-                                let assertedArrayOfValues = []
-                                if(typeof assertedValue === "object"){
-                                    //The body value of this annotation is an object.  Perhaps it is a container object instead of just an array.
-                                    assertedArrayOfValues = UTILS.getArrayFromContainerObj(assertedValue)
-                                    //This may have returned an empty array
-                                    if(assertedArrayOfValues.length){
-                                        //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                        el.value = (assertedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
-                                    }
-                                }
-                                else if(Array.isArray(assertedValue)) {
-                                    assertedArrayOfValues = UTILS.cleanArrayForString(assertedValue)
-                                    //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                    el.value = (assertedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
+                            */
+                            let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
+                            let assertedArrayOfValues = []
+                            if(Array.isArray(assertedValue)){
+                                //The body value of this annotation is an array
+                                assertedArrayOfValues  = UTILS.cleanArrayForString(assertedValue)
+                                //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
+                                el.value = (assertedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
+                                
+                            }
+                            else if(typeof assertedValue === "object"){
+                                //The body value of this annotation is an object.  Perhaps it is a container object instead of just an array.
+                                assertedArrayOfValues = UTILS.getArrayFromContainerObj(assertedValue)
+                                //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
+                                el.value = (assertedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
+                            }
+                            else{
+                                if((["string","number"].indexOf(typeof assertedValue)>-1)){
+                                    el.value = UTILS.getValue(obj[key])
                                 }
                                 else{
-                                    if((["string","number"].indexOf(typeof assertedValue)>-1)){
-                                        el.value = UTILS.getValue(obj[key])
-                                    }
-                                    else{
-                                        //Is this a hard error maybe??
-                                    }
+                                    //Is this a hard error maybe?? Doing nothing seems OK since the point of this function is to write to HTML
                                 }
-
-                                if(obj[key].source) {
-                                    el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
-                                }
-                                break
+                            }
+                            if(obj[key].source) {
+                                el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
                             }
                         }
-                    } catch(err){ console.log(err) }
-                }).bind(this))
+                    }
+                } catch(err){ console.log(err) }
                 UTILS.broadcast(undefined,DEER.EVENTS.LOADED,elem,obj)
             }).bind(this))
             .then(()=>elem.click())
@@ -189,7 +184,7 @@ export default class DeerReport {
             .filter((el, i)=>{
                 //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
                 if(annotations.indexOf(el)===i){
-                    console.warn("Duplicate deer-key "+el.getAttribute(DEER.KEY)+" detected, we will only respect the first one.")
+                    console.warn("Duplicate deer-key "+el.getAttribute(DEER.KEY)+" detected, we will only respect the first value of."+annotations[annotations.indexOf(el)].getAttribute(DEER.KEY))
                 }
                 return annotations.indexOf(el)===i
             })

@@ -32,11 +32,6 @@ export default {
                 return list
             })
     },
-    listFromContainer: function () { },
-
-    //TODO
-    //Write a helper to getArrayFromContainerObj(obj, asType)
-
     getValue: function (property, alsoPeek = [], asType) {
         // TODO: There must be a best way to do this...
         let prop;
@@ -45,7 +40,9 @@ export default {
             return undefined
         }
         if (Array.isArray(property)) {
-            prop = property.map(this.getValue.bind(this))
+            //It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
+            //prop = property.map(this.getValue.bind(this))
+            prop = property
         } else {
             if (typeof property === "object") {
                 // TODO: JSON-LD insists on "@value", but this is simplified in a lot
@@ -119,7 +116,7 @@ export default {
             console.warn("Unable to find URI in object:",entity)
             return entity
         }
-        let getValue = this.getValue
+        let getVal = this.getValue
         return fetch(findId).then(response => response.json())
             .then(obj => this.findByTargetId(findId)
                 .then(function (annos) {
@@ -142,7 +139,7 @@ export default {
                                     let k = Object.keys(val)[0];
                                     if (!val.source) {
                                         // include an origin for this property, placehold madsrdf:Source
-                                        let aVal = getValue(val[k]);
+                                        let aVal = getVal(val[k])
                                         val[k] = {
                                             value: aVal,
                                             source: {
@@ -150,7 +147,7 @@ export default {
                                                 citationNote: annos[i].label || "Composed object from DEER",
                                                 comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
                                             }
-                                        };
+                                        }
                                     }
                                     if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
                                         // this is not the most recent available
@@ -266,19 +263,19 @@ export default {
         element.dispatchEvent(e)
     },
     /**
-     * The body.value of an annotation was an array value.  We will eventually turn that into a string to show as the value of
-     * some input area.  We have decided to ignore any array value that is an object or array.  Throw a soft error when encounterint
+     * The body.value of an annotation is an array.  We will eventually turn that into a string to show as the value of
+     * some input area.  We have decided to ignore any array value that is an object or array.  Throw a soft error when encountering
      * one.
     */
     cleanArrayForString:function(arr){
         return arr.filter((arrItem)=>{
-            if(typeof arrItem === "object") {
-                //TODO how should we handle?
-                console.warn("An annotation body value array contained an object.  We ignored it.")
+            if(Array.isArray(arrItem)){
+                console.warn("An annotation body value array contained an array.  We ignored it.")
                 console.log(arrItem)
             }
-            else if(Array.isArray(arrItem)){
-                console.warn("An annotation body value array contained an array.  We ignored it.")
+            else if(typeof arrItem === "object") {
+                //TODO how should we handle?
+                console.warn("An annotation body value array contained an object.  We ignored it.")
                 console.log(arrItem)
             }
             return ["string","number"].indexOf(typeof arrItem)>-1
