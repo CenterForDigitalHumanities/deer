@@ -272,7 +272,7 @@ export default {
     */
     cleanArrayForString:function(arr){
         let cleanArray = []
-        for (const v of assertedValue) {
+        for (const v of arr) {
             if((["string","number"].indexOf(typeof v)>-1)){
                 cleanArray.push(v)
             }
@@ -308,11 +308,11 @@ export default {
         }
         //The array we want to return will be in obj.items or obj.
         if(DEER.CONTAINERS.indexOf(objType) > -1){
-            if(["List", "Set", "set","list", "@set", "@list"].indexOf(objTYpe) > -1){
-                cleanArray = cleanArrayForString(containerObj.items)
+            if(["List", "Set", "set","list", "@set", "@list"].indexOf(objType) > -1){
+                cleanArray = this.cleanArrayForString(containerObj.items)
             }
             else if(["ItemList"].indexOf(objType > -1)){
-                cleanArray = cleanArrayForString(containerObj.itemListElement)
+                cleanArray = this.cleanArrayForString(containerObj.itemListElement)
             }
         }
         return cleanArray

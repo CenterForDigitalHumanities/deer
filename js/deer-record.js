@@ -117,15 +117,15 @@ export default class DeerReport {
                                     //The body value of this annotation is an object.  Perhaps it is a container object instead of just an array.
                                     assertedArrayOfValues = UTILS.getArrayFromContainerObj(assertedValue)
                                     //This may have returned an empty array
-                                    if(assortedArrayOfValues.length){
+                                    if(assertedArrayOfValues.length){
                                         //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                        el.value = (assortedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
+                                        el.value = (assertedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
                                     }
                                 }
                                 else if(Array.isArray(assertedValue)) {
                                     assertedArrayOfValues = UTILS.cleanArrayForString(assertedValue)
                                     //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                    el.value = (assortedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
+                                    el.value = (assertedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
                                 }
                                 else{
                                     if((["string","number"].indexOf(typeof assertedValue)>-1)){
