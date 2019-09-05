@@ -264,5 +264,57 @@ export default {
     broadcast: function (event = {}, type, element, obj = {}) {
         let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
         element.dispatchEvent(e)
+    },
+    /**
+     * The body.value of an annotation was an array value.  We will eventually turn that into a string to show as the value of
+     * some input area.  We have decided to ignore any array value that is an object or array.  We do not simply want to
+     * filter() the array.  We want to show a soft error or warning when we come across an entry we are intentionally ignoring.  
+    */
+    cleanArrayForString:function(arr){
+        let cleanArray = []
+        for (const v of assertedValue) {
+            if((["string","number"].indexOf(typeof v)>-1)){
+                cleanArray.push(v)
+            }
+            else if(typeof v === "object") {
+                //TODO how should we handle?
+                console.warn("An annotation body value array contained an object.  We ignored it.")
+                console.log(v)
+            }
+            else if(Array.isArray(v)){
+                console.warn("An annotation body value array contained an array.  We ignored it.")
+                console.log(v)
+            }
+        }
+        return cleanArray
+    },
+    /**
+     * The body.value of an annotation is an object.  Normally we would ignore objects as values, but container objects
+     * may contain a list or set of things meant to represent the value as per web standards.  We should check for known/supported
+     * container objects.  If this object is not a supported object, an empty array will be returned indicating a failure
+     * to find any value.  
+    */
+    getArrayFromContainerObj:function(containerObj){
+        let cleanArray = []
+        let objType = containerObj.type || containerObj["@type"] || ""
+        if(Array.isArray(objType)){
+            //Grab the first type DEER supports from the obj type array
+            objType = objType.reduce((acc, curVal, ind, arr) => {
+                if(DEER.CONTAINERS.indexOf(curVal) > -1){
+                    return curVal
+                }
+            } ,"")
+            //If none match, objType is undefined.
+        }
+        //The array we want to return will be in obj.items or obj.
+        if(DEER.CONTAINERS.indexOf(objType) > -1){
+            if(["List", "Set", "set","list", "@set", "@list"].indexOf(objTYpe) > -1){
+                cleanArray = cleanArrayForString(containerObj.items)
+            }
+            else if(["ItemList"].indexOf(objType > -1)){
+                cleanArray = cleanArrayForString(containerObj.itemListElement)
+            }
+        }
+        return cleanArray
     }
 }

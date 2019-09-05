@@ -94,44 +94,48 @@ export default class DeerReport {
                             if(el.getAttribute(DEER.KEY)===key){
                                 let assertedValue = UTILS.getValue(obj[key])
                                 /*
+                                  some annos for testing.
                                   http://devstore.rerum.io/v1/id/5d70029de4b07f0c56c0f4fd
                                   http://devstore.rerum.io/v1/id/5d700c0de4b07f0c56c0f4ff
                                 */
 
                             
-                                //We are expecting that the obj[key] is an annotation object that is some sort of list or set.
+                                /*
+                                    We are expecting that obj is the body:{} of an annotation containing a 'value' of some kind.
+                                    That value needs to be displayed in the <input> HTML elelment.  Since it is a JSON object, the value
+                                    can be a string, number, array[strings, numbers, arrays, objects], or an object.
+                                    We need to end up with a string we can put into the <input> area.
+
+                                    A json object is a soft error, we will not display it.
+                                    This means we also ignore objects inside of arrays.
+                                    We also ignore arrays inside of arrays.
+
+                                */
                                 let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
                                 let assertedArrayOfValues = []
                                 if(typeof assertedValue === "object"){
+                                    //The body value of this annotation is an object.  Perhaps it is a container object instead of just an array.
                                     assertedArrayOfValues = UTILS.getArrayFromContainerObj(assertedValue)
+                                    //This may have returned an empty array
+                                    if(assortedArrayOfValues.length){
+                                        //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
+                                        el.value = (assortedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
+                                    }
                                 }
                                 else if(Array.isArray(assertedValue)) {
-                                    for (const v of assertedValue) {
-                                        if((["string","number"].indexOf(typeof v)!==-1)){
-                                            assertedArrayOfValues.push(v)
-                                        }
-                                        if(typeof v === "object") {
-                                            //TODO how should we handle?
-                                        }
-                                    }
-                                    if(assertedArrayOfValues.length){
-                                        el.value = assertedArrayOfValues.join(delim)
-                                    }
+                                    assertedArrayOfValues = UTILS.cleanArrayForString(assertedValue)
+                                    //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
+                                    el.value = (assortedArrayOfValues.length) ? assertedArrayOfValues.join(delim) : ""
                                 }
                                 else{
-                                    //We were really expecting something else here, there is a type mismatch.
-                                    if((["string","number"].indexOf(typeof assertedValue)!==-1)){
+                                    if((["string","number"].indexOf(typeof assertedValue)>-1)){
                                         el.value = UTILS.getValue(obj[key])
                                     }
+                                    else{
+                                        //Is this a hard error maybe??
+                                    }
                                 }
-                                
 
-                                //We are expecting this be some kind of string or number that we can pull straight out.
-                                
-                                else{
-                                    //We were really expecting something else here, there is a type mismatch.
-                                }
-                            
                                 if(obj[key].source) {
                                     el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
                                 }
