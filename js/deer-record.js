@@ -93,12 +93,7 @@ export default class DeerReport {
                         for(let el of Array.from(this.inputs)) {
                             if(el.getAttribute(DEER.KEY)===key){
                                 let assertedValue = UTILS.getValue(obj[key])
-                                /*
-                                  some annos for testing.
-                                  http://devstore.rerum.io/v1/id/5d70029de4b07f0c56c0f4fd
-                                  http://devstore.rerum.io/v1/id/5d700c0de4b07f0c56c0f4ff
-                                */
-
+                
                             
                                 /*
                                     We are expecting that obj is the body:{} of an annotation containing a 'value' of some kind.
@@ -188,7 +183,17 @@ export default class DeerReport {
         }
 
         formAction.then((function(entity) {
-            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).filter(el=>Boolean(el.$isDirty)).map(input => {
+            let visitedAnnos = []  
+            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(",")))
+            .filter(el=>Boolean(el.$isDirty))
+            .filter((el, i)=>{
+                //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
+                if(annotations.indexOf(el)===i){
+                    console.warn("Duplicate deer-key "+el.getAttribute(DEER.KEY)+" detected, we will only respect the first one.")
+                }
+                return annotations.indexOf(el)===i
+            })
+            .map(input => {
                 let inputId = input.getAttribute(DEER.SOURCE)
                 let action = (inputId) ? "UPDATE" : "CREATE"
                 let annotation = {

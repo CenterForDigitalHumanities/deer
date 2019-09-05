@@ -267,26 +267,22 @@ export default {
     },
     /**
      * The body.value of an annotation was an array value.  We will eventually turn that into a string to show as the value of
-     * some input area.  We have decided to ignore any array value that is an object or array.  We do not simply want to
-     * filter() the array.  We want to show a soft error or warning when we come across an entry we are intentionally ignoring.  
+     * some input area.  We have decided to ignore any array value that is an object or array.  Throw a soft error when encounterint
+     * one.
     */
     cleanArrayForString:function(arr){
-        let cleanArray = []
-        for (const v of arr) {
-            if((["string","number"].indexOf(typeof v)>-1)){
-                cleanArray.push(v)
-            }
-            else if(typeof v === "object") {
+        return arr.filter((arrItem)=>{
+            if(typeof arrItem === "object") {
                 //TODO how should we handle?
                 console.warn("An annotation body value array contained an object.  We ignored it.")
-                console.log(v)
+                console.log(arrItem)
             }
-            else if(Array.isArray(v)){
+            else if(Array.isArray(arrItem)){
                 console.warn("An annotation body value array contained an array.  We ignored it.")
-                console.log(v)
+                console.log(arrItem)
             }
-        }
-        return cleanArray
+            return ["string","number"].indexOf(typeof arrItem)>-1
+        })
     },
     /**
      * The body.value of an annotation is an object.  Normally we would ignore objects as values, but container objects
@@ -298,22 +294,24 @@ export default {
         let cleanArray = []
         let objType = containerObj.type || containerObj["@type"] || ""
         if(Array.isArray(objType)){
-            //Grab the first type DEER supports from the obj type array
+            //Since type can be an array we have to pick one of the values that matches one of our supported container types.
             objType = objType.reduce((acc, curVal, ind, arr) => {
                 if(DEER.CONTAINERS.indexOf(curVal) > -1){
                     return curVal
                 }
             } ,"")
-            //If none match, objType is undefined.
         }
-        //The array we want to return will be in obj.items or obj.
         if(DEER.CONTAINERS.indexOf(objType) > -1){
+            //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config.
             if(["List", "Set", "set","list", "@set", "@list"].indexOf(objType) > -1){
                 cleanArray = this.cleanArrayForString(containerObj.items)
             }
             else if(["ItemList"].indexOf(objType > -1)){
                 cleanArray = this.cleanArrayForString(containerObj.itemListElement)
             }
+        }
+        else{
+            console.warn("The type of object we found is not a supported container type of an annotation's body's value.  Therefore, the value is empty.")
         }
         return cleanArray
     }

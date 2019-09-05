@@ -18,7 +18,7 @@ export default {
     ARRAYTYPE : "deer-array-type", //attribute, defines whether this array is a list or a set
     
     INPUTS: ["input","textarea","dataset","select"], // array of selectors, identifies inputs with .value
-    CONTAINERS: ["ItemList","ItemListElement", "List", "Set", "set","list", "@set", "@list"], // array of supported list and set types the script will dig into for array values
+    CONTAINERS: ["ItemList","ItemListElement", "List", "Set", "list","set", "@list", "@set"], // array of supported list and set types the script will dig into for array values
     ENTITYNAME: "[deer-key='name']",// selector, value to grab for form entity label
 
     URLS: {
