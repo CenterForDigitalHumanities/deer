@@ -299,7 +299,7 @@ export default {
             } ,"")
         }
         if(DEER.CONTAINERS.indexOf(objType) > -1){
-            //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config.
+            //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
             if(["List", "Set", "set","list", "@set", "@list"].indexOf(objType) > -1){
                 cleanArray = this.cleanArrayForString(containerObj.items)
             }
