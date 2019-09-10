@@ -90,6 +90,7 @@ export default class DeerReport {
                             if(obj.hasOwnProperty(key)){
                                 //Then there is an annotation this input is a representative for.  
                                 let assertedValue = UTILS.getValue(obj[key])
+                                let objType = (obj[key].hasOwnProperty("value")) ? obj[key].value.type || obj[key].value["@type"] || "" : "" 
                                 let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
                                 let arrayOfValues = []
                                 let assertedArrayOfValues = ""
@@ -103,7 +104,6 @@ export default class DeerReport {
                                 } 
                                 else if(typeof assertedValue === "object"){
                                     //The body value of this annotation is an object.  Perhaps it is a container object we support that contains an array to be used as a string value.
-                                    let objType = obj[key].type || obj[key]["@type"] || ""
                                     if(el.getAttribute(DEER.ARRAYTYPE)){
                                         if(el.getAttribute(DEER.ARRAYTYPE) !== objType){
                                             console.warn("Container type mismatch!.  See annotation "+key+" and attribute "+DEER.ARRAYTYPE+" on element "+el+".  We will force the type found in the annotation.")
@@ -111,10 +111,12 @@ export default class DeerReport {
                                         }
                                         arrayOfValues = UTILS.getArrayFromObj(assertedValue)
                                         assertedValue =  UTILS.stringifyArray(arrayOfValues, delim)
+                                        UTILS.assertElementValue(el, assertedValue)
                                     } else{
-                                        console.warn("We do not support values that are objects, unless they are a supported container object.  Therefore, the value of annotation "+key+" is being ignored.")
+                                        console.warn("We do not support values that are objects, unless they are a supported container object and the element notes "+DEER.ARRAYTYPE+".  Therefore, the value of annotation "+key+" is being ignored.")
+                                        UTILS.assertElementValue(el, "")
                                     } 
-                                    UTILS.assertElementValue(el, assertedValue)
+                                    
                                 } else if((["string","number"].indexOf(typeof assertedValue)>-1)){
                                     //The body value of this annotation is a string or number that we can grab outright.  
                                     UTILS.assertElementValue(el, assertedValue)
