@@ -94,7 +94,7 @@ export default class DeerReport {
                                 let arrayOfValues = []
                                 let assertedArrayOfValues = ""
                                 if(Array.isArray(assertedValue)){
-                                    //The body value of this annotation is an array.  At the moment, this is unsupported.  
+                                    //The body value of this annotation is an array.  At the moment, this is unsupported.  DEER saves this kind of data in supported container objects.   
                                     // arrayOfValues = UTILS.cleanArray(assertedValue)
                                     // assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
                                     // UTILS.assertElementValue(el, assertedValue)
@@ -105,7 +105,7 @@ export default class DeerReport {
                                     //The body value of this annotation is an object.  Perhaps it is a container object we support that contains an array to be used as a string value.
                                     let objType = obj[key].type || obj[key]["@type"] || ""
                                     if(el.getAttribute(DEER.ARRAYTYPE)){
-                                        if(el.getAttribute(DEER.ARRAYTYPE)  !== objType){
+                                        if(el.getAttribute(DEER.ARRAYTYPE) !== objType){
                                             console.warn("Container type mismatch!.  See annotation "+key+" and attribute "+DEER.ARRAYTYPE+" on element "+el+".  We will force the type found in the annotation.")
                                             el.setAttribute(DEER.ARRAYTYPE, objType)
                                         }
@@ -119,7 +119,6 @@ export default class DeerReport {
                                     //The body value of this annotation is a string or number that we can grab outright.  
                                     UTILS.assertElementValue(el, assertedValue)
                                 } else{
-                                    //Do we need this?
                                     console.warn("We do not support values of this type "+typeof assertedValue+".  Therefore, the value of annotation "+key+" is being ignored.")
                                     UTILS.assertElementValue(el, "")
                                 }
@@ -204,30 +203,36 @@ export default class DeerReport {
                 let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
                 let val = input.value
                 let arrType = input.getAttribute(DEER.ARRAYTYPE)
-                let entityType = entity.type || entity["@type"] || ""
+                let annoBodyValueType = entity[input.getAttribute(DEER.KEY)].type ||  entity[input.getAttribute(DEER.KEY)]["@type"] || ""
                 if(input.hasAttribute(DEER.ARRAYTYPE)){
-                    if(input.getAttribute(DEER.ARRAYTYPE) === entityType){
-                        if(DEER.CONTAINERS.indexOf(arrType) > -1){
-                            val = val.split(delim)
-                            if(["List", "Set", "set","list", "@set", "@list"].indexOf(arrType) > -1){
-                                annotation.body[input.getAttribute(DEER.KEY)] = {
-                                    "@type":arrType,
-                                    "items":val
-                                }
-                            } else if(["ItemList"].indexOf(arrType > -1)){
-                                annotation.body[input.getAttribute(DEER.KEY)] = {
-                                    "@type":arrType,
-                                    "itemListElement":val
-                                }
+                    if(annoBodyValueType && input.getAttribute(DEER.ARRAYTYPE) !== annoBodyValueType){
+                        console.error("Container type mismatch!.  See annotation "+key+" and attribute "+DEER.ARRAYTYPE+" on element "+el+".  The annotation will not be saved or updated.")
+                        continue
+                        //Could just preserve the type from the annotation and still try to save
+                        //arrType = annoBodyValueType
+                    }
+                    if(DEER.CONTAINERS.indexOf(arrType) > -1){
+                        val = val.split(delim)
+                        if(["List", "Set", "set","list", "@set", "@list"].indexOf(arrType) > -1){
+                            annotation.body[input.getAttribute(DEER.KEY)] = {
+                                "@type":arrType,
+                                "items":val
                             }
-                        }   
-                    }
+                        } else if(["ItemList"].indexOf(arrType > -1)){
+                            annotation.body[input.getAttribute(DEER.KEY)] = {
+                                "@type":arrType,
+                                "itemListElement":val
+                            }
+                        }
+                    } 
                     else{
-                        //Type mismatch! do not save this
-                        console.warn("Container type mismatch!.  See annotation "+key+" and attribute "+DEER.ARRAYTYPE+" on element "+el)
-
+                        console.error("Cannot save array value of unsupported type "+arrType+".  This annotation will not be saved or updated.")
+                        continue
+                        // Could save it as a string and move on instead of failing
+                        // annotation.body[input.getAttribute(DEER.KEY)] = {
+                        //     "value":input.value
+                        // }
                     }
-                    
                 } else{
                     annotation.body[input.getAttribute(DEER.KEY)] = {
                         "value":val

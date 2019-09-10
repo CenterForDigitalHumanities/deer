@@ -319,9 +319,7 @@ export default {
         //TODO detect if delim is not the correct deliminator and warn?
         //TODO warn if arr is empty?
         if(delim === ","){
-            /**
-             * We are making a hard choice here and saying that for interface input areas, it is best if values are separated by a , plus " "
-            */
+            //We are making a hard choice here and saying that for interface input areas, it is best if values are separated by a , plus " "
             delim += " "
         }
         return (arr.length) ? arr.join(delim) : ""
@@ -333,11 +331,14 @@ export default {
      * Note this should only be used for DEER inputs. 
     */
     assertElementValue:function(elem, val){
-        //TODO: do something different if elem.getAttribute(DEER.ARRAYTYPE) is a list vs set?  There is no check for that right now.
-        if(elem.value && elem.value !== val){
+        let re = new RegExp(", ", "g")
+        if(elem.value){
             if(elem.type==="hidden"){
                 //Notice this will not consider hidden inputs with empty values in favor of avoiding accidental empty overwrites.
-                elem.$isDirty = true
+                //Also notice we are negating whitespace matching around the , plus " " delimeter situation that stringifyArray produces.  
+                if(elem.value.replace(re, ",") === val.replace(re, ",")){
+                    elem.$isDirty = true  
+                }
             } else{
                 console.warn("Element value for "+elem.getAttribute(DEER.KEY)+" is not equal to the annotation value.  The element value should not be set and is being overwritten.")
             }
