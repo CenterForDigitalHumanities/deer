@@ -280,10 +280,11 @@ export default {
             return ["string","number"].indexOf(typeof arrItem)>-1
         })
     },
+
     /**
-     * Get the array items from the object, so long at it is one of the containers we support (so we know where to look.) 
+     * Get the array of data from the container object, so long at it is one of the containers we support (so we know where to look.) 
     */
-    getArrayValue:function(containerObj){
+    getArrayFromObj:function(containerObj){
         let cleanArray = []
         let objType = containerObj.type || containerObj["@type"] || ""
         if(Array.isArray(objType)){
@@ -309,5 +310,40 @@ export default {
             console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value is empty.")
         }
         return cleanArray
+    },
+
+    /**
+     * Given an array, turn the array into a string where the values are separated by the given delimeter.
+    */
+    stringifyArray:function(arr, delim){
+        //TODO detect if delim is not the correct deliminator and warn?
+        //TODO warn if arr is empty?
+        if(delim === ","){
+            /**
+             * We are making a hard choice here and saying that for interface input areas, it is best if values are separated by a , plus " "
+             * Users need to follow this convention when setting the values of hidden input elements that are array strings with delimeter ','
+             * We do not make the same presumption for other delimeters because it is already going to look odd.
+            */
+            delim += " "
+        }
+        return (arr.length) ? arr.join(delim) : ""
+    },
+
+    /**
+     * Assert a value from an annotation onto an HTML input element.
+     * If it is a hidden input, the set value matters to determine whether or not the element is dirty.
+     * Note this should only be used for DEER inputs. 
+    */
+    assertElementValue:function(elem, val){
+        if(elem.value && elem.value !== val){
+            if(elem.type==="hidden"){
+                //Notice this will not consider hidden inputs with empty values in favor of avoiding accidental empty overwrites.
+                elem.$isDirty = true
+            } else{
+                console.warn("Element value for "+elem.getAttribute(DEER.KEY)+" is not equal to the annotation value.  The element value should not be set and is being overwritten.")
+            }
+        }
+        elem.value = val
     }
+
 }

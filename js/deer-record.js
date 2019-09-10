@@ -97,55 +97,28 @@ export default class DeerReport {
                                 if(Array.isArray(assertedValue)){
                                     //The body value of this annotation is an array
                                     arrayOfValues = UTILS.cleanArray(assertedValue)
-                                    //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                    assertedArrayOfValues = UTILS.stringifyArray(arrayOfValues, delim)
-                                    if(el.value && el.value !== assertedArrayOfValues){
-                                        if(el.type==="hidden"){
-                                            el.$isDirty = true
-                                        } else{
-                                            //The HTML input element has a value that is already set.  This is a soft error and the element should not be dirty..
-                                            console.warn("Element value for "+el.getAttribute(DEER.KEY)+" is not equal to the annotation value.  The element value should not be set and is being overwritten.")
-                                        }
-                                    }
-                                    el.value = assertedArrayOfValues
+                                    assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
+                                    UTILS.assertElementValue(el, assertedValue)
                                 } else if(typeof assertedValue === "object"){
                                     //The body value of this annotation is an object.  Perhaps it is a container object we support that contains an array.
-                                    arrayOfValues = UTILS.getArrayFromContainerObj(assertedValue)
-                                    //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                    assertedArrayOfValues = (arrayOfValues.length) ? arrayOfValues.join(delim+" ") : ""
-                                    if(el.value && el.value !== assertedArrayOfValues){
-                                        if(el.type==="hidden"){
-                                            el.$isDirty = true
-                                        } else{
-                                            //The HTML input element has a value that is already set.  This is a soft error and the element should not be dirty.
-                                            console.warn("Element value for "+el.getAttribute(DEER.KEY)+" is not equal to the annotation value.  The element value should not be set and is being overwritten.")
-                                        }
-                                    }
-                                    el.value = assertedArrayOfValues
+                                    arrayOfValues = UTILS.getArrayFromObj(assertedValue)
+                                    assertedValue =  UTILS.stringifyArray(arrayOfValues, delim)
+                                    UTILS.assertElementValue(el, assertedValue)
+                                } else if((["string","number"].indexOf(typeof assertedValue)>-1)){
+                                    //The body value of this annotation is a string or number that we can grab outright.  
+                                    UTILS.assertElementValue(el, assertedValue)
                                 } else{
-                                    if((["string","number"].indexOf(typeof assertedValue)>-1)){
-                                        //The body value of this annotation is a string or number that we can grab outright.  
-                                        if(el.value && el.value !== assertedValue){
-                                            if(el.type==="hidden"){
-                                                el.$isDirty = true
-                                            } else{
-                                                //The HTML input element has a value that is already set.  This is a soft error and the element should not be dirty..
-                                                console.warn("Element value for "+el.getAttribute(DEER.KEY)+" is not equal to the annotation value.  The element value should not be set and is being overwritten.")
-                                            }
-                                        }
-                                        el.value = assertedValue
-                                    } else{
-                                        //The body value of this annotation is something unsupported, we cannot get its value.  Throw a soft error.
-                                        console.warn("We do not support values of this type "+typeof assertedValue+".  Therefore, the value of annotation "+key+" is being ignored.")
-                                        el.value=""
-                                    }
+                                    //Do we need to intervene more here?
+                                    console.warn("We do not support values of this type "+typeof assertedValue+".  Therefore, the value of annotation "+key+" is being ignored.")
+                                    UTILS.assertElementValue(el, "")
                                 }
                                 if(obj[key].source) {
                                     el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
                                 }
                             } else{
-                                //An annotation for this input has not been created yet.  If it is hidden and has a value, it is dirty. 
+                                //An annotation for this input has not been created yet.
                                 if(el.type==="hidden" && el.value !== ""){
+                                    //Notice this will not consider hidden inputs with empty values, but perhaps it should?
                                     el.$isDirty = true
                                 } 
                             }                              
