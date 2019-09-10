@@ -307,7 +307,8 @@ export default {
             }
         }
         else{
-            console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value will be empty.")
+            console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value will be empty.  Check the annotation body value.")
+            console.log(containerObj)
         }
         return cleanArray
     },
@@ -330,12 +331,12 @@ export default {
      * If it is a hidden input, the set value matters to determine whether or not the element is dirty.
      * Note this should only be used for DEER inputs. 
     */
-    assertElementValue:function(elem, val){
+    assertElementValue:function(elem, val, delim){
         let re = new RegExp(", ", "g")
         if(elem.value){
             if(elem.type==="hidden"){
                 //Notice this will not consider hidden inputs with empty values in favor of avoiding accidental empty overwrites.
-                //Also notice we are negating whitespace matching around the , plus " " delimeter situation that stringifyArray produces.  
+                //Also notice we are negating whitespace matching around the , plus " " delimeter situation
                 if(elem.value.replace(re, ",") === val.replace(re, ",")){
                     elem.$isDirty = true  
                 }
