@@ -84,7 +84,6 @@ export default class DeerReport {
                 try {
                     for(let el of Array.from(this.inputs)){
                         let key=el.getAttribute(DEER.KEY)
-                        let test = ""
                         el.addEventListener('input', () => inpt.$isDirty = true)
                         if(key){
                             //Then this is a DEER form input, let's check if there is an annotation for it.
@@ -93,22 +92,34 @@ export default class DeerReport {
                                 let assertedValue = UTILS.getValue(obj[key])
                                 let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
                                 let arrayOfValues = []
-                                let assertedArrayOfValues = []
+                                let assertedArrayOfValues = ""
                                 if(Array.isArray(assertedValue)){
-                                    //The body value of this annotation is an array
-                                    arrayOfValues = UTILS.cleanArray(assertedValue)
-                                    assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
-                                    UTILS.assertElementValue(el, assertedValue)
-                                } else if(typeof assertedValue === "object"){
-                                    //The body value of this annotation is an object.  Perhaps it is a container object we support that contains an array.
-                                    arrayOfValues = UTILS.getArrayFromObj(assertedValue)
-                                    assertedValue =  UTILS.stringifyArray(arrayOfValues, delim)
+                                    //The body value of this annotation is an array.  At the moment, this is unsupported.  
+                                    // arrayOfValues = UTILS.cleanArray(assertedValue)
+                                    // assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
+                                    // UTILS.assertElementValue(el, assertedValue)
+                                    UTILS.assertElementValue(el, "")
+                                    console.warn("We do not support values that are arrays.  The array of values should be in a container object.  Therefore, the value of annotation "+key+" is being ignored.")
+                                } 
+                                else if(typeof assertedValue === "object"){
+                                    //The body value of this annotation is an object.  Perhaps it is a container object we support that contains an array to be used as a string value.
+                                    let objType = obj[key].type || obj[key]["@type"] || ""
+                                    if(el.getAttribute(DEER.ARRAYTYPE)){
+                                        if(el.getAttribute(DEER.ARRAYTYPE)  !== objType){
+                                            console.warn("Container type mismatch!.  See annotation "+key+" and attribute "+DEER.ARRAYTYPE+" on element "+el+".  We will force the type found in the annotation.")
+                                            el.setAttribute(DEER.ARRAYTYPE, objType)
+                                        }
+                                        arrayOfValues = UTILS.getArrayFromObj(assertedValue)
+                                        assertedValue =  UTILS.stringifyArray(arrayOfValues, delim)
+                                    } else{
+                                        console.warn("We do not support values that are objects, unless they are a supported container object.  Therefore, the value of annotation "+key+" is being ignored.")
+                                    } 
                                     UTILS.assertElementValue(el, assertedValue)
                                 } else if((["string","number"].indexOf(typeof assertedValue)>-1)){
                                     //The body value of this annotation is a string or number that we can grab outright.  
                                     UTILS.assertElementValue(el, assertedValue)
                                 } else{
-                                    //Do we need to intervene more here?
+                                    //Do we need this?
                                     console.warn("We do not support values of this type "+typeof assertedValue+".  Therefore, the value of annotation "+key+" is being ignored.")
                                     UTILS.assertElementValue(el, "")
                                 }
@@ -185,15 +196,44 @@ export default class DeerReport {
                 let inputId = input.getAttribute(DEER.SOURCE)
                 let action = (inputId) ? "UPDATE" : "CREATE"
                 let annotation = {
+                    type: "Annotation",
                     creator: DEER.ATTRIBUTION,
                     target: entity["@id"],
                     body: {}
                 }
                 let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
                 let val = input.value
-                annotation.body[input.getAttribute(DEER.KEY)] = {
-                    value: (input.getAttribute(DEER.ARRAYTYPE)) ? val.split(delim) : val
-                }
+                let arrType = input.getAttribute(DEER.ARRAYTYPE)
+                let entityType = entity.type || entity["@type"] || ""
+                if(input.hasAttribute(DEER.ARRAYTYPE)){
+                    if(input.getAttribute(DEER.ARRAYTYPE) === entityType){
+                        if(DEER.CONTAINERS.indexOf(arrType) > -1){
+                            val = val.split(delim)
+                            if(["List", "Set", "set","list", "@set", "@list"].indexOf(arrType) > -1){
+                                annotation.body[input.getAttribute(DEER.KEY)] = {
+                                    "@type":arrType,
+                                    "items":val
+                                }
+                            } else if(["ItemList"].indexOf(arrType > -1)){
+                                annotation.body[input.getAttribute(DEER.KEY)] = {
+                                    "@type":arrType,
+                                    "itemListElement":val
+                                }
+                            }
+                        }   
+                    }
+                    else{
+                        //Type mismatch! do not save this
+                        console.warn("Container type mismatch!.  See annotation "+key+" and attribute "+DEER.ARRAYTYPE+" on element "+el)
+
+                    }
+                    
+                } else{
+                    annotation.body[input.getAttribute(DEER.KEY)] = {
+                        "value":val
+                    }
+                }  
+            
                 if(inputId) { annotation["@id"] = inputId }
                 // TODO: maybe we need a deer-value to assign things here... or some option...
                 if(input.getAttribute(DEER.KEY)==="targetCollection"){

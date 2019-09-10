@@ -297,7 +297,7 @@ export default {
                 }
             }
         }
-        else if(DEER.CONTAINERS.indexOf(objType) > -1){
+        if(DEER.CONTAINERS.indexOf(objType) > -1){
             //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
             if(["List", "Set", "set","list", "@set", "@list"].indexOf(objType) > -1){
                 cleanArray = this.cleanArray(containerObj.items)
@@ -307,7 +307,7 @@ export default {
             }
         }
         else{
-            console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value is empty.")
+            console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value will be empty.")
         }
         return cleanArray
     },
@@ -321,8 +321,6 @@ export default {
         if(delim === ","){
             /**
              * We are making a hard choice here and saying that for interface input areas, it is best if values are separated by a , plus " "
-             * Users need to follow this convention when setting the values of hidden input elements that are array strings with delimeter ','
-             * We do not make the same presumption for other delimeters because it is already going to look odd.
             */
             delim += " "
         }
@@ -335,6 +333,7 @@ export default {
      * Note this should only be used for DEER inputs. 
     */
     assertElementValue:function(elem, val){
+        //TODO: do something different if elem.getAttribute(DEER.ARRAYTYPE) is a list vs set?  There is no check for that right now.
         if(elem.value && elem.value !== val){
             if(elem.type==="hidden"){
                 //Notice this will not consider hidden inputs with empty values in favor of avoiding accidental empty overwrites.
