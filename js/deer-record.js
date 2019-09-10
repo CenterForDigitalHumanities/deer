@@ -70,7 +70,6 @@ export default class DeerReport {
         this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
-        //Array.from(this.inputs).forEach(inpt=>inpt.addEventListener('input', () => inpt.$isDirty = true))
         changeLoader.observe(elem, {
             attributes:true
         })
@@ -97,9 +96,9 @@ export default class DeerReport {
                                 let assertedArrayOfValues = []
                                 if(Array.isArray(assertedValue)){
                                     //The body value of this annotation is an array
-                                    arrayOfValues = UTILS.cleanArrayForString(assertedValue)
+                                    arrayOfValues = UTILS.cleanArray(assertedValue)
                                     //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                    assertedArrayOfValues = (arrayOfValues.length) ? arrayOfValues.join(delim) : ""
+                                    assertedArrayOfValues = UTILS.stringifyArray(arrayOfValues, delim)
                                     if(el.value && el.value !== assertedArrayOfValues){
                                         if(el.type==="hidden"){
                                             el.$isDirty = true
@@ -113,7 +112,7 @@ export default class DeerReport {
                                     //The body value of this annotation is an object.  Perhaps it is a container object we support that contains an array.
                                     arrayOfValues = UTILS.getArrayFromContainerObj(assertedValue)
                                     //Should we write a helper for this to catch a join failure and tell the user to check their delimeter?
-                                    assertedArrayOfValues = (arrayOfValues.length) ? arrayOfValues.join(delim) : ""
+                                    assertedArrayOfValues = (arrayOfValues.length) ? arrayOfValues.join(delim+" ") : ""
                                     if(el.value && el.value !== assertedArrayOfValues){
                                         if(el.type==="hidden"){
                                             el.$isDirty = true
@@ -217,10 +216,12 @@ export default class DeerReport {
                     target: entity["@id"],
                     body: {}
                 }
-                if(inputId) { annotation["@id"] = inputId }
+                let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
+                let val = input.value
                 annotation.body[input.getAttribute(DEER.KEY)] = {
-                    value: input.value
+                    value: (input.getAttribute(DEER.ARRAYTYPE)) ? val.split(delim) : val
                 }
+                if(inputId) { annotation["@id"] = inputId }
                 // TODO: maybe we need a deer-value to assign things here... or some option...
                 if(input.getAttribute(DEER.KEY)==="targetCollection"){
                     annotation.body.targetCollection = input.value

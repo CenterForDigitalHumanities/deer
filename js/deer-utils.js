@@ -263,11 +263,10 @@ export default {
         element.dispatchEvent(e)
     },
     /**
-     * The body.value of an annotation is an array.  We will eventually turn that into a string to show as the value of
-     * some input area.  We have decided to ignore any array value that is an object or array.  Throw a soft error when encountering
-     * one.
+     * Remove array values that are objects or arrays.  We have decided these are not meant to be populated
+     * to interface.
     */
-    cleanArrayForString:function(arr){
+    cleanArray:function(arr){
         return arr.filter((arrItem)=>{
             if(Array.isArray(arrItem)){
                 console.warn("An annotation body value array contained an array.  We ignored it.")
@@ -282,33 +281,32 @@ export default {
         })
     },
     /**
-     * The body.value of an annotation is an object.  Normally we would ignore objects as values, but container objects
-     * may contain a list or set of things meant to represent the value as per web standards.  We should check for known/supported
-     * container objects.  If this object is not a supported object, an empty array will be returned indicating a failure
-     * to find any value.  
+     * Get the array items from the object, so long at it is one of the containers we support (so we know where to look.) 
     */
-    getArrayFromContainerObj:function(containerObj){
+    getArrayValue:function(containerObj){
         let cleanArray = []
         let objType = containerObj.type || containerObj["@type"] || ""
         if(Array.isArray(objType)){
             //Since type can be an array we have to pick one of the values that matches one of our supported container types.
-            objType = objType.reduce((acc, curVal, ind, arr) => {
-                if(DEER.CONTAINERS.indexOf(curVal) > -1){
-                    return curVal
+            //This picks the first one it comes across, since it doesnt seem like we would have any preference.
+            for(let t of objType){
+                if(DEER.CONTAINERS.indexOf(t) > -1){
+                    objType = t
+                    break
                 }
-            } ,"")
+            }
         }
-        if(DEER.CONTAINERS.indexOf(objType) > -1){
+        else if(DEER.CONTAINERS.indexOf(objType) > -1){
             //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
             if(["List", "Set", "set","list", "@set", "@list"].indexOf(objType) > -1){
-                cleanArray = this.cleanArrayForString(containerObj.items)
+                cleanArray = this.cleanArray(containerObj.items)
             }
             else if(["ItemList"].indexOf(objType > -1)){
-                cleanArray = this.cleanArrayForString(containerObj.itemListElement)
+                cleanArray = this.cleanArray(containerObj.itemListElement)
             }
         }
         else{
-            console.warn("The type of object we found is not a supported container type of an annotation's body's value.  Therefore, the value is empty.")
+            console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value is empty.")
         }
         return cleanArray
     }
