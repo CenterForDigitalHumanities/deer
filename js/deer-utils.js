@@ -182,7 +182,7 @@ export default {
                     }
                     return obj
                 })).catch(err => {
-                    console.log("Error expanding object:" + err)
+                    console.warn("Error expanding object:" + err)
                     return err
                 })
     },
@@ -216,7 +216,7 @@ export default {
             }
         })
             .then(response => response.json())
-            .catch((err) => console.log(err))
+            .catch((err) => console.warn(err))
         let local_matches = everything.filter(o => o.target === id)
         matches = local_matches.concat(matches)
         return matches
@@ -230,25 +230,25 @@ export default {
             let status = response.status
             switch (status) {
                 case 400:
-                    console.log("Bad Request")
+                    console.warn("Bad Request")
                     break
                 case 401:
-                    console.log("Request was unauthorized")
+                    console.warn("Request was unauthorized")
                     break
                 case 403:
-                    console.log("Forbidden to make request")
+                    console.warn("Forbidden to make request")
                     break
                 case 404:
-                    console.log("Not found")
+                    console.warn("Not found")
                     break
                 case 500:
-                    console.log("Internal server error")
+                    console.warn("Internal server error")
                     break
                 case 503:
-                    console.log("Server down time")
+                    console.warn("Server down time")
                     break
                 default:
-                    console.log("unahndled HTTP ERROR")
+                    console.warn("unahndled HTTP ERROR")
             }
             throw Error("HTTP Error: " + response.statusText)
         }
@@ -269,13 +269,13 @@ export default {
     cleanArray:function(arr){
         return arr.filter((arrItem)=>{
             if(Array.isArray(arrItem)){
-                console.warn("An annotation body value array contained an array.  We ignored it.")
-                console.log(arrItem)
+                console.warn("An annotation body value array contained an array.  We ignored it.  See ignored value below.")
+                console.warn(arrItem)
             }
             else if(typeof arrItem === "object") {
                 //TODO how should we handle?
-                console.warn("An annotation body value array contained an object.  We ignored it.")
-                console.log(arrItem)
+                console.warn("An annotation body value array contained an object.  We ignored it.  See ignored value below.")
+                console.warn(arrItem)
             }
             return ["string","number"].indexOf(typeof arrItem)>-1
         })
@@ -308,7 +308,7 @@ export default {
         }
         else{
             console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value will be empty.  Check the annotation body value.")
-            console.log(containerObj)
+            console.warn(containerObj)
         }
         return cleanArray
     },
@@ -323,7 +323,14 @@ export default {
             //We are making a hard choice here and saying that for interface input areas, it is best if values are separated by a , plus " "
             delim += " "
         }
-        return (arr.length) ? arr.join(delim) : ""
+        try{
+            return (arr.length) ? arr.join(delim) : ""    
+        }
+        catch (e){
+            console.error("There was a join error on "+arr)
+            return ""
+        }
+        
     },
 
     /**
@@ -332,16 +339,18 @@ export default {
      * Note this should only be used for DEER inputs. 
     */
     assertElementValue:function(elem, val, delim){
-        let re = new RegExp(", ", "g")
+        let re = new RegExp(", ", "g") //Replace all ', '...
         if(elem.value){
             if(elem.type==="hidden"){
                 //Notice this will not consider hidden inputs with empty values in favor of avoiding accidental empty overwrites.
                 //Also notice we are negating whitespace matching around the , plus " " delimeter situation
-                if(elem.value.replace(re, ",") === val.replace(re, ",")){
+                if(elem.value.replace(re, ",") !== val.replace(re, ",")){
+                    console.log("Found a hidden element that did not have a macthing value.  Making it dirty.")
+                    console.log(el.outerHTML)
                     elem.$isDirty = true  
                 }
             } else{
-                console.warn("Element value for "+elem.getAttribute(DEER.KEY)+" is not equal to the annotation value.  The element value should not be set and is being overwritten.")
+                console.warn("Element value '"+elem.value+"' is not equal to the annotation value '"+val+"'.  The element value should not be set and is being overwritten.")
             }
         }
         elem.value = val

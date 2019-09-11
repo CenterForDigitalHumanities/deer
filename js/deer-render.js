@@ -256,8 +256,7 @@ export default class DeerRender {
                     .then(pointers => {
                         let list = []
                         pointers.map(tc => list.push(fetch(tc.target || tc["@id"] || tc.id).then(response=>response.json().catch(err=>{__deleted:console.log(err)}))))
-                         return Promise.all(list).then(l=>l.filter(i=>!i.hasOwnProperty("__deleted")))
-
+                        return Promise.all(list).then(l=>l.filter(i=>!i.hasOwnProperty("__deleted")))
                     })
                     .then(list => {
                         let listObj = {
@@ -291,9 +290,8 @@ export default class DeerRender {
                 window[listensTo].addEventListener("click", e => UTILS.broadcast(e,DEER.EVENTS.CLICKED,elem))
             }
             catch (err) {
-                console.error("There is no HTML element with id "+listensTo+" to attach an event to");
+                console.error("There is no HTML element with id "+listensTo+" to attach an event to")
             }
-            
         }
         
     }
