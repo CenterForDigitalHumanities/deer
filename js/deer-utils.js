@@ -346,7 +346,7 @@ export default {
                 //Also notice we are negating whitespace matching around the , plus " " delimeter situation
                 if(elem.value.replace(re, ",") !== val.replace(re, ",")){
                     console.log("Found a hidden element that did not have a macthing value.  Making it dirty.")
-                    console.log(el.outerHTML)
+                    console.log(elem.outerHTML)
                     elem.$isDirty = true  
                 }
             } else{
