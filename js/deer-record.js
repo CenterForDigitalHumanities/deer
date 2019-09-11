@@ -84,18 +84,19 @@ export default class DeerReport {
                 try {
                     for(let el of Array.from(this.inputs)){
                         let key=el.getAttribute(DEER.KEY)
-                        el.addEventListener('input', () => inpt.$isDirty = true)
                         if(key){
-                            //Then this is a DEER form input, let's check if there is an annotation for it.
+                            //Then this is a DEER form input.  Check if an annotation maps to this deer key.
+                            el.addEventListener('input', (inpt) => inpt.target.$isDirty = true)
                             if(obj.hasOwnProperty(key)){
-                                //Then there is an annotation this input is a representative for.  
+                                //Then there is an annotation that maps to this deer key.
                                 let assertedValue = UTILS.getValue(obj[key])
                                 let containerObjectType = (obj[key].hasOwnProperty("value")) ? obj[key].value.type || obj[key].value["@type"] || "" : "" 
                                 let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || "," //super fail safe
                                 let arrayOfValues = []
                                 if(Array.isArray(assertedValue)){
                                     /**
-                                    //The body value of this annotation is an array.  At the moment, this is unsupported.  DEER saves this kind of data in supported container objects.   
+                                    //The body value of this annotation is an array.  At the moment, this is unsupported.  DEER saves this kind of data in supported container objects.  
+                                    //This would support annotation.body.value : ["like", "this"] 
                                     arrayOfValues = UTILS.cleanArray(assertedValue)
                                     assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
                                     UTILS.assertElementValue(el, assertedValue)
