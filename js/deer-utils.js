@@ -335,10 +335,9 @@ export default {
     },
 
     /**
-     * Assert a value from an annotation onto an HTML input element.
-     * This element becomes dirty if it is hidden and the values do not match.
+     * Assert a value found on an expanded object onto the HTML input that represents it.
+     * This element becomes dirty if it is hidden and the values do not match or if the value found on the expanded object was not an annotation.
      * @param fromAnno Boolean for if the value is from a DEER annotation as opposed to part of the object (noted in deer-id on the form) directly.
-     * If the value is not from a DEER annotation, then it is from the deer-id object directly.
      * 
     */
     assertElementValue:function(elem, val, fromAnno){
