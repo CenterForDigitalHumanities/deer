@@ -262,9 +262,9 @@ export default {
         let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
         element.dispatchEvent(e)
     },
+
     /**
-     * Remove array values that are objects or arrays.  We have decided these are not meant to be populated
-     * to interface.
+     * Remove array values that are objects or arrays.  We have decided these are not meant to be put to the interface.
     */
     cleanArray:function(arr){
         return arr.filter((arrItem)=>{
@@ -299,13 +299,13 @@ export default {
         }
         if(DEER.CONTAINERS.indexOf(objType) > -1){
             //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
-            if(["List", "Set", "set","list", "@set", "@list"].indexOf(objType) > -1){
+            if(["Set", "List", "set","list", "@set", "@list"].indexOf(objType) > -1){
                 if(containerObj.hasOwnProperty("items")){ cleanArray = this.cleanArray(containerObj.items) }
                 else{ console.error("Object of type '"+objType+"' is malformed.  The values could not be found in obj.items.  Therefore, the value is empty.") }
                 
             }
             else if(["ItemList"].indexOf(objType > -1)){
-                if(containerObj.hasOwnProperty("itemListElement")){ cleanArray =  cleanArray = this.cleanArray(containerObj.itemListElement)}
+                if(containerObj.hasOwnProperty("itemListElement")){ cleanArray = this.cleanArray(containerObj.itemListElement)}
                 else{console.error("Object of type '"+objType+"' is malformed.  The values could not be found in obj.itemListElement.  Therefore, the value is empty.")}
             }
         }
@@ -320,47 +320,56 @@ export default {
      * Given an array, turn the array into a string where the values are separated by the given delimeter.
     */
     stringifyArray:function(arr, delim){
-        //TODO detect if delim is not the correct deliminator and warn?
         //TODO warn if arr is empty?
-        //We are making a hard choice here and saying that for interface input areas, it is best if values are separated by a , plus " "
-        if(delim === ","){ delim += " " }
         try{
             return (arr.length) ? arr.join(delim) : ""    
         }
         catch (e){
-            console.error("There was a join error on "+arr)
+            console.error("There was a join error on '"+arr+"'' using delimeter '"+delim+"'.")
             return ""
         }
-        
     },
 
     /**
      * Assert a value found on an expanded object onto the HTML input that represents it.
-     * This element becomes dirty if it is hidden and the values do not match or if the value found on the expanded object was not an annotation.
+     * The input is a representative for the annotation so the values should match.  Hidden elements will never have user interaction, they
+     * must be marked dirty if the values do not match or if there is no annotation mapped to its DEER.KEY attribute.
+     * Values should not be coded into non-hidden input fields, they will be overwritten by the annotation value without being marked dirty.
+
+     * @param elem The input HTML element the value is being asserted on
+     * @param val The string value to be asserted onto an input HTML element
      * @param fromAnno Boolean for if the value is from a DEER annotation as opposed to part of the object (noted in deer-id on the form) directly.
      * 
     */
-    assertElementValue:function(elem, val, fromAnno){
-        let re = new RegExp(", ", "g") //Replace all ', '...
+    assertElementValue:function(elem, val, mapsToAnno){
         if(elem.type==="hidden"){
-            if(elem.value !== undefined){
+            if(elem.hasAttribute("value") && elem.value !== undefined){
                 if(elem.hasAttribute(DEER.ARRAYTYPE)){
-                    console.warn("Hidden element with a hard coded value contains attributes '"+DEER.KEY+"'' and '"+DEER.ARRAYTYPE+"'.  "
-                    + "DEER takes this to mean the '"+elem.getAttribute(DEER.KEY)+"' annotation body value array will .join() into this string and pass a comparison operation, even if the hidden element's value is an empty string. " 
+                    console.warn("Hidden element with a hard coded 'value' also contains attributes '"+DEER.KEY+"' and '"+DEER.ARRAYTYPE+"'.  "
+                    + "DEER takes this to mean the '"+elem.getAttribute(DEER.KEY)+"' annotation body value array will .join() into this string and pass a comparison operation. " 
                     + "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate "
-                    + "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. /n"
+                    + "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n"
                     + "If this hidden input value is reactive to other interactions then processing should be done by your own custom interaction handler. "
                     + "Remove the hard coded '"+DEER.KEY+"' or 'value' attribute.  This will make the DEER form input handler avoid processing of this input on page load. "
-                    + "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '"+DEER.KEY+"' attribute before submission.")
+                    + "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '"+DEER.KEY+"' attribute before submission. " 
+                    + "See below.")
+                    console.log(elem)
                 }
-                if(!fromAnno || elem.value !== val){
-                    //If an annotation does not exist that represents this value, then make it dirty so that DEER will make one on form submission.  
+                if(!mapsToAnno || elem.value !== val){
                     elem.$isDirty = true  
-                }    
+                }
             }
         } else{
-            console.warn("Element value is already set '"+elem.outerHTML+"'.  The element value should not be set and will be overwritten by the annotation value '"+val+"'")
-        }   
+            if(elem.hasAttribute("value") && elem.value !== undefined){
+                //Empty strings count as a value.
+                console.warn("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '"+val+"'.  See below.")
+                console.log(elem)    
+            }
+            if(elem.hasAttribute(DEER.ARRAYTYPE)){
+                console.warn("This input element also has attribute '"+DEER.ARRAYTYPE+"'.  This attribute is only for hidden inputs only.  It is being removed to avoid errors.")
+                elem.removeAttribute(DEER.ARRAYTYPE)
+            }
+        }
         elem.value = val
         elem.setAttribute("value", val)
     }
