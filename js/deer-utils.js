@@ -344,19 +344,20 @@ export default {
     assertElementValue:function(elem, val, mapsToAnno){
         if(elem.type==="hidden"){
             if(elem.hasAttribute("value") && elem.value !== undefined){
-                if(elem.hasAttribute(DEER.ARRAYTYPE)){
-                    console.warn("Hidden element with a hard coded 'value' also contains attributes '"+DEER.KEY+"' and '"+DEER.ARRAYTYPE+"'.  "
-                    + "DEER takes this to mean the '"+elem.getAttribute(DEER.KEY)+"' annotation body value array will .join() into this string and pass a comparison operation. " 
-                    + "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate "
-                    + "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n"
-                    + "If this hidden input value is reactive to other interactions then processing should be done by your own custom interaction handler. "
-                    + "Remove the hard coded '"+DEER.KEY+"' or 'value' attribute.  This will make the DEER form input handler avoid processing of this input on page load. "
-                    + "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '"+DEER.KEY+"' attribute before submission. " 
-                    + "See below.")
-                    console.log(elem)
-                }
                 if(!mapsToAnno || elem.value !== val){
                     elem.$isDirty = true  
+                    if(elem.value !== val && elem.hasAttribute(DEER.ARRAYTYPE)){
+                        console.warn("Hidden element with a hard coded 'value' also contains attributes '"+DEER.KEY+"' and '"+DEER.ARRAYTYPE+"'.  "
+                        + "DEER takes this to mean the '"+elem.getAttribute(DEER.KEY)+"' annotation body value array will .join() into this string and pass a comparison operation. " 
+                        + "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate "
+                        + "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n"
+                        + "If this hidden input value is reactive to other interactions then processing should be done by your own custom interaction handler. "
+                        + "Remove the hard coded '"+DEER.KEY+"' or 'value' attribute.  This will make the DEER form input handler avoid processing of this input on page load. "
+                        + "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '"+DEER.KEY+"' attribute before submission. " 
+                        + "See below.")
+                        console.log(elem)
+                    }
+                    
                 }
             }
         } else{
