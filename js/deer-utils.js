@@ -273,8 +273,7 @@ export default {
             if(Array.isArray(arrItem)){
                 console.warn("An annotation body value array contained an array.  We ignored it.  See ignored value below.")
                 console.warn(arrItem)
-            }
-            else if(typeof arrItem === "object") {
+            } else if(typeof arrItem === "object") {
                 //TODO how should we handle?
                 console.warn("An annotation body value array contained an object.  We ignored it.  See ignored value below.")
                 console.warn(arrItem)
@@ -308,16 +307,14 @@ export default {
                     console.log(containerObj)
                 }
                 
-            }
-            else if(["ItemList"].indexOf(objType > -1)){
+            } else if(["ItemList"].indexOf(objType > -1)){
                 if(containerObj.hasOwnProperty("itemListElement")){ cleanArray = this.cleanArray(containerObj.itemListElement)}
                 else{
                     console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj.itemListElement.  Therefore, the value is empty.  See object below.")
                     console.log(containerObj)
                 }
             }
-        }
-        else{
+        } else{
             console.warn("Object of type ("+objType+") is not a supported container type.  Therefore, the value will be empty.  See object below..")
             console.log(containerObj)
         }
