@@ -339,7 +339,7 @@ export default {
      * Assert a value found on an expanded object onto the HTML input that represents it.
      * The input is a representative for the annotation so the values should match.  Hidden elements will never have user interaction, they
      * must be marked dirty if the values do not match or if there is no annotation mapped to its DEER.KEY attribute.
-     * Values should not be coded into non-hidden input fields, they will be overwritten by the annotation value without being marked dirty.
+     * Values should not be hard coded into non-hidden input fields, they will be overwritten by the annotation value without being marked dirty.
 
      * @param elem The input HTML element the value is being asserted on
      * @param val The string value to be asserted onto an input HTML element

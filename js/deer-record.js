@@ -158,7 +158,7 @@ export default class DeerReport {
                                                 //The HTML input should note the same type of container as the annotation so helper functiions can determine if it is a supported in DEER.CONTAINERS
                                                 console.warn("Container type mismatch!.  See attribute '"+DEER.ARRAYTYPE+"' on element "+el.outerHTML+"."
                                                     +" The element is now dirty and will overwrite the type noted in the annotation seen below upon form submission."
-                                                    +" If the type of the annotation body is not a supported type then DEER will not be able to pull the array of values.")
+                                                    +" If the type of the annotation body is not a supported type then DEER will not be able to get the array of values.")
                                                 console.log(obj[deerKeyValue])
                                             }
                                             arrayOfValues = UTILS.getArrayFromObj(assertedValue)
@@ -177,15 +177,15 @@ export default class DeerReport {
                                     } 
                                 } else if((["string","number"].indexOf(typeof assertedValue)>-1)){
                                     //Get value either found that obj[deerKeyValue] was a string or found that it was an object with a value that was a string or number. 
-                                    //The asserted value is already set and we know whether or not it mapsToAnno, so do nothing.
+                                    //The asserted value is already set and we know whether or not it mapsToAnno, so do nothing.  Keep this here for future handling. 
                                 } else{
                                     //An undefined situation perhaps?
                                     console.error("We do not support values of this type '"+typeof assertedValue+"'.  Therefore, the value of annotation is being ignored.  See annotation below.")
                                     console.log(obj[deerKeyValue])
                                     assertedValue = ""
                                 }
+                                UTILS.assertElementValue(el, assertedValue, mapsToAnno)
                             }
-                            UTILS.assertElementValue(el, assertedValue, mapsToAnno)                             
                         }
                     }
                 } catch(err){ console.log(err) }
