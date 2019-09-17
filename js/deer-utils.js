@@ -149,14 +149,14 @@ export default {
                                             }
                                         }
                                     }
-                                    if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
+                                    if (obj.hasOwnProperty(k) && annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
                                         // this is not the most recent available
                                         // TODO: maybe check generator, etc.
                                         continue Leaf;
                                     }
                                     else {
                                         // Assign this to the main object.
-                                        if(obj[k]) {
+                                        if(obj.hasOwnProperty(k)) {
                                             // It may be already there as an Array with some various labels
                                             if (Array.isArray(obj[k])){
                                                 let deepMatch = false
@@ -167,7 +167,9 @@ export default {
                                                     }
                                                 }
                                                 if(!deepMatch) { obj[k].push(val) }
-                                            } else if (obj[k].name !== val.name) { // often undefined
+                                            } else{
+                                                //It is already there and is an object, string, or number, perhaps from another annotation with a similar body.  
+                                                //Add in the body of this annotation we found,  DEER will aribitrarily pick a value from the array down the road and preference Annotations. .
                                                 obj[k] = [obj[k],val]
                                             }
                                         } else {
@@ -301,17 +303,23 @@ export default {
             //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
             if(["Set", "List", "set","list", "@set", "@list"].indexOf(objType) > -1){
                 if(containerObj.hasOwnProperty("items")){ cleanArray = this.cleanArray(containerObj.items) }
-                else{ console.error("Object of type '"+objType+"' is malformed.  The values could not be found in obj.items.  Therefore, the value is empty.") }
+                else{ 
+                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj.items.  Therefore, the value is empty.  See object below.") 
+                    console.log(containerObj)
+                }
                 
             }
             else if(["ItemList"].indexOf(objType > -1)){
                 if(containerObj.hasOwnProperty("itemListElement")){ cleanArray = this.cleanArray(containerObj.itemListElement)}
-                else{console.error("Object of type '"+objType+"' is malformed.  The values could not be found in obj.itemListElement.  Therefore, the value is empty.")}
+                else{
+                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj.itemListElement.  Therefore, the value is empty.  See object below.")
+                    console.log(containerObj)
+                }
             }
         }
         else{
-            console.warn("The type of object ("+objType+") is not a supported container type.  Therefore, the value will be empty.  Check the annotation body value.")
-            console.warn(containerObj)
+            console.warn("Object of type ("+objType+") is not a supported container type.  Therefore, the value will be empty.  See object below..")
+            console.log(containerObj)
         }
         return cleanArray
     },
@@ -367,7 +375,7 @@ export default {
                 console.log(elem)    
             }
             if(elem.hasAttribute(DEER.ARRAYTYPE)){
-                console.warn("This input element also has attribute '"+DEER.ARRAYTYPE+"'.  This attribute is only for hidden inputs only.  It is being removed to avoid errors.")
+                console.warn("This input element also has attribute '"+DEER.ARRAYTYPE+"'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
                 elem.removeAttribute(DEER.ARRAYTYPE)
             }
         }

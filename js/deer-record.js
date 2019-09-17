@@ -117,18 +117,28 @@ export default class DeerReport {
                                     let arbitraryAssertedValue = ""
                                     for(let entry of assertedValue){
                                         if(["string","number"].indexOf(typeof entry)>-1){
-                                            //We found it and understand it, but it is not an annotation that DEER mapped to the object.  We will remember the last one we came across.
+                                            //We found it and understand it, but we preference annotation objects so look at the rest of the entries.
+                                            //Consequently, if no annotations are found, the last string/number entry will be the one DEER encounters.
                                             mapsToAnno = false
                                             assertedValue = arbitraryAssertedValue = UTILS.getValue(entry)
                                         }
-                                        else if(typeof entry === "object" && entry[deerKeyValue].hasOwnProperty("source")){
+                                        else if(typeof entry === "object"){
                                             //Then this is definitely an annotation DEER knows about and probably mapped itself.  We will preference this one and move forward with it, even if there are others.
-                                            mapsToAnno = true
-                                            assertedValue = arbitraryAssertedValue = UTILS.getValue(entry[deerKeyValue])
-                                            break
+                                            if(entry.hasOwnProperty(deerKeyValue)){
+                                                //Then this is an object like {deerKeyValue:{value:"hello", source:"anno/123"}} and can be preferenced
+                                                mapsToAnno = true
+                                                assertedValue = arbitraryAssertedValue = UTILS.getValue(entry[deerKeyValue])
+                                                break
+                                            }
+                                            else if(entry.hasOwnProperty("source")){
+                                                //Then this is an object like {value:"hello", source:"anno/123"} and can be preferenced
+                                                mapsToAnno = true
+                                                assertedValue = arbitraryAssertedValue = UTILS.getValue(entry)
+                                                break
+                                            }
                                         }
                                     }
-                                    if(arbitraryAssertedValue){  console.warn("DEER arbitrarily chose "+arbitraryAssertedValue) }
+                                    if(arbitraryAssertedValue){  console.warn("DEER arbitrarily chose the value '"+arbitraryAssertedValue+"'.") }
                                     else{ 
                                         console.error("DEER did not understand any of these values.  Therefore, the value will be an empty string.") 
                                         assertedValue = ""
@@ -142,7 +152,9 @@ export default class DeerReport {
                                             //Only an element noted as a DEER.ARRAYTYPE would have this kind of body.value (a container obj containing an array of values)
                                             if(annoBodyObjectType === "" || el.getAttribute(DEER.ARRAYTYPE) !== annoBodyObjectType){
                                                 //The HTML input should note the same type of container as the annotation so helper functiions can determine if it is a supported in DEER.CONTAINERS
-                                                console.warn("Container type mismatch!.  See attribute '"+DEER.ARRAYTYPE+"' on element "+el.outerHTML+".  The element is now dirty and will overwrite the type noted in the annotation seen below upon form submission.")
+                                                console.warn("Container type mismatch!.  See attribute '"+DEER.ARRAYTYPE+"' on element "+el.outerHTML+"."
+                                                    +" The element is now dirty and will overwrite the type noted in the annotation seen below upon form submission."
+                                                    +" If the type of the annotation body is not a supported type then DEER will not be able to pull the array of values.")
                                                 console.log(obj[deerKeyValue])
                                             }
                                             arrayOfValues = UTILS.getArrayFromObj(assertedValue)
@@ -248,7 +260,6 @@ export default class DeerReport {
                 let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT
                 let val = input.value
                 let arrType = input.getAttribute(DEER.ARRAYTYPE)
-                //On page load, if there was a mismatch, the attribute was overwritten to be the one from the annotation.  The type here and on the annotation match now, don't check again.
                 if(input.hasAttribute(DEER.ARRAYTYPE)){
                     if(DEER.CONTAINERS.indexOf(arrType) > -1){
                         val = val.split(delim)
