@@ -43,7 +43,7 @@ export default {
     SUPPRESS: ["__rerum","@context"],   //properties to ignore
     ATTRIBUTION: "testMachine",         //replace with user to attribute assertions
     DELIMETERDEFAULT: ",",              //Default delimeter for .split()ing and .join()ing 
-    ROBUSTFEEDBACK : false,              //Show warnings along with errors in the web console.  Set to false to only see errors.  
+    ROBUSTFEEDBACK : true,              //Show warnings along with errors in the web console.  Set to false to only see errors.  
 
     /**
      * Add any custom templates here through import or copy paste.
