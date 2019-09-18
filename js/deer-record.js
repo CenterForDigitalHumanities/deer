@@ -108,7 +108,7 @@ export default class DeerReport {
                                     el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[deerKeyValue].source,"citationSource"))
                                 }
                                 let annoBodyObjectType = (typeof assertedValue === "object") ? assertedValue.type || assertedValue["@type"] || "" : "" 
-                                let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || "," //super fail safe
+                                let delim = el.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
                                 let arrayOfValues = []
                                 if(Array.isArray(assertedValue)){
                                     /**
@@ -184,8 +184,8 @@ export default class DeerReport {
                                     console.log(obj[deerKeyValue])
                                     assertedValue = ""
                                 }
-                                UTILS.assertElementValue(el, assertedValue, mapsToAnno)
                             }
+                            UTILS.assertElementValue(el, assertedValue, mapsToAnno)
                         }
                     }
                 } catch(err){ console.log(err) }
@@ -259,7 +259,7 @@ export default class DeerReport {
                 let arrType = input.getAttribute(DEER.ARRAYTYPE)
                 if(input.hasAttribute(DEER.ARRAYTYPE)){
                     if(DEER.CONTAINERS.indexOf(arrType) > -1){
-                        val = val.split(delim)
+                        val = (val !== "") ? val.split(delim) : []
                         if(["List", "Set", "set","list", "@set", "@list"].indexOf(arrType) > -1){
                             annotation.body[input.getAttribute(DEER.KEY)] = {
                                 "@type":arrType,
