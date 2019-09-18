@@ -111,6 +111,7 @@ export default {
      * @param {Object} entity Target object to search for description
      */
     async expand(entity) {
+        let UTILS = this
         let findId = entity["@id"] || entity.id || entity
         if (typeof findId !== "string") {
             UTILS.warning("Unable to find URI in object:",entity)
@@ -118,7 +119,7 @@ export default {
         }
         let getVal = this.getValue
         return fetch(findId).then(response => response.json())
-            .then(obj => this.findByTargetId(findId)
+            .then(obj => UTILS.findByTargetId(findId)
                 .then(function (annos) {
                     for (let i = 0; i < annos.length; i++) {
                         let body
@@ -149,7 +150,7 @@ export default {
                                             }
                                         }
                                     }
-                                    if (obj.hasOwnProperty(k) && annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
+                                    if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
                                         // this is not the most recent available
                                         // TODO: maybe check generator, etc.
                                         continue Leaf;
@@ -210,6 +211,7 @@ export default {
                 obj["$or"].push(o)
             }
         }
+        //TODO let this request also include $and:__rerum.history.next.length === 0
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",
             body: JSON.stringify(obj),
@@ -386,15 +388,10 @@ export default {
       * Send a warning message to the console if dev has this feature turned on through the ROBUSTFEEDBACK config option.
     */
     warning:function(msg, logMe){
-        if(DEER.ROBUSTFEEDBACK){
-            if(msg){
-                console.warn(msg)
-                if(logMe){
-                    console.log(logMe)
-                }
-            }
-            else{
-                return "You are using this incorrectly"
+        if(DEER.ROBUSTFEEDBACK.valueOf() && msg){
+            console.warn(msg)
+            if(logMe){
+                console.log(logMe)
             }
         }
     }
