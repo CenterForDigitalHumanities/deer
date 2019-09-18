@@ -41,7 +41,6 @@ export default {
         }
         if (Array.isArray(property)) {
             //It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
-            //prop = property.map(this.getValue.bind(this))
             prop = property
         } else {
             if (typeof property === "object") {
