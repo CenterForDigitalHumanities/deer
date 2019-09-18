@@ -113,7 +113,7 @@ export default {
     async expand(entity) {
         let findId = entity["@id"] || entity.id || entity
         if (typeof findId !== "string") {
-            console.warn("Unable to find URI in object:",entity)
+            UTILS.warning("Unable to find URI in object:",entity)
             return entity
         }
         let getVal = this.getValue
@@ -169,11 +169,11 @@ export default {
                                                 if(!deepMatch) { obj[k].push(val) }
                                             } else{
                                                 //It is already there and is an object, string, or number, perhaps from another annotation with a similar body.  
-                                                //Add in the body of this annotation we found,  DEER will aribitrarily pick a value from the array down the road and preference Annotations. .
+                                                //Add in the body of this annotation we found,  DEER will aribitrarily pick a value from the array down the road and preference Annotations.
                                                 obj[k] = [obj[k],val]
                                             }
                                         } else {
-                                            // or just tack it on
+                                            //or just tack it on
                                             obj = Object.assign(obj, val);
                                         }
                                     }
@@ -184,7 +184,7 @@ export default {
                     }
                     return obj
                 })).catch(err => {
-                    console.warn("Error expanding object:" + err)
+                    console.error("Error expanding object:" + err)
                     return err
                 })
     },
@@ -218,7 +218,7 @@ export default {
             }
         })
             .then(response => response.json())
-            .catch((err) => console.warn(err))
+            .catch((err) => console.error(err))
         let local_matches = everything.filter(o => o.target === id)
         matches = local_matches.concat(matches)
         return matches
@@ -228,29 +228,30 @@ export default {
      * An error handler for various HTTP traffic scenarios
      */
     handleHTTPError: function (response) {
+        let UTILS = this
         if (!response.ok) {
             let status = response.status
             switch (status) {
                 case 400:
-                    console.warn("Bad Request")
+                    UTILS.warning("Bad Request")
                     break
                 case 401:
-                    console.warn("Request was unauthorized")
+                    UTILS.warning("Request was unauthorized")
                     break
                 case 403:
-                    console.warn("Forbidden to make request")
+                    UTILS.warning("Forbidden to make request")
                     break
                 case 404:
-                    console.warn("Not found")
+                    UTILS.warning("Not found")
                     break
                 case 500:
-                    console.warn("Internal server error")
+                    UTILS.warning("Internal server error")
                     break
                 case 503:
-                    console.warn("Server down time")
+                    UTILS.warning("Server down time")
                     break
                 default:
-                    console.warn("unahndled HTTP ERROR")
+                    UTILS.warning("unahndled HTTP ERROR")
             }
             throw Error("HTTP Error: " + response.statusText)
         }
@@ -269,14 +270,15 @@ export default {
      * Remove array values that are objects or arrays.  We have decided these are not meant to be put to the interface.
     */
     cleanArray:function(arr){
+        let UTILS = this
         return arr.filter((arrItem)=>{
             if(Array.isArray(arrItem)){
-                console.warn("An annotation body value array contained an array.  We ignored it.  See ignored value below.")
-                console.warn(arrItem)
+                UTILS.warning("An annotation body value array contained an array.  We ignored it.  See ignored value below.")
+                UTILS.warning(arrItem)
             } else if(typeof arrItem === "object") {
                 //TODO how should we handle?
-                console.warn("An annotation body value array contained an object.  We ignored it.  See ignored value below.")
-                console.warn(arrItem)
+                UTILS.warning("An annotation body value array contained an object.  We ignored it.  See ignored value below.")
+                UTILS.warning(arrItem)
             }
             return ["string","number"].indexOf(typeof arrItem)>-1
         })
@@ -288,6 +290,7 @@ export default {
     getArrayFromObj:function(containerObj){
         let cleanArray = []
         let objType = containerObj.type || containerObj["@type"] || ""
+        let UTILS = this
         if(Array.isArray(objType)){
             //Since type can be an array we have to pick one of the values that matches one of our supported container types.
             //This picks the first one it comes across, since it doesnt seem like we would have any preference.
@@ -315,7 +318,7 @@ export default {
                 }
             }
         } else{
-            console.warn("Object of type ("+objType+") is not a supported container type.  Therefore, the value will be empty.  See object below..")
+            console.error("Object of type ("+objType+") is not a supported container type.  Therefore, the value will be empty.  See object below..")
             console.log(containerObj)
         }
         return cleanArray
@@ -347,20 +350,20 @@ export default {
      * 
     */
     assertElementValue:function(elem, val, mapsToAnno){
+        let UTILS = this
         if(elem.type==="hidden"){
             if(elem.hasAttribute("value") && elem.value !== undefined){
                 if(!mapsToAnno || elem.value !== val){
                     elem.$isDirty = true  
                     if(elem.value !== val && elem.hasAttribute(DEER.ARRAYTYPE)){
-                        console.warn("Hidden element with a hard coded 'value' also contains attributes '"+DEER.KEY+"' and '"+DEER.ARRAYTYPE+"'.  "
+                        UTILS.warning("Hidden element with a hard coded 'value' also contains attributes '"+DEER.KEY+"' and '"+DEER.ARRAYTYPE+"'.  "
                         + "DEER takes this to mean the '"+elem.getAttribute(DEER.KEY)+"' annotation body value array will .join() into this string and pass a comparison operation. " 
                         + "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate "
                         + "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n"
                         + "If this hidden input value is reactive to other interactions then processing should be done by your own custom interaction handler. "
                         + "Remove the hard coded '"+DEER.KEY+"' or 'value' attribute.  This will make the DEER form input handler avoid processing of this input on page load. "
                         + "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '"+DEER.KEY+"' attribute before submission. " 
-                        + "See below.")
-                        console.log(elem)
+                        + "See below.", elem)
                     }
                     
                 }
@@ -368,16 +371,32 @@ export default {
         } else{
             if(elem.hasAttribute("value") && elem.value !== undefined){
                 //Empty strings count as a value.
-                console.warn("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '"+val+"'.  See below.")
-                console.log(elem)    
+                UTILS.warning("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '"+val+"'.  See below.", elem)
             }
             if(elem.hasAttribute(DEER.ARRAYTYPE)){
-                console.warn("This input element also has attribute '"+DEER.ARRAYTYPE+"'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
+                UTILS.warning("This input element also has attribute '"+DEER.ARRAYTYPE+"'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
                 elem.removeAttribute(DEER.ARRAYTYPE)
             }
+            elem.value = val
+            elem.setAttribute("value", val)
         }
-        elem.value = val
-        elem.setAttribute("value", val)
+    },
+
+    /**
+      * Send a warning message to the console if dev has this feature turned on through the ROBUSTFEEDBACK config option.
+    */
+    warning:function(msg, logMe){
+        if(DEER.ROBUSTFEEDBACK){
+            if(msg){
+                console.warn(msg)
+                if(logMe){
+                    console.log(logMe)
+                }
+            }
+            else{
+                return "You are using this incorrectly"
+            }
+        }
     }
 
 }
