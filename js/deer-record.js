@@ -232,7 +232,7 @@ export default class DeerReport {
         formAction.then((function(entity) {
             let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(",")))
             .filter(el=>Boolean(el.$isDirty))
-            annotations.filter(el=>{
+            .filter(el=>{
                 //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
                 if(el.hasAttribute(DEER.KEYDUPLICATE)){
                     UTILS.warning("Duplicate input "+DEER.KEY+" attribute value '"+el.hasAttribute(DEER.KEY)+"' detected during submission.  This input will be ignored.  See duplicate below. ", el)
