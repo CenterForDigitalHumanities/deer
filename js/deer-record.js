@@ -85,7 +85,6 @@ export default class DeerReport {
                     let flatKeys = inputElems.map(input => {
                         return input.getAttribute(DEER.KEY)
                     })
-                    //obj has all the annotations mapped onto it.  The inputs drive everything that happens with those annotations, so let's just loop over them to figure out what to do with the obj.anno's
                     for(let i=0; i<inputElems.length; i++){
                         let el = inputElems[i]
                         let deerKeyValue = (el.hasAttribute(DEER.KEY)) ? el.getAttribute(DEER.KEY) : ""
