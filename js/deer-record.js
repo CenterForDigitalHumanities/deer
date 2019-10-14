@@ -156,7 +156,8 @@ export default class DeerReport {
                                                     +" The element is now dirty and will overwrite the type noted in the annotation seen below upon form submission."
                                                     +" If the type of the annotation body is not a supported type then DEER will not be able to get the array of values.", obj[deerKeyValue])
                                             }
-                                            arrayOfValues = UTILS.getArrayFromObj(assertedValue)
+                                            
+                                            arrayOfValues = UTILS.getArrayFromObj(assertedValue, el)
                                             assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
                                         } else{
                                             //This should have been a string or number.  We do not support whatever was meant to be here.  
@@ -256,18 +257,24 @@ export default class DeerReport {
                 let arrType = input.getAttribute(DEER.ARRAYTYPE)
                 if(input.hasAttribute(DEER.ARRAYTYPE)){
                     if(DEER.CONTAINERS.indexOf(arrType) > -1){
-                        //TODO warn user if delim is not detected in val?
+                        let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
+                        if(arrKey === "") {
+                        }
                         val = (val !== "") ? val.split(delim) : []
                         if(["List", "Set", "set","list", "@set", "@list"].indexOf(arrType) > -1){
-                            annotation.body[input.getAttribute(DEER.KEY)] = {
-                                "@type":arrType,
-                                "items":val
-                            }
+                            if(arrKey === "") {
+                                arrKey = "items"
+                                UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to save the array for this "+arrType+".", input)
+                            } 
+                            annotation.body[input.getAttribute(DEER.KEY)] = {"@type":arrType}
+                            annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val
                         } else if(["ItemList"].indexOf(arrType > -1)){
-                            annotation.body[input.getAttribute(DEER.KEY)] = {
-                                "@type":arrType,
-                                "itemListElement":val
+                            if(arrKey === "") {
+                                arrKey = "itemListElement"
+                                UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to save the array for this "+arrType+".", input)
                             }
+                            annotation.body[input.getAttribute(DEER.KEY)] = {"@type":arrType}
+                            annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val
                         }
                     } else{
                         console.error("Cannot save array value of unsupported type "+arrType+".  This annotation will not be saved or updated.")

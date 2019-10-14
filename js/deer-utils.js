@@ -288,10 +288,11 @@ export default {
     /**
      * Get the array of data from the container object, so long at it is one of the containers we support (so we know where to look.) 
     */
-    getArrayFromObj:function(containerObj){
+    getArrayFromObj:function(containerObj, inputElem){
         let cleanArray = []
         let objType = containerObj.type || containerObj["@type"] || ""
         let UTILS = this
+        let arrKey = (inputElem.hasAttribute(DEER.LIST)) ? inputElem.getAttribute(DEER.LIST) : ""
         if(Array.isArray(objType)){
             //Since type can be an array we have to pick one of the values that matches one of our supported container types.
             //This picks the first one it comes across, since it doesnt seem like we would have any preference.
@@ -305,16 +306,23 @@ export default {
         if(DEER.CONTAINERS.indexOf(objType) > -1){
             //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
             if(["Set", "List", "set","list", "@set", "@list"].indexOf(objType) > -1){
-                if(containerObj.hasOwnProperty("items")){ cleanArray = this.cleanArray(containerObj.items) }
+                if(arrKey === "") {
+                    arrKey = "items"
+                    UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to find the array values for this "+objType+".", inputElem)
+                } 
+                if(containerObj.hasOwnProperty(arrKey)){ cleanArray = this.cleanArray(containerObj[arrKey]) }
                 else{ 
                     console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj.items.  Therefore, the value is empty.  See object below.") 
                     console.log(containerObj)
                 }
-                
             } else if(["ItemList"].indexOf(objType > -1)){
-                if(containerObj.hasOwnProperty("itemListElement")){ cleanArray = this.cleanArray(containerObj.itemListElement)}
+                if(arrKey === "") {
+                    arrKey = "itemListElement"
+                    UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to find the the array values for this "+objType+".", inputElem)
+                } 
+                if(containerObj.hasOwnProperty(arrKey)){ cleanArray = this.cleanArray(containerObj[arrKey])}
                 else{
-                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj.itemListElement.  Therefore, the value is empty.  See object below.")
+                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj["+arrKey+"].  Therefore, the value is empty.  See object below.")
                     console.log(containerObj)
                 }
             }
