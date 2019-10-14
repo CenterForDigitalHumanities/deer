@@ -25,42 +25,42 @@ async function renderChange(mutationsList) {
     for (var mutation of mutationsList) {
         switch (mutation.attributeName) {
             case DEER.ID:
-            let id = mutation.target.getAttribute(DEER.ID)
-            if (id === "null") return
-            let obj = {}
-            try {
-                obj = JSON.parse(localStorage.getItem(id))
-            } catch (err) {}
-            if (!obj||!obj["@id"]) {
-                obj = await fetch(id).then(response => response.json()).catch(error => error)
-                if (obj) {
-                    localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
-                } else {
-                    return false
+                let id = mutation.target.getAttribute(DEER.ID)
+                if (id === "null") return
+                let obj = {}
+                try {
+                    obj = JSON.parse(localStorage.getItem(id))
+                } catch (err) {}
+                if (!obj || !obj["@id"]) {
+                    obj = await fetch(id).then(response => response.json()).catch(error => error)
+                    if (obj) {
+                        localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
+                    } else {
+                        return false
+                    }
                 }
-            }
-            new DeerReport(mutation.target,DEER)
-            // TODO: This is too heavy. Create a "populateFormFields" method and call it instead.
-            break
+                new DeerReport(mutation.target, DEER)
+                    // TODO: This is too heavy. Create a "populateFormFields" method and call it instead.
+                break
             case DEER.LISTENING:
-            let listensTo = mutation.target.getAttribute(DEER.LISTENING)
-            if(listensTo){
-                mutation.target.addEventListener(DEER.EVENTS.CLICKED,e=>{
-                    let loadId = e.detail["@id"]
-                    if(loadId===listensTo) { mutation.target.setAttribute("deer-id",loadId) }
-                })
-            }
-		}
-	}
+                let listensTo = mutation.target.getAttribute(DEER.LISTENING)
+                if (listensTo) {
+                    mutation.target.addEventListener(DEER.EVENTS.CLICKED, e => {
+                        let loadId = e.detail["@id"]
+                        if (loadId === listensTo) { mutation.target.setAttribute("deer-id", loadId) }
+                    })
+                }
+        }
+    }
 }
 
 export default class DeerReport {
-    constructor(elem,deer={}) {
-        for(let key in DEER) {
-            if(typeof DEER[key] === "string") {
+    constructor(elem, deer = {}) {
+        for (let key in DEER) {
+            if (typeof DEER[key] === "string") {
                 DEER[key] = deer[key] || config[key]
             } else {
-                DEER[key] = Object.assign(config[key],deer[key])
+                DEER[key] = Object.assign(config[key], deer[key])
             }
         }
         this.$isDirty = false
@@ -69,154 +69,155 @@ export default class DeerReport {
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
         this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
-        this.inputs = document.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))
+        this.inputs = document.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))
 
-        Array.from(this.inputs).forEach(inpt=>inpt.addEventListener('input', () => inpt.$isDirty = true))
+        Array.from(this.inputs).forEach(inpt => inpt.addEventListener('input', () => inpt.$isDirty = true))
 
         changeLoader.observe(elem, {
-            attributes:true
+            attributes: true
         })
-        
+
         elem.oninput = event => this.$isDirty = true
         elem.onsubmit = this.processRecord.bind(this)
-        
+
         if (this.id) {
             //Do we want to expand for all types?
-            UTILS.expand({"@id":this.id})
-            //What if there are no annotations on it and the things I need to know are already in the object?
-            //Expand only returned an object like {"@id": "http://an/id"} instead of resolving it, which is what I expected. 
-            .then((function(obj){
-                Object.keys(obj).forEach((function(key){
-                    try {
-                        for(let el of Array.from(this.inputs)) {
-                            if(el.getAttribute(DEER.KEY)===key){
-                                let assertedValue = UTILS.getValue(obj[key])
-                                if(Array.isArray(assertedValue)) {
-                                    for (const v of assertedValue) {
-                                        if(!el.value && (["string","number"].indexOf(typeof v)!==-1)){
-                                            el.value = v
+            UTILS.expand({ "@id": this.id })
+                //What if there are no annotations on it and the things I need to know are already in the object?
+                //Expand only returned an object like {"@id": "http://an/id"} instead of resolving it, which is what I expected. 
+                .then((function(obj) {
+                    Object.keys(obj).forEach((function(key) {
+                        try {
+                            for (let el of Array.from(this.inputs)) {
+                                if (el.getAttribute(DEER.KEY) === key) {
+                                    let assertedValue = UTILS.getValue(obj[key])
+                                    if (Array.isArray(assertedValue)) {
+                                        for (const v of assertedValue) {
+                                            if (!el.value && (["string", "number"].indexOf(typeof v) !== -1)) {
+                                                el.value = v
+                                            }
+                                            if (typeof v === "object") {
+
+                                            }
                                         }
-                                        if(typeof v === "object") {
-                                            
-                                        }
+                                    } else {
+                                        el.value = UTILS.getValue(obj[key])
                                     }
-                                } else {
-                                    el.value = UTILS.getValue(obj[key])
+                                    if (obj[key].source) {
+                                        el.setAttribute(DEER.SOURCE, UTILS.getValue(obj[key].source, "citationSource"))
+                                    }
+                                    break
                                 }
-                                if(obj[key].source) {
-                                    el.setAttribute(DEER.SOURCE,UTILS.getValue(obj[key].source,"citationSource"))
-                                }
-                                break
                             }
-                        }
-                    } catch(err){ console.log(err) }
+                        } catch (err) { console.log(err) }
+                    }).bind(this))
+                    UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
                 }).bind(this))
-                UTILS.broadcast(undefined,DEER.EVENTS.LOADED,elem,obj)
-            }).bind(this))
-            .then(()=>elem.click())
+                .then(() => elem.click())
         } else {
-            Array.from(this.inputs).filter(el=>el.type==="hidden").forEach(inpt=>inpt.$isDirty = true)
+            Array.from(this.inputs).filter(el => el.type === "hidden").forEach(inpt => inpt.$isDirty = true)
         }
     }
-    
+
     processRecord(event) {
-        event.preventDefault()  
+        event.preventDefault()
         if (!this.$isDirty) {
-            console.warn(event.target.id+" form submitted unchanged.")
+            console.warn(event.target.id + " form submitted unchanged.")
         }
-        if(this.elem.getAttribute(DEER.ITEMTYPE)==="simple") {
+        if (this.elem.getAttribute(DEER.ITEMTYPE) === "simple") {
             return this.simpleUpsert(event).bind(this).then(entity => {
-                this.elem.setAttribute(DEER.ID,entity["@id"])
+                this.elem.setAttribute(DEER.ID, entity["@id"])
                 new DeerReport(this.elem)
             })
         }
         let record = {
             "@type": this.type
         }
-        if(this.context) { record["@context"] = this.context }
-        try {
-            record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
-        } catch(err){}
+        if (this.context) { record["@context"] = this.context }
+        for (let p of DEER.PRIMITIVES) {
+            try {
+                record[p] = this.elem.querySelector("[" + DEER.KEY + "='" + p + "']").value
+            } catch (err) {
+                UTILS.warn(err)
+            }
+        }
         let formAction
         if (this.id) {
             record["@id"] = this.id
             formAction = Promise.resolve(record)
         } else {
             formAction = fetch(DEER.URLS.CREATE, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8"
-                },
-                body: JSON.stringify(record)
-            })
-            .then(response => response.json())
-            .then(data => data.new_obj_state)
-            UTILS.broadcast(undefined,DEER.EVENTS.CREATED,this.elem,record)
-        }
-
-        formAction.then((function(entity) {
-            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).filter(el=>Boolean(el.$isDirty)).map(input => {
-                let inputId = input.getAttribute(DEER.SOURCE)
-                let action = (inputId) ? "UPDATE" : "CREATE"
-                let annotation = {
-                    creator: DEER.ATTRIBUTION,
-                    target: entity["@id"],
-                    body: {}
-                }
-                if(inputId) { annotation["@id"] = inputId }
-                annotation.body[input.getAttribute(DEER.KEY)] = {
-                    value: input.value
-                }
-                // TODO: maybe we need a deer-value to assign things here... or some option...
-                if(input.getAttribute(DEER.KEY)==="targetCollection"){
-                    annotation.body.targetCollection = input.value
-                }
-                let ev = input.getAttribute(DEER.EVIDENCE) || this.evidence
-                if(ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
-                let name = input.getAttribute("title")
-                if(name) { annotation.body[input.getAttribute(DEER.KEY)].name = name }
-                return fetch(DEER.URLS[action], {
-                    method: (inputId) ? "PUT" : "POST",
+                    method: "POST",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8"
                     },
-                    body: JSON.stringify(annotation)
+                    body: JSON.stringify(record)
                 })
-                .then(response=>response.json())
-                .then(anno=>input.setAttribute(DEER.SOURCE,anno.new_obj_state["@id"]))
+                .then(response => response.json())
+                .then(data => data.new_obj_state)
+            UTILS.broadcast(undefined, DEER.EVENTS.CREATED, this.elem, record)
+        }
+
+        formAction.then((function(entity) {
+                let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).filter(el => Boolean(el.$isDirty)).map(input => {
+                    let inputId = input.getAttribute(DEER.SOURCE)
+                    let action = (inputId) ? "UPDATE" : "CREATE"
+                    let annotation = {
+                        creator: DEER.ATTRIBUTION,
+                        target: entity["@id"],
+                        body: {}
+                    }
+                    if (inputId) { annotation["@id"] = inputId }
+                    annotation.body[input.getAttribute(DEER.KEY)] = {
+                            value: input.value
+                        }
+                        // TODO: maybe we need a deer-value to assign things here... or some option...
+                    if (input.getAttribute(DEER.KEY) === "targetCollection") {
+                        annotation.body.targetCollection = input.value
+                    }
+                    let ev = input.getAttribute(DEER.EVIDENCE) || this.evidence
+                    if (ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
+                    let name = input.getAttribute("title")
+                    if (name) { annotation.body[input.getAttribute(DEER.KEY)].name = name }
+                    return fetch(DEER.URLS[action], {
+                            method: (inputId) ? "PUT" : "POST",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                            body: JSON.stringify(annotation)
+                        })
+                        .then(response => response.json())
+                        .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))
+                })
+                return Promise.all(annotations).then(() => entity)
+            }).bind(this))
+            .then(entity => {
+                this.elem.setAttribute(DEER.ID, entity["@id"])
+                new DeerReport(this.elem)
             })
-            return Promise.all(annotations).then(()=>entity)
-        }).bind(this))
-        .then(entity => {
-            this.elem.setAttribute(DEER.ID,entity["@id"])
-            new DeerReport(this.elem)
-        })
     }
 
     simpleUpsert(event) {
         let record = {
             "@type": this.type
         }
-        if(this.context) { record["@context"] = this.context }
-        if(this.evidence) { record.evidence = this.evidence }
-        try {
-            record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
-        } catch(err){}
-        Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).map(input => {
+        if (this.context) { record["@context"] = this.context }
+        if (this.evidence) { record.evidence = this.evidence }
+        Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).map(input => {
             let key = input.getAttribute(DEER.KEY)
             let val = input.value
             let title = input.getAttribute("title")
             let evidence = input.getAttribute(DEER.EVIDENCE)
 
-            if(title || evidence) {
-                val = { "@value" : val }
-                if(title) val.name = title
-                if(evidence) val.evidence = evidence
+            if (title || evidence) {
+                val = { "@value": val }
+                if (title) val.name = title
+                if (evidence) val.evidence = evidence
             }
 
-            record[key] = (record.hasOwnProperty(key)) 
-                ? ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val])
-                : val
+            record[key] = (record.hasOwnProperty(key)) ?
+                ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val]) :
+                val
 
             let formId = this.elem.getAttribute(DEER.ID)
             let action = "CREATE"
@@ -227,14 +228,14 @@ export default class DeerReport {
             }
 
             return fetch(DEER.URLS[action], {
-                method: (formId) ? "PUT" : "POST",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8"
-                },
-                body: JSON.stringify(record)
-            })
-            .then(response=>response.json())
-            .then(obj=>input.setAttribute(DEER.ID,obj.new_obj_state["@id"]))
+                    method: (formId) ? "PUT" : "POST",
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8"
+                    },
+                    body: JSON.stringify(record)
+                })
+                .then(response => response.json())
+                .then(obj => input.setAttribute(DEER.ID, obj.new_obj_state["@id"]))
         })
     }
 }
@@ -256,14 +257,14 @@ async function create(obj, attribution, evidence) {
         mint.evidence = evidence
     }
     const newObj = await fetch(CREATE_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8"
-        },
-        body: JSON.stringify(mint)
-    })
-    .then(this.handleHTTPError)
-    .then(response => response.json())
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify(mint)
+        })
+        .then(this.handleHTTPError)
+        .then(response => response.json())
     const listID = localStorage.getItem("CURRENT_LIST_ID") || this.DEFAULT_LIST_ID
     let list = await get(listID)
     const objID = newObj.new_obj_state["@id"]
@@ -273,15 +274,15 @@ async function create(obj, attribution, evidence) {
     })
     try {
         list = await fetch(UPDATE_URL, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json; charset=utf-8"
-            },
-            body: JSON.stringify(list)
-        })
-        .then(this.handleHTTPError)
-        .then(response => response.json().new_obj_state)
-        .catch(err => Promise.reject(err))
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                body: JSON.stringify(list)
+            })
+            .then(this.handleHTTPError)
+            .then(response => response.json().new_obj_state)
+            .catch(err => Promise.reject(err))
     } catch (err) {}
     localStorage.setItem(list["@id"], JSON.stringify(list))
     localStorage.setItem("CURRENT_LIST_ID", list["@id"])
@@ -314,6 +315,6 @@ async function create(obj, attribution, evidence) {
 export function initializeDeerForms(config) {
     const forms = document.querySelectorAll(config.FORM)
     const formArray = Array.from(forms)
-    Array.from(forms).forEach(elem => new DeerReport(elem,config))
-    document.addEventListener(DEER.EVENTS.NEW_FORM,e => Array.from(e.detail.set).forEach(elem=>new DeerReport(elem,config)))
+    Array.from(forms).forEach(elem => new DeerReport(elem, config))
+    document.addEventListener(DEER.EVENTS.NEW_FORM, e => Array.from(e.detail.set).forEach(elem => new DeerReport(elem, config)))
 }
