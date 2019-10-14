@@ -3,7 +3,6 @@ export default {
     TYPE: "deer-type",              // attribute, JSON-LD @type
     TEMPLATE: "deer-template",      // attribute, enum for custom template
     KEY: "deer-key",                // attribute, key to use for annotation
-    KEYDUPLICATE: "deer-key-duplicate", // attribute, notes input is a duplicate and app should ignore       
     LABEL: "title",                 // attribute, alternate label for properties
     CONTEXT: "deer-context",        // attribute, JSON-LD @context, scoped
     LIST: "deer-list",              // attribute, property with resource array

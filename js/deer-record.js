@@ -75,7 +75,6 @@ export default class DeerReport {
         })
         elem.oninput = event => this.$isDirty = true
         elem.onsubmit = this.processRecord.bind(this)
-        
         if (this.id) {
             //Do we want to expand for all types?
             UTILS.expand({"@id":this.id})
@@ -93,9 +92,8 @@ export default class DeerReport {
                             //Then this is a DEER form input.
                             el.addEventListener('input', (e) => e.target.$isDirty = true)
                             let assertedValue = ""
-                            if(flatKeys.indexOf(deerKeyValue)!==i){
+                            if(deerKeyValue && flatKeys.indexOf(deerKeyValue)!==i){
                                 UTILS.warning("Duplicate input "+DEER.KEY+" attribute value '"+deerKeyValue+"' detected in form.  This input will be ignored upon form submission and only the first instance will be respected.  See duplicate below.", el)
-                                el.setAttribute(DEER.KEYDUPLICATE, "true")
                                 //Don't skip the input though, let it recieve all warnings and errors per usual in case this happens to be the one the dev means to keep.
                             }
                             if(obj.hasOwnProperty(deerKeyValue)){
@@ -190,7 +188,9 @@ export default class DeerReport {
             }).bind(this))
             .then(()=>elem.click())
         } else {
-            Array.from(this.inputs).filter(el=>el.type==="hidden").forEach(inpt=>inpt.$isDirty = true)
+            let inputElems = Array.from(this.inputs)
+            inputElems.forEach(el=>{if(el.getAttribute(DEER.KEY))el.addEventListener('input', (e) => e.target.$isDirty = true)})
+            inputElems.filter(el=>el.type==="hidden").forEach(inpt=>inpt.$isDirty = true)
         }
     }
     
@@ -230,14 +230,17 @@ export default class DeerReport {
         }
 
         formAction.then((function(entity) {
-            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(",")))
-            .filter(el=>Boolean(el.$isDirty))
-            .filter(el=>{
-                //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
-                if(el.hasAttribute(DEER.KEYDUPLICATE)){
-                    UTILS.warning("Duplicate input "+DEER.KEY+" attribute value '"+el.hasAttribute(DEER.KEY)+"' detected during submission.  This input will be ignored.  See duplicate below. ", el)
+            //Note that for forms that created a new initial object (did not have deer-id), there is no $isDirty on non-hidden inputs.  
+            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s=>s+"["+DEER.KEY+"]").join(","))).filter(el=>Boolean(el.$isDirty))
+            let flatKeys = annotations.map(input => {
+                return input.getAttribute(DEER.KEY)
+            })
+            annotations = annotations.filter((el,i)=>{
+                let deerKeyValue = (el.hasAttribute(DEER.KEY)) ? el.getAttribute(DEER.KEY) : ""
+                if(deerKeyValue && flatKeys.indexOf(deerKeyValue)!==i){
+                    UTILS.warning("Duplicate input "+DEER.KEY+" attribute value '"+deerKeyValue+"' detected during form submission.  This input will be ignored and only the first instance will be respected.  See duplicate below.", el)
                 }
-                return !el.hasAttribute(DEER.KEYDUPLICATE)
+                return flatKeys.indexOf(deerKeyValue)===i
             })
             .map(input => {
                 let inputId = input.getAttribute(DEER.SOURCE)
