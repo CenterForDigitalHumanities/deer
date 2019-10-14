@@ -41,7 +41,7 @@ export default {
         }
         if (Array.isArray(property)) {
             //It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
-            prop = property
+            return property
         } else {
             if (typeof property === "object") {
                 // TODO: JSON-LD insists on "@value", but this is simplified in a lot
