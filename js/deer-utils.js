@@ -312,7 +312,7 @@ export default {
                 } 
                 if(containerObj.hasOwnProperty(arrKey)){ cleanArray = this.cleanArray(containerObj[arrKey]) }
                 else{ 
-                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj.items.  Therefore, the value is empty.  See object below.") 
+                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj["+arrKey+"].  Therefore, the value is empty.  See object below.") 
                     console.log(containerObj)
                 }
             } else if(["ItemList"].indexOf(objType > -1)){

@@ -82,16 +82,17 @@ export default class DeerReport {
                     try {
                         let inputElems = Array.from(this.inputs)
                         let flatKeys = inputElems.map(input => input.getAttribute(DEER.KEY))
-                        for (let el of inputElems) {
+                        for (let i=0; i<inputElems.length; i++) {
+                            let el = inputElems[i]
                             let deerKeyValue = (el.hasAttribute(DEER.KEY)) ? el.getAttribute(DEER.KEY) : ""
                             let mapsToAnno = false
                             if (deerKeyValue) {
                                 //Then this is a DEER form input.
                                 el.addEventListener('input', (e) => e.target.$isDirty = true)
                                 let assertedValue = ""
-                                if (flatKeys[deerKeyValue] !== i) {
+                                if (flatKeys.indexOf(deerKeyValue) !== i) {
                                     UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + deerKeyValue + "' detected in form.  This input will be ignored upon form submission and only the first instance will be respected.  See duplicate below.", el)
-                                        //Don't skip the input though, let it recieve all warnings and errors per usual in case this happens to be the one the dev means to keep.
+                                    //Don't skip the input though, let it recieve all warnings and errors per usual in case this happens to be the one the dev means to keep.
                                 }
                                 if (obj.hasOwnProperty(deerKeyValue)) {
                                     //Then there is a key on this object that maps to the input.  
@@ -184,8 +185,8 @@ export default class DeerReport {
                 .then(() => elem.click())
         } else {
             Array.from(this.inputs).forEach(inpt => {
-                if(input.getAttribute(DEER.KEY)){inpt.addEventListener('input', (e) => e.target.$isDirty = true) }
-                if(input.type === "hidden") {input.$isDirty = true}
+                if(inpt.getAttribute(DEER.KEY)){inpt.addEventListener('input', (e) => e.target.$isDirty = true) }
+                if(inpt.type === "hidden") {inpt.$isDirty = true}
             })
         }
     }
@@ -231,7 +232,7 @@ export default class DeerReport {
             annotations = annotations.filter((el,i) => {
                 //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
                 if (flatKeys.indexOf(el.getAttribute(DEER.KEY)) !== i) {
-                    UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + el.hasAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
+                    UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
                 }
                 return flatKeys.indexOf(el.getAttribute(DEER.KEY)) === i
             })
@@ -255,20 +256,20 @@ export default class DeerReport {
                         if (["List", "Set", "set", "list", "@set", "@list"].indexOf(arrType) > -1) {
                             if(arrKey === ""){
                                 arrKey = "items"
-                                UTILS.warning("Found input with '"+DEER.ARRAYTYPE+"' attribute but no '"+DEER.LIST+"' attribute.  We will use the default schema "+arrKey+" to save the array values for this "+arrType+".", input)
+                                UTILS.warning("Found input with '"+DEER.ARRAYTYPE+"' attribute but no '"+DEER.LIST+"' attribute during submission.  DEER will use the default schema '"+arrKey+"' to save the array values for this "+arrType+".", input)
                             }
                             annotation.body[input.getAttribute(DEER.KEY)] = {"@type":arrType }
                             annotation.body[input.getAttribute(DEER.KEY)][arrKey]=val
                         } else if (["ItemList"].indexOf(arrType > -1)) {
                             if(arrKey === ""){
                                 arrKey = "itemListElement"
-                                UTILS.warning("Found input with '"+DEER.ARRAYTYPE+"' attribute but no '"+DEER.LIST+"' attribute.  We will use the default schema "+arrKey+" to save the array values for this "+arrType+".", input)
+                                UTILS.warning("Found input with '"+DEER.ARRAYTYPE+"' attribute but no '"+DEER.LIST+"' attribute during submission.  DEER will use the default schema '"+arrKey+"' to save the array values for this "+arrType+".", input)
                             }
                             annotation.body[input.getAttribute(DEER.KEY)] = {"@type":arrType }
                             annotation.body[input.getAttribute(DEER.KEY)][arrKey]=val
                         }
                     } else {
-                        console.error("Cannot save array value of unsupported type " + arrType + ".  This annotation will not be saved or updated.")
+                        console.error("Cannot save array value of unsupported type '" + arrType + "'.  This annotation will not be saved or updated.")
                         return false
                             // Could save it as a string instead of failing...
                             // annotation.body[input.getAttribute(DEER.KEY)] = {
