@@ -138,7 +138,7 @@ export default class DeerReport {
             try {
                 record[p] = this.elem.querySelector("[" + DEER.KEY + "='" + p + "']").value
             } catch (err) {
-                UTILS.warning(err)
+                console.warn(err)
             }
         }
         let formAction
