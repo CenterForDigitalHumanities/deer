@@ -292,7 +292,7 @@ export default {
         let cleanArray = []
         let objType = containerObj.type || containerObj["@type"] || ""
         let UTILS = this
-        let arrKey = (inputElem.hasAttribute(DEER.LIST)) ? inputElem.getAttribute(DEER.LIST) : ""
+        let arrKey = (inputElem !== null && inputElem.hasAttribute(DEER.LIST)) ? inputElem.getAttribute(DEER.LIST) : ""
         if(Array.isArray(objType)){
             //Since type can be an array we have to pick one of the values that matches one of our supported container types.
             //This picks the first one it comes across, since it doesnt seem like we would have any preference.
