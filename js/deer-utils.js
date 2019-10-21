@@ -292,9 +292,17 @@ export default {
      * Get the array of data from the container object, so long at it is one of the containers we support (so we know where to look.) 
     */
     getArrayFromObj:function(containerObj, inputElem){
-        let cleanArray = []
-        let objType = containerObj.type || containerObj["@type"] || ""
         let UTILS = this
+        let cleanArray = []
+        //Handle if what we are actualy looking for is inside containObj.value (DEER templates do that)
+        let alsoPeek = ["@value", "value", "$value", "val"]
+        for (let k of alsoPeek) {
+            if (containerObj.hasOwnProperty(k)) {
+                containerObj = containerObj[k]
+                break
+            }
+        }
+        let objType = containerObj.type || containerObj["@type"] || ""
         let arrKey = (inputElem !== null && inputElem.hasAttribute(DEER.LIST)) ? inputElem.getAttribute(DEER.LIST) : ""
         if(Array.isArray(objType)){
             //Since type can be an array we have to pick one of the values that matches one of our supported container types.
