@@ -94,12 +94,15 @@ export default {
      * Attempt to discover a readable label from the object
      */
     get getLabel() {
+        let UTILS = this
         return (obj, noLabel = "[ unlabeled ]", options = {}) => {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
             if(Array.isArray(label)) {
-                label = [...new Set(label.map(l => this.getValue(this.getLabel(l))))]
-
+                label = [...new Set(label.map(l => this.getValue(UTILS.getLabel(l))))]
+            }
+            if(typeof label === "object"){
+                label = UTILS.getValue(label)
             }
             return label || noLabel
         }
