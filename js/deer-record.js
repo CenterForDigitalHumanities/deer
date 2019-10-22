@@ -206,9 +206,13 @@ export default class DeerReport {
             "@type": this.type
         }
         if (this.context) { record["@context"] = this.context }
-        try {
-            record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
-        } catch (err) {}
+        for (let p of DEER.PRIMITIVES) {
+            try {
+                record[p] = this.elem.querySelector("[" + DEER.KEY + "='" + p + "']").value
+            } catch (err) {
+                UTILS.warn(err)
+            }
+        }
         let formAction
         if (this.id) {
             record["@id"] = this.id
@@ -315,9 +319,6 @@ export default class DeerReport {
         }
         if (this.context) { record["@context"] = this.context }
         if (this.evidence) { record.evidence = this.evidence }
-        try {
-            record.name = this.elem.querySelectorAll(DEER.ENTITYNAME)[0].value
-        } catch (err) {}
         Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).map(input => {
             let key = input.getAttribute(DEER.KEY)
             let val = input.value

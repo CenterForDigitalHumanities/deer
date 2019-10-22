@@ -214,7 +214,6 @@ export default {
                 obj["$or"].push(o)
             }
         }
-        //TODO let this request also include $and:__rerum.history.next.length === 0
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",
             body: JSON.stringify(obj),

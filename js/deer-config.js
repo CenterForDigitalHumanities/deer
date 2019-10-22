@@ -19,7 +19,7 @@ export default {
     
     INPUTS: ["input","textarea","dataset","select"], // array of selectors, identifies inputs with .value
     CONTAINERS: ["ItemList","ItemListElement", "List", "Set", "list","set", "@list", "@set"], // array of supported list and set types the app will dig into for array values
-    ENTITYNAME: "[deer-key='name']",// selector, value to grab for form entity label
+    PRIMITIVES: ["name", "creator", "label"],
 
     URLS: {
         BASE_ID: "http://devstore.rerum.io/v1",
@@ -54,6 +54,8 @@ export default {
     TEMPLATES: {
         cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
     },
+
+    APPAGENT:"http://devstore.rerum.io/v1/id/5da8c04ae4b0a6b3a23849af",
 
     version: "alpha 0.8"
 }
