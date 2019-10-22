@@ -241,12 +241,15 @@ export default class DeerRender {
                     fetch(this.id).then(response=>response.json()).then(obj=>RENDER.element(this.elem,obj)).catch(err=>err)
                 } else if (this.collection) {
                     // Look not only for direct objects, but also collection annotations
+                    // Only the most recent, do not consider history parent or children history nodes
+                    let historyWildcard = {"$exists":true, "$size":0}
                     let queryObj = {
                         $or: [{
-                            "targetCollection": this.collection
-                        },{
-                            "body.targetCollection": this.collection
-                        }]
+                            "targetCollection": this.collection,
+                        }, {
+                            "body.targetCollection": this.collection,
+                        }],
+                        "__rerum.history.next": historyWildcard
                     }
                     fetch(DEER.URLS.QUERY, {
                         method: "POST",

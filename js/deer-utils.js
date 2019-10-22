@@ -203,7 +203,8 @@ export default {
             targetStyle = [targetStyle]
         }
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
-        let obj = {"$or":[]}
+        let historyWildcard = {"$exists":true, "$size":0}
+        let obj = {"$or":[], "__rerum.history.next":historyWildcard}
         for (let target of targetStyle) {
             //Entries that are not strings are not supported.  Ignore those entries.  
             //TODO: should we we let the user know we had to ignore something here?
