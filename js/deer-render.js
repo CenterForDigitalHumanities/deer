@@ -245,9 +245,9 @@ export default class DeerRender {
                     let historyWildcard = {"$exists":true, "$size":0}
                     let queryObj = {
                         $or: [{
-                            "targetCollection": this.collection,
+                            "targetCollection": this.collection
                         }, {
-                            "body.targetCollection": this.collection,
+                            "body.targetCollection": this.collection
                         }],
                         "__rerum.history.next": historyWildcard
                     }
