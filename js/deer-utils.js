@@ -32,7 +32,6 @@ export default {
                 return list
             })
     },
-    listFromContainer: function () { },
     getValue: function (property, alsoPeek = [], asType) {
         // TODO: There must be a best way to do this...
         let prop;
@@ -41,7 +40,8 @@ export default {
             return undefined
         }
         if (Array.isArray(property)) {
-            prop = property.map(this.getValue.bind(this))
+            //It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
+            return property
         } else {
             if (typeof property === "object") {
                 // TODO: JSON-LD insists on "@value", but this is simplified in a lot
@@ -94,12 +94,15 @@ export default {
      * Attempt to discover a readable label from the object
      */
     get getLabel() {
+        let UTILS = this
         return (obj, noLabel = "[ unlabeled ]", options = {}) => {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
             if(Array.isArray(label)) {
-                label = [...new Set(label.map(l => this.getValue(this.getLabel(l))))]
-
+                label = [...new Set(label.map(l => this.getValue(UTILS.getLabel(l))))]
+            }
+            if(typeof label === "object"){
+                label = UTILS.getValue(label)
             }
             return label || noLabel
         }
@@ -110,14 +113,15 @@ export default {
      * @param {Object} entity Target object to search for description
      */
     async expand(entity) {
+        let UTILS = this
         let findId = entity["@id"] || entity.id || entity
         if (typeof findId !== "string") {
-            console.warn("Unable to find URI in object:",entity)
+            UTILS.warning("Unable to find URI in object:",entity)
             return entity
         }
-        let getValue = this.getValue
+        let getVal = this.getValue
         return fetch(findId).then(response => response.json())
-            .then(obj => this.findByTargetId(findId)
+            .then(obj => UTILS.findByTargetId(findId)
                 .then(function (annos) {
                     for (let i = 0; i < annos.length; i++) {
                         let body
@@ -138,7 +142,7 @@ export default {
                                     let k = Object.keys(val)[0];
                                     if (!val.source) {
                                         // include an origin for this property, placehold madsrdf:Source
-                                        let aVal = getValue(val[k]);
+                                        let aVal = getVal(val[k])
                                         val[k] = {
                                             value: aVal,
                                             source: {
@@ -146,16 +150,16 @@ export default {
                                                 citationNote: annos[i].label || "Composed object from DEER",
                                                 comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
                                             }
-                                        };
+                                        }
                                     }
-                                    if (obj[k] !== undefined && annos[i].__rerum && annos[i].__rerum.history.next.length) {
+                                    if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
                                         // this is not the most recent available
                                         // TODO: maybe check generator, etc.
                                         continue Leaf;
                                     }
                                     else {
                                         // Assign this to the main object.
-                                        if(obj[k]) {
+                                        if(obj.hasOwnProperty(k)) {
                                             // It may be already there as an Array with some various labels
                                             if (Array.isArray(obj[k])){
                                                 let deepMatch = false
@@ -166,11 +170,13 @@ export default {
                                                     }
                                                 }
                                                 if(!deepMatch) { obj[k].push(val) }
-                                            } else if (obj[k].name !== val.name) { // often undefined
+                                            } else{
+                                                //It is already there and is an object, string, or number, perhaps from another annotation with a similar body.  
+                                                //Add in the body of this annotation we found,  DEER will aribitrarily pick a value from the array down the road and preference Annotations.
                                                 obj[k] = [obj[k],val]
                                             }
                                         } else {
-                                            // or just tack it on
+                                            //or just tack it on
                                             obj = Object.assign(obj, val);
                                         }
                                     }
@@ -181,7 +187,7 @@ export default {
                     }
                     return obj
                 })).catch(err => {
-                    console.log("Error expanding object:" + err)
+                    console.error("Error expanding object:" + err)
                     return err
                 })
     },
@@ -197,7 +203,8 @@ export default {
             targetStyle = [targetStyle]
         }
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
-        let obj = {"$or":[]}
+        let historyWildcard = {"$exists":true, "$size":0}
+        let obj = {"$or":[], "__rerum.history.next":historyWildcard}
         for (let target of targetStyle) {
             //Entries that are not strings are not supported.  Ignore those entries.  
             //TODO: should we we let the user know we had to ignore something here?
@@ -215,7 +222,7 @@ export default {
             }
         })
             .then(response => response.json())
-            .catch((err) => console.log(err))
+            .catch((err) => console.error(err))
         let local_matches = everything.filter(o => o.target === id)
         matches = local_matches.concat(matches)
         return matches
@@ -225,29 +232,30 @@ export default {
      * An error handler for various HTTP traffic scenarios
      */
     handleHTTPError: function (response) {
+        let UTILS = this
         if (!response.ok) {
             let status = response.status
             switch (status) {
                 case 400:
-                    console.log("Bad Request")
+                    UTILS.warning("Bad Request")
                     break
                 case 401:
-                    console.log("Request was unauthorized")
+                    UTILS.warning("Request was unauthorized")
                     break
                 case 403:
-                    console.log("Forbidden to make request")
+                    UTILS.warning("Forbidden to make request")
                     break
                 case 404:
-                    console.log("Not found")
+                    UTILS.warning("Not found")
                     break
                 case 500:
-                    console.log("Internal server error")
+                    UTILS.warning("Internal server error")
                     break
                 case 503:
-                    console.log("Server down time")
+                    UTILS.warning("Server down time")
                     break
                 default:
-                    console.log("unahndled HTTP ERROR")
+                    UTILS.warning("unahndled HTTP ERROR")
             }
             throw Error("HTTP Error: " + response.statusText)
         }
@@ -260,5 +268,150 @@ export default {
     broadcast: function (event = {}, type, element, obj = {}) {
         let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
         element.dispatchEvent(e)
+    },
+
+    /**
+     * Remove array values that are objects or arrays.  We have decided these are not meant to be put to the interface.
+    */
+    cleanArray:function(arr){
+        let UTILS = this
+        return arr.filter((arrItem)=>{
+            if(Array.isArray(arrItem)){
+                UTILS.warning("An annotation body value array contained an array.  We ignored it.  See ignored value below.")
+                UTILS.warning(arrItem)
+            } else if(typeof arrItem === "object") {
+                //TODO how should we handle?
+                UTILS.warning("An annotation body value array contained an object.  We ignored it.  See ignored value below.")
+                UTILS.warning(arrItem)
+            }
+            return ["string","number"].indexOf(typeof arrItem)>-1
+        })
+    },
+
+    /**
+     * Get the array of data from the container object, so long at it is one of the containers we support (so we know where to look.) 
+    */
+    getArrayFromObj:function(containerObj, inputElem){
+        let UTILS = this
+        let cleanArray = []
+        //Handle if what we are actualy looking for is inside containObj.value (DEER templates do that)
+        let alsoPeek = ["@value", "value", "$value", "val"]
+        for (let k of alsoPeek) {
+            if (containerObj.hasOwnProperty(k)) {
+                containerObj = containerObj[k]
+                break
+            }
+        }
+        let objType = containerObj.type || containerObj["@type"] || ""
+        let arrKey = (inputElem !== null && inputElem.hasAttribute(DEER.LIST)) ? inputElem.getAttribute(DEER.LIST) : ""
+        if(Array.isArray(objType)){
+            //Since type can be an array we have to pick one of the values that matches one of our supported container types.
+            //This picks the first one it comes across, since it doesnt seem like we would have any preference.
+            for(let t of objType){
+                if(DEER.CONTAINERS.indexOf(t) > -1){
+                    objType = t
+                    break
+                }
+            }
+        }
+        if(DEER.CONTAINERS.indexOf(objType) > -1){
+            //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
+            if(["Set", "List", "set","list", "@set", "@list"].indexOf(objType) > -1){
+                if(arrKey === "") {
+                    arrKey = "items"
+                    UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to find the array values for this "+objType+".", inputElem)
+                } 
+                if(containerObj.hasOwnProperty(arrKey)){ cleanArray = this.cleanArray(containerObj[arrKey]) }
+                else{ 
+                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj["+arrKey+"].  Therefore, the value is empty.  See object below.") 
+                    console.log(containerObj)
+                }
+            } else if(["ItemList"].indexOf(objType > -1)){
+                if(arrKey === "") {
+                    arrKey = "itemListElement"
+                    UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to find the the array values for this "+objType+".", inputElem)
+                } 
+                if(containerObj.hasOwnProperty(arrKey)){ cleanArray = this.cleanArray(containerObj[arrKey])}
+                else{
+                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj["+arrKey+"].  Therefore, the value is empty.  See object below.")
+                    console.log(containerObj)
+                }
+            }
+        } else{
+            console.error("Object of type ("+objType+") is not a supported container type.  Therefore, the value will be empty.  See object below..")
+            console.log(containerObj)
+        }
+        return cleanArray
+    },
+
+    /**
+     * Given an array, turn the array into a string where the values are separated by the given delimeter.
+    */
+    stringifyArray:function(arr, delim){
+        //TODO warn if arr is empty?
+        try{
+            return (arr.length) ? arr.join(delim) : ""    
+        }
+        catch (e){
+            console.error("There was a join error on '"+arr+"'' using delimeter '"+delim+"'.")
+            return ""
+        }
+    },
+
+    /**
+     * Assert a value found on an expanded object onto the HTML input that represents it.
+     * The input is a representative for the annotation so the values should match.  Hidden elements will never have user interaction, they
+     * must be marked dirty if the values do not match or if there is no annotation mapped to its DEER.KEY attribute.
+     * Values should not be hard coded into non-hidden input fields, they will be overwritten by the annotation value without being marked dirty.
+
+     * @param elem The input HTML element the value is being asserted on
+     * @param val The string value to be asserted onto an input HTML element
+     * @param fromAnno Boolean for if the value is from a DEER annotation as opposed to part of the object (noted in deer-id on the form) directly.
+     * 
+    */
+    assertElementValue:function(elem, val, mapsToAnno){
+        let UTILS = this
+        if(elem.type==="hidden"){
+            if(elem.hasAttribute("value") && elem.value !== undefined){
+                if(!mapsToAnno || elem.value !== val){
+                    elem.$isDirty = true  
+                    if(elem.value !== val && elem.hasAttribute(DEER.ARRAYTYPE)){
+                        UTILS.warning("Hidden element with a hard coded 'value' also contains attributes '"+DEER.KEY+"' and '"+DEER.ARRAYTYPE+"'.  "
+                        + "DEER takes this to mean the '"+elem.getAttribute(DEER.KEY)+"' annotation body value array will .join() into this string and pass a comparison operation. " 
+                        + "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate "
+                        + "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n"
+                        + "If this hidden input value is reactive to other interactions then processing should be done by your own custom interaction handler. "
+                        + "Remove the hard coded '"+DEER.KEY+"' or 'value' attribute.  This will make the DEER form input handler avoid processing of this input on page load. "
+                        + "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '"+DEER.KEY+"' attribute before submission. " 
+                        + "See below.", elem)
+                    }
+                    
+                }
+            }
+        } else{
+            if(elem.hasAttribute("value") && elem.value !== undefined){
+                //Empty strings count as a value.
+                UTILS.warning("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '"+val+"'.  See below.", elem)
+            }
+            if(elem.hasAttribute(DEER.ARRAYTYPE)){
+                UTILS.warning("This input element also has attribute '"+DEER.ARRAYTYPE+"'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
+                elem.removeAttribute(DEER.ARRAYTYPE)
+            }
+            elem.value = val
+            elem.setAttribute("value", val)
+        }
+    },
+
+    /**
+      * Send a warning message to the console if dev has this feature turned on through the ROBUSTFEEDBACK config option.
+    */
+    warning:function(msg, logMe){
+        if(DEER.ROBUSTFEEDBACK.valueOf() && msg){
+            console.warn(msg)
+            if(logMe){
+                console.log(logMe)
+            }
+        }
     }
+
 }
