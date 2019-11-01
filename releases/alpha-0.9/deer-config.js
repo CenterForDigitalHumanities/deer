@@ -55,7 +55,5 @@ export default {
         cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
     },
 
-    APPAGENT: "http://devstore.rerum.io/v1/id/5da8c04ae4b0a6b3a23849af",
-
     version: "alpha 0.8"
 }
