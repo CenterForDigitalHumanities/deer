@@ -260,41 +260,40 @@ export default class DeerReport {
                         let inputType = input.getAttribute(DEER.INPUTTYPE)
                         let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
                         if (input.hasAttribute(DEER.INPUTTYPE)) {
-                            if (DEER.CONTAINERS.indexOf(inputType) > -1) {
-                                //TODO warn user if delim is not detected in val?
-                                val = (val !== "") ? val.split(delim) : []
-                                switch (inputType) {
-                                    case "List":
-                                    case "Set":
-                                    case "set":
-                                    case "list":
-                                    case "@set":
-                                    case "@list":
-                                        if (arrKey === "") {
-                                            arrKey = "items"
-                                            UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
-                                        }
-                                        annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
-                                        annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val
-                                        break
-                                    case "ItemList":
-                                        if (arrKey === "") {
-                                            arrKey = "itemListElement"
-                                            UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
-                                        }
-                                        annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
-                                        annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val
-                                        break
-
-                                        //TODO: case "object"
-                                }
-                            } else {
-                                console.error("Cannot save array value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.")
-                                return false
-                                    // Could save it as a string instead of failing...
-                                    // annotation.body[input.getAttribute(DEER.KEY)] = {
-                                    //     "value":input.value
-                                    // }
+                            switch (inputType) {
+                                case "List":
+                                case "Set":
+                                case "set":
+                                case "list":
+                                case "@set":
+                                case "@list":
+                                    if (arrKey === "") {
+                                        arrKey = "items"
+                                        UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
+                                    }
+                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
+                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
+                                    break
+                                case "ItemList":
+                                    if (arrKey === "") {
+                                        arrKey = "itemListElement"
+                                        UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
+                                    }
+                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
+                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
+                                    break
+                                case "object":
+                                    let body = {
+                                        profile: "http://www.w3.org/ns/anno.jsonld",
+                                        value: val
+                                    }
+                                    try {
+                                        body = JSON.parse(val)
+                                    } catch (err) {}
+                                    break
+                                default:
+                                    UTILS.warning("Cannot save array value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
+                                    return false
                             }
                         } else {
                             annotation.body[input.getAttribute(DEER.KEY)] = {
@@ -316,7 +315,7 @@ export default class DeerReport {
                                 headers: {
                                     "Content-Type": "application/json; charset=utf-8"
                                 },
-                                body: JSON.stringify(record)
+                                body: JSON.stringify(annotation)
                             })
                             .then(response => response.json())
                             .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))
