@@ -300,7 +300,7 @@ export default class DeerReport {
                                 headers: {
                                     "Content-Type": "application/json; charset=utf-8"
                                 },
-                                body: JSON.stringify(record)
+                                body: JSON.stringify(annotation)
                             })
                             .then(response => response.json())
                             .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))
