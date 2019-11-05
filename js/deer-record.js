@@ -144,19 +144,25 @@ export default class DeerReport {
                                         //getValue either returned an object because it could not find obj.value or because obj.value was an object.  
                                         if (mapsToAnno) {
                                             //Then getValue found an annotation DEER understood and the body.value was an object.
-                                            if (el.getAttribute(DEER.ARRAYTYPE)) {
-                                                //Only an element noted as a DEER.ARRAYTYPE would have this kind of annotation behind it.  For others, it is an error.  
-                                                if (annoBodyObjectType === "" || el.getAttribute(DEER.ARRAYTYPE) !== annoBodyObjectType) {
+                                            if (el.getAttribute(DEER.INPUTTYPE)) {
+                                                //Only an element noted as a DEER.INPUTTYPE would have this kind of annotation behind it.  For others, it is an error.  
+                                                if (annoBodyObjectType === "" || el.getAttribute(DEER.INPUTTYPE) !== annoBodyObjectType) {
                                                     //The HTML input should note the same type of container as the annotation so helper functiions can determine if it is a supported in DEER.CONTAINERS
-                                                    UTILS.warning("Container type mismatch!.  See attribute '" + DEER.ARRAYTYPE + "' on element " + el.outerHTML + "." +
+                                                    UTILS.warning("Container type mismatch!.  See attribute '" + DEER.INPUTTYPE + "' on element " + el.outerHTML + "." +
                                                         " The element is now dirty and will overwrite the type noted in the annotation seen below upon form submission." +
                                                         " If the type of the annotation body is not a supported type then DEER will not be able to get the array of values.", obj[deerKeyValue])
                                                 }
-                                                arrayOfValues = UTILS.getArrayFromObj(assertedValue, el)
-                                                assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
+                                                if (el.getAttribute(DEER.INPUTTYPE) === "object") {
+                                                    try {
+                                                        UTILS.assertElementValue(el, JSON.stringify(assertedValue))
+                                                    } catch (err) {}
+                                                } else {
+                                                    arrayOfValues = UTILS.getArrayFromObj(assertedValue, el)
+                                                    assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
+                                                }
                                             } else {
                                                 //This should have been a string or number.  We do not support whatever was meant to be here.  
-                                                console.error("We do not support annotation body values that are objects, unless they are a supported container object and the element " + el.outerHTML + " notes '" + DEER.ARRAYTYPE + "'.  Therefore, the value of annotation is being ignored.  See annotation below.")
+                                                console.error("We do not support annotation body values that are objects, unless they are a supported container object and the element " + el.outerHTML + " notes '" + DEER.INPUTTYPE + "'.  Therefore, the value of annotation is being ignored.  See annotation below.")
                                                 console.log(obj[deerKeyValue])
                                                 assertedValue = ""
                                             }
@@ -251,34 +257,43 @@ export default class DeerReport {
                         }
                         let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
                         let val = input.value
-                        let arrType = input.getAttribute(DEER.ARRAYTYPE)
+                        let inputType = input.getAttribute(DEER.INPUTTYPE)
                         let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
-                        if (input.hasAttribute(DEER.ARRAYTYPE)) {
-                            if (DEER.CONTAINERS.indexOf(arrType) > -1) {
-                                //TODO warn user if delim is not detected in val?
-                                val = (val !== "") ? val.split(delim) : []
-                                if (["List", "Set", "set", "list", "@set", "@list"].indexOf(arrType) > -1) {
+                        if (input.hasAttribute(DEER.INPUTTYPE)) {
+                            switch (inputType) {
+                                case "List":
+                                case "Set":
+                                case "set":
+                                case "list":
+                                case "@set":
+                                case "@list":
                                     if (arrKey === "") {
                                         arrKey = "items"
-                                        UTILS.warning("Found input with '" + DEER.ARRAYTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + arrType + ".", input)
+                                        UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
                                     }
-                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": arrType }
-                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val
-                                } else if (["ItemList"].indexOf(arrType > -1)) {
+                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
+                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
+                                    break
+                                case "ItemList":
                                     if (arrKey === "") {
                                         arrKey = "itemListElement"
-                                        UTILS.warning("Found input with '" + DEER.ARRAYTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + arrType + ".", input)
+                                        UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
                                     }
-                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": arrType }
-                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val
-                                }
-                            } else {
-                                console.error("Cannot save array value of unsupported type '" + arrType + "'.  This annotation will not be saved or updated.")
-                                return false
-                                    // Could save it as a string instead of failing...
-                                    // annotation.body[input.getAttribute(DEER.KEY)] = {
-                                    //     "value":input.value
-                                    // }
+                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
+                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
+                                    break
+                                case "object":
+                                    let body = {
+                                        profile: "http://www.w3.org/ns/anno.jsonld",
+                                        value: val
+                                    }
+                                    try {
+                                        body = JSON.parse(val)
+                                    } catch (err) {}
+                                    break
+                                default:
+                                    UTILS.warning("Cannot save array value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
+                                    return false
                             }
                         } else {
                             annotation.body[input.getAttribute(DEER.KEY)] = {
@@ -300,7 +315,7 @@ export default class DeerReport {
                                 headers: {
                                     "Content-Type": "application/json; charset=utf-8"
                                 },
-                                body: JSON.stringify(record)
+                                body: JSON.stringify(annotation)
                             })
                             .then(response => response.json())
                             .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))

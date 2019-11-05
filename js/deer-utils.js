@@ -13,26 +13,26 @@
 import { default as DEER } from './deer-config.js'
 
 export default {
-    listFromCollection: function (collectionId) {
+    listFromCollection: function(collectionId) {
         let queryObj = {
             body: {
                 targetCollection: collectionId
             }
         }
         return fetch(DEER.URLS.QUERY, {
-            method: "POST",
-            body: JSON.stringify(queryObj)
-        }).then(response => response.json())
-            .then(function (pointers) {
+                method: "POST",
+                body: JSON.stringify(queryObj)
+            }).then(response => response.json())
+            .then(function(pointers) {
                 let list = []
                 pointers.map(tc => list.push(fetch(tc.target).then(response => response.json())))
                 return Promise.all(list)
             })
-            .then(function (list) {
+            .then(function(list) {
                 return list
             })
     },
-    getValue: function (property, alsoPeek = [], asType) {
+    getValue: function(property, alsoPeek = [], asType) {
         // TODO: There must be a best way to do this...
         let prop;
         if (property === undefined || property === "") {
@@ -54,13 +54,11 @@ export default {
                     if (property.hasOwnProperty(k)) {
                         prop = property[k]
                         break
-                    }
-                    else {
+                    } else {
                         prop = property
                     }
                 }
-            }
-            else {
+            } else {
                 prop = property
             }
         }
@@ -98,10 +96,10 @@ export default {
         return (obj, noLabel = "[ unlabeled ]", options = {}) => {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
-            if(Array.isArray(label)) {
+            if (Array.isArray(label)) {
                 label = [...new Set(label.map(l => this.getValue(UTILS.getLabel(l))))]
             }
-            if(typeof label === "object"){
+            if (typeof label === "object") {
                 label = UTILS.getValue(label)
             }
             return label || noLabel
@@ -116,13 +114,13 @@ export default {
         let UTILS = this
         let findId = entity["@id"] || entity.id || entity
         if (typeof findId !== "string") {
-            UTILS.warning("Unable to find URI in object:",entity)
+            UTILS.warning("Unable to find URI in object:", entity)
             return entity
         }
         let getVal = this.getValue
         return fetch(findId).then(response => response.json())
             .then(obj => UTILS.findByTargetId(findId)
-                .then(function (annos) {
+                .then(function(annos) {
                     for (let i = 0; i < annos.length; i++) {
                         let body
                         try {
@@ -135,8 +133,7 @@ export default {
                         Leaf: for (let j = 0; j < body.length; j++) {
                             if (body[j].evidence) {
                                 obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence;
-                            }
-                            else {
+                            } else {
                                 try {
                                     let val = body[j];
                                     let k = Object.keys(val)[0];
@@ -156,40 +153,38 @@ export default {
                                         // this is not the most recent available
                                         // TODO: maybe check generator, etc.
                                         continue Leaf;
-                                    }
-                                    else {
+                                    } else {
                                         // Assign this to the main object.
-                                        if(obj.hasOwnProperty(k)) {
+                                        if (obj.hasOwnProperty(k)) {
                                             // It may be already there as an Array with some various labels
-                                            if (Array.isArray(obj[k])){
+                                            if (Array.isArray(obj[k])) {
                                                 let deepMatch = false
-                                                for(const e of obj[k]) {
-                                                    if(e.name===val.name){
+                                                for (const e of obj[k]) {
+                                                    if (e.name === val.name) {
                                                         deepMatch = true
                                                         break
                                                     }
                                                 }
-                                                if(!deepMatch) { obj[k].push(val) }
-                                            } else{
+                                                if (!deepMatch) { obj[k].push(val) }
+                                            } else {
                                                 //It is already there and is an object, string, or number, perhaps from another annotation with a similar body.  
                                                 //Add in the body of this annotation we found,  DEER will aribitrarily pick a value from the array down the road and preference Annotations.
-                                                obj[k] = [obj[k],val]
+                                                obj[k] = [obj[k], val]
                                             }
                                         } else {
                                             //or just tack it on
                                             obj = Object.assign(obj, val);
                                         }
                                     }
-                                }
-                                catch (err_1) { }
+                                } catch (err_1) {}
                             }
                         }
                     }
                     return obj
                 })).catch(err => {
-                    console.error("Error expanding object:" + err)
-                    return err
-                })
+                console.error("Error expanding object:" + err)
+                return err
+            })
     },
     /**
      * Execute query for any annotations in RERUM which target the
@@ -197,30 +192,30 @@ export default {
      * @param {String} id URI for the targeted entity
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-    findByTargetId: async function (id, targetStyle=[]) {
+    findByTargetId: async function(id, targetStyle = []) {
         let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
         if (!Array.isArray(targetStyle)) {
             targetStyle = [targetStyle]
         }
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
-        let historyWildcard = {"$exists":true, "$size":0}
-        let obj = {"$or":[], "__rerum.history.next":historyWildcard}
+        let historyWildcard = { "$exists": true, "$size": 0 }
+        let obj = { "$or": [], "__rerum.history.next": historyWildcard }
         for (let target of targetStyle) {
             //Entries that are not strings are not supported.  Ignore those entries.  
             //TODO: should we we let the user know we had to ignore something here?
-            if(typeof target === "string"){
+            if (typeof target === "string") {
                 let o = {}
                 o[target] = id
                 obj["$or"].push(o)
             }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
-            method: "POST",
-            body: JSON.stringify(obj),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
+                method: "POST",
+                body: JSON.stringify(obj),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
             .then(response => response.json())
             .catch((err) => console.error(err))
         let local_matches = everything.filter(o => o.target === id)
@@ -231,7 +226,7 @@ export default {
     /**
      * An error handler for various HTTP traffic scenarios
      */
-    handleHTTPError: function (response) {
+    handleHTTPError: function(response) {
         let UTILS = this
         if (!response.ok) {
             let status = response.status
@@ -265,36 +260,36 @@ export default {
     /**
      * Broadcast a message about DEER
      */
-    broadcast: function (event = {}, type, element, obj = {}) {
+    broadcast: function(event = {}, type, element, obj = {}) {
         let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
         element.dispatchEvent(e)
     },
 
     /**
      * Remove array values that are objects or arrays.  We have decided these are not meant to be put to the interface.
-    */
-    cleanArray:function(arr){
+     */
+    cleanArray: function(arr) {
         let UTILS = this
-        return arr.filter((arrItem)=>{
-            if(Array.isArray(arrItem)){
+        return arr.filter((arrItem) => {
+            if (Array.isArray(arrItem)) {
                 UTILS.warning("An annotation body value array contained an array.  We ignored it.  See ignored value below.")
                 UTILS.warning(arrItem)
-            } else if(typeof arrItem === "object") {
+            } else if (typeof arrItem === "object") {
                 //TODO how should we handle?
                 UTILS.warning("An annotation body value array contained an object.  We ignored it.  See ignored value below.")
                 UTILS.warning(arrItem)
             }
-            return ["string","number"].indexOf(typeof arrItem)>-1
+            return ["string", "number"].indexOf(typeof arrItem) > -1
         })
     },
 
     /**
      * Get the array of data from the container object, so long at it is one of the containers we support (so we know where to look.) 
-    */
-    getArrayFromObj:function(containerObj, inputElem){
+     */
+    getArrayFromObj: function(containerObj, inputElem) {
         let UTILS = this
         let cleanArray = []
-        //Handle if what we are actualy looking for is inside containObj.value (DEER templates do that)
+            //Handle if what we are actualy looking for is inside containObj.value (DEER templates do that)
         let alsoPeek = ["@value", "value", "$value", "val"]
         for (let k of alsoPeek) {
             if (containerObj.hasOwnProperty(k)) {
@@ -304,41 +299,39 @@ export default {
         }
         let objType = containerObj.type || containerObj["@type"] || ""
         let arrKey = (inputElem !== null && inputElem.hasAttribute(DEER.LIST)) ? inputElem.getAttribute(DEER.LIST) : ""
-        if(Array.isArray(objType)){
+        if (Array.isArray(objType)) {
             //Since type can be an array we have to pick one of the values that matches one of our supported container types.
             //This picks the first one it comes across, since it doesnt seem like we would have any preference.
-            for(let t of objType){
-                if(DEER.CONTAINERS.indexOf(t) > -1){
+            for (let t of objType) {
+                if (DEER.CONTAINERS.indexOf(t) > -1) {
                     objType = t
                     break
                 }
             }
         }
-        if(DEER.CONTAINERS.indexOf(objType) > -1){
+        if (DEER.CONTAINERS.indexOf(objType) > -1) {
             //Where it is we will find the array we seek differs between our supported types.  Perhaps we should store that with them in the config too.
-            if(["Set", "List", "set","list", "@set", "@list"].indexOf(objType) > -1){
-                if(arrKey === "") {
+            if (["Set", "List", "set", "list", "@set", "@list"].indexOf(objType) > -1) {
+                if (arrKey === "") {
                     arrKey = "items"
-                    UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to find the array values for this "+objType+".", inputElem)
-                } 
-                if(containerObj.hasOwnProperty(arrKey)){ cleanArray = this.cleanArray(containerObj[arrKey]) }
-                else{ 
-                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj["+arrKey+"].  Therefore, the value is empty.  See object below.") 
+                    UTILS.warning("Found attribute '" + DEER.INPUTTYPE + "' on an input, but there is no '" + DEER.LIST + "' attribute value.  DEER will use the default schema '" + arrKey + "' to find the array values for this " + objType + ".", inputElem)
+                }
+                if (containerObj.hasOwnProperty(arrKey)) { cleanArray = this.cleanArray(containerObj[arrKey]) } else {
+                    console.error("Object of type (" + objType + ") is malformed.  The values could not be found in obj[" + arrKey + "].  Therefore, the value is empty.  See object below.")
                     console.log(containerObj)
                 }
-            } else if(["ItemList"].indexOf(objType > -1)){
-                if(arrKey === "") {
+            } else if (["ItemList"].indexOf(objType > -1)) {
+                if (arrKey === "") {
                     arrKey = "itemListElement"
-                    UTILS.warning("Found attribute '"+DEER.ARRAYTYPE+"' on an input, but there is no '"+DEER.LIST+"' attribute value.  DEER will use the default schema '"+arrKey+"' to find the the array values for this "+objType+".", inputElem)
-                } 
-                if(containerObj.hasOwnProperty(arrKey)){ cleanArray = this.cleanArray(containerObj[arrKey])}
-                else{
-                    console.error("Object of type ("+objType+") is malformed.  The values could not be found in obj["+arrKey+"].  Therefore, the value is empty.  See object below.")
+                    UTILS.warning("Found attribute '" + DEER.INPUTTYPE + "' on an input, but there is no '" + DEER.LIST + "' attribute value.  DEER will use the default schema '" + arrKey + "' to find the the array values for this " + objType + ".", inputElem)
+                }
+                if (containerObj.hasOwnProperty(arrKey)) { cleanArray = this.cleanArray(containerObj[arrKey]) } else {
+                    console.error("Object of type (" + objType + ") is malformed.  The values could not be found in obj[" + arrKey + "].  Therefore, the value is empty.  See object below.")
                     console.log(containerObj)
                 }
             }
-        } else{
-            console.error("Object of type ("+objType+") is not a supported container type.  Therefore, the value will be empty.  See object below..")
+        } else {
+            console.error("Object of type (" + objType + ") is not a supported container type.  Therefore, the value will be empty.  See object below..")
             console.log(containerObj)
         }
         return cleanArray
@@ -346,14 +339,13 @@ export default {
 
     /**
      * Given an array, turn the array into a string where the values are separated by the given delimeter.
-    */
-    stringifyArray:function(arr, delim){
+     */
+    stringifyArray: function(arr, delim) {
         //TODO warn if arr is empty?
-        try{
-            return (arr.length) ? arr.join(delim) : ""    
-        }
-        catch (e){
-            console.error("There was a join error on '"+arr+"'' using delimeter '"+delim+"'.")
+        try {
+            return (arr.length) ? arr.join(delim) : ""
+        } catch (e) {
+            console.error("There was a join error on '" + arr + "'' using delimeter '" + delim + "'.")
             return ""
         }
     },
@@ -369,33 +361,33 @@ export default {
      * @param fromAnno Boolean for if the value is from a DEER annotation as opposed to part of the object (noted in deer-id on the form) directly.
      * 
     */
-    assertElementValue:function(elem, val, mapsToAnno){
+    assertElementValue: function(elem, val, mapsToAnno) {
         let UTILS = this
-        if(elem.type==="hidden"){
-            if(elem.hasAttribute("value") && elem.value !== undefined){
-                if(!mapsToAnno || elem.value !== val){
-                    elem.$isDirty = true  
-                    if(elem.value !== val && elem.hasAttribute(DEER.ARRAYTYPE)){
-                        UTILS.warning("Hidden element with a hard coded 'value' also contains attributes '"+DEER.KEY+"' and '"+DEER.ARRAYTYPE+"'.  "
-                        + "DEER takes this to mean the '"+elem.getAttribute(DEER.KEY)+"' annotation body value array will .join() into this string and pass a comparison operation. " 
-                        + "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate "
-                        + "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n"
-                        + "If this hidden input value is reactive to other interactions then processing should be done by your own custom interaction handler. "
-                        + "Remove the hard coded '"+DEER.KEY+"' or 'value' attribute.  This will make the DEER form input handler avoid processing of this input on page load. "
-                        + "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '"+DEER.KEY+"' attribute before submission. " 
-                        + "See below.", elem)
+        if (elem.type === "hidden") {
+            if (elem.hasAttribute("value") && elem.value !== undefined) {
+                if (!mapsToAnno || elem.value !== val) {
+                    elem.$isDirty = true
+                    if (elem.value !== val && elem.hasAttribute(DEER.INPUTTYPE)) {
+                        UTILS.warning("Hidden element with a hard coded 'value' also contains attributes '" + DEER.KEY + "' and '" + DEER.INPUTTYPE + "'.  " +
+                            "DEER takes this to mean the '" + elem.getAttribute(DEER.KEY) + "' annotation body value array will .join() into this string and pass a comparison operation. " +
+                            "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate " +
+                            "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n" +
+                            "If this hidden input value is reactive to other interactions then processing should be done by your own custom interaction handler. " +
+                            "Remove the hard coded '" + DEER.KEY + "' or 'value' attribute.  This will make the DEER form input handler avoid processing of this input on page load. " +
+                            "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '" + DEER.KEY + "' attribute before submission. " +
+                            "See below.", elem)
                     }
-                    
+
                 }
             }
-        } else{
-            if(elem.hasAttribute("value") && elem.value !== undefined){
+        } else {
+            if (elem.hasAttribute("value") && elem.value !== undefined) {
                 //Empty strings count as a value.
-                UTILS.warning("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '"+val+"'.  See below.", elem)
+                UTILS.warning("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '" + val + "'.  See below.", elem)
             }
-            if(elem.hasAttribute(DEER.ARRAYTYPE)){
-                UTILS.warning("This input element also has attribute '"+DEER.ARRAYTYPE+"'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
-                elem.removeAttribute(DEER.ARRAYTYPE)
+            if (elem.hasAttribute(DEER.INPUTTYPE)) {
+                UTILS.warning("This input element also has attribute '" + DEER.INPUTTYPE + "'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
+                elem.removeAttribute(DEER.INPUTTYPE)
             }
             elem.value = val
             elem.setAttribute("value", val)
@@ -403,12 +395,12 @@ export default {
     },
 
     /**
-      * Send a warning message to the console if dev has this feature turned on through the ROBUSTFEEDBACK config option.
-    */
-    warning:function(msg, logMe){
-        if(DEER.ROBUSTFEEDBACK.valueOf() && msg){
+     * Send a warning message to the console if dev has this feature turned on through the ROBUSTFEEDBACK config option.
+     */
+    warning: function(msg, logMe) {
+        if (DEER.ROBUSTFEEDBACK.valueOf() && msg) {
             console.warn(msg)
-            if(logMe){
+            if (logMe) {
                 console.log(logMe)
             }
         }
