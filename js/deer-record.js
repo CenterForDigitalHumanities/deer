@@ -154,8 +154,10 @@ export default class DeerReport {
                                                 }
                                                 if (el.getAttribute(DEER.INPUTTYPE) === "object") {
                                                     try {
-                                                        UTILS.assertElementValue(el, JSON.stringify(assertedValue))
-                                                    } catch (err) {}
+                                                        assertedValue = JSON.stringify(assertedValue)
+                                                    } catch (err) {
+                                                        assertedValue = ""
+                                                    }
                                                 } else {
                                                     arrayOfValues = UTILS.getArrayFromObj(assertedValue, el)
                                                     assertedValue = UTILS.stringifyArray(arrayOfValues, delim)
@@ -290,6 +292,7 @@ export default class DeerReport {
                                     try {
                                         body = JSON.parse(val)
                                     } catch (err) {}
+                                    annotation.body[input.getAttribute(DEER.KEY)] = body
                                     break
                                 default:
                                     UTILS.warning("Cannot save array value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
