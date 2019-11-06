@@ -153,8 +153,9 @@ export default class DeerReport {
                                                         " If the type of the annotation body is not a supported type then DEER will not be able to get the array of values.", obj[deerKeyValue])
                                                 }
                                                 if (el.getAttribute(DEER.INPUTTYPE) === "object") {
+                                                    assertedValue = ""
                                                     try {
-                                                        UTILS.assertElementValue(el, JSON.stringify(assertedValue))
+                                                        assertedValue = JSON.stringify(assertedValue)
                                                     } catch (err) {}
                                                 } else {
                                                     arrayOfValues = UTILS.getArrayFromObj(assertedValue, el)
