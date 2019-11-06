@@ -290,6 +290,7 @@ export default class DeerReport {
                                     try {
                                         body = JSON.parse(val)
                                     } catch (err) {}
+                                    annotation.body[input.getAttribute(DEER.KEY)] = body
                                     break
                                 default:
                                     UTILS.warning("Cannot save array value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
