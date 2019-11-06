@@ -295,7 +295,7 @@ export default class DeerReport {
                                     annotation.body[input.getAttribute(DEER.KEY)] = body
                                     break
                                 default:
-                                    UTILS.warning("Cannot save array value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
+                                    UTILS.warning("Cannot save value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
                                     return false
                             }
                         } else {
