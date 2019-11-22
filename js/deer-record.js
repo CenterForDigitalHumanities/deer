@@ -234,8 +234,11 @@ export default class DeerReport {
                     body: JSON.stringify(record)
                 })
                 .then(response => response.json())
-                .then(data => data.new_obj_state)
-            UTILS.broadcast(undefined, DEER.EVENTS.CREATED, this.elem, record)
+                .then(data =>{
+                    UTILS.broadcast(undefined, DEER.EVENTS.CREATED, this.elem, data.new_obj_state)
+                    return data.new_obj_state
+                })
+                .catch(err => {})
         }
 
         formAction.then((function(entity) {
