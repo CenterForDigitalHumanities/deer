@@ -226,6 +226,7 @@ export default class DeerReport {
             record["@id"] = this.id
             formAction = Promise.resolve(record)
         } else {
+            let self = this
             formAction = fetch(DEER.URLS.CREATE, {
                     method: "POST",
                     headers: {
@@ -235,10 +236,9 @@ export default class DeerReport {
                 })
                 .then(response => response.json())
                 .then(data =>{
-                    UTILS.broadcast(undefined, DEER.EVENTS.CREATED, this.elem, data.new_obj_state)
+                    UTILS.broadcast(undefined, DEER.EVENTS.CREATED, self.elem, data.new_obj_state)
                     return data.new_obj_state
                 })
-                .bind(this)
                 .catch(err => {})
         }
 
