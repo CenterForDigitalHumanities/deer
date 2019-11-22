@@ -238,6 +238,7 @@ export default class DeerReport {
                     UTILS.broadcast(undefined, DEER.EVENTS.CREATED, this.elem, data.new_obj_state)
                     return data.new_obj_state
                 })
+                .bind(this)
                 .catch(err => {})
         }
 
