@@ -205,7 +205,7 @@ export default class DeerReport {
             UTILS.warning(event.target.id + " form submitted unchanged.")
         }
         if (this.elem.getAttribute(DEER.ITEMTYPE) === "simple") {
-            return this.simpleUpsert(event).bind(this).then(entity => {
+            return this.simpleUpsert(event).then(entity => {
                 this.elem.setAttribute(DEER.ID, entity["@id"])
                 new DeerReport(this.elem)
             })
