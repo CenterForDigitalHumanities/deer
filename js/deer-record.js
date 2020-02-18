@@ -351,12 +351,6 @@ export default class DeerReport {
             record[key] = (record.hasOwnProperty(key)) ?
                 ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val]) : val
         })
-        let formId = this.elem.getAttribute(DEER.ID)
-        let action = "CREATE"
-        if (formId) {
-            action = "OVERWRITE"
-            record["@id"] = formId
-        }
         if(Object.keys(record).length === 0){
             //There is no good reason for this, but DEER allows it.  However, there better a type otherwise it is completely undescribed.
             UTILS.warning("The form submitted does not contain any inputs.  The resulting object will not be described.", this.elem)
@@ -370,6 +364,12 @@ export default class DeerReport {
         }
         if (this.context) { record["@context"] = this.context }
         if (this.evidence) { record.evidence = this.evidence }
+        let formId = this.elem.getAttribute(DEER.ID)
+        let action = "CREATE"
+        if (formId) {
+            action = "OVERWRITE"
+            record["@id"] = formId
+        }
         return fetch(DEER.URLS[action], {
             method: (formId) ? "PUT" : "POST",
             headers: {
