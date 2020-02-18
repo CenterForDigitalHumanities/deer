@@ -337,7 +337,6 @@ export default class DeerReport {
 
     simpleUpsert(event) {
         let record = {}
-        if(this.type) {record.type = this.type}
         Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).map(input => {
             let key = input.getAttribute(DEER.KEY)
             let val = input.value
@@ -358,6 +357,8 @@ export default class DeerReport {
             record["@id"] = formId
         }
         if(Object.keys(record).length > 0){
+            //This is a decision that the user cannot submit a form that has no input fields.  There is no good reason for a completely undescribed object of some type.
+            if(this.type) {record.type = this.type}
             if (this.context) { record["@context"] = this.context }
             if (this.evidence) { record.evidence = this.evidence }
             return fetch(DEER.URLS[action], {
@@ -371,7 +372,7 @@ export default class DeerReport {
             .then(obj => {return obj.new_obj_state})
         }
         else{
-            UTILS.warning("You attemped to create an empty simple JSON object.  Make sure your simple form has at least one descriptive input.", this.elem)
+            UTILS.warning("You attemped to create a completely undescribed simple object.  Make sure your simple form has at least one input.", this.elem)
             return {}
         }
     }
