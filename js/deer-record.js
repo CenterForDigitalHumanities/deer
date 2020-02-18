@@ -369,7 +369,6 @@ export default class DeerReport {
             })
             .then(response => response.json())
             .then(obj => {return obj.new_obj_state})
-            //.then(obj => this.elem.setAttribute(DEER.ID, obj.new_obj_state["@id"]))
         }
         else{
             UTILS.warning("You attemped to create an empty simple JSON object.  Make sure your simple form has at least one descriptive input.", this.elem)
