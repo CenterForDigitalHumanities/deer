@@ -336,45 +336,43 @@ export default class DeerReport {
     }
 
     simpleUpsert(event) {
-        let record = {
-            "@type": this.type
-        }
-        if (this.context) { record["@context"] = this.context }
-        if (this.evidence) { record.evidence = this.evidence }
+        let record = {}
+        if(this.type) {record.type = this.type}
         Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).map(input => {
             let key = input.getAttribute(DEER.KEY)
             let val = input.value
             let title = input.getAttribute("title")
             let evidence = input.getAttribute(DEER.EVIDENCE)
-
             if (title || evidence) {
                 val = { "@value": val }
                 if (title) val.name = title
                 if (evidence) val.evidence = evidence
             }
-
             record[key] = (record.hasOwnProperty(key)) ?
-                ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val]) :
-                val
-
-            let formId = this.elem.getAttribute(DEER.ID)
-            let action = "CREATE"
-
-            if (formId) {
-                action = "OVERWRITE"
-                record["@id"] = formId
-            }
-
-            return fetch(DEER.URLS[action], {
-                    method: (formId) ? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json; charset=utf-8"
-                    },
-                    body: JSON.stringify(record)
-                })
-                .then(response => response.json())
-                .then(obj => input.setAttribute(DEER.ID, obj.new_obj_state["@id"]))
+                ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val]) : val
         })
+        let formId = this.elem.getAttribute(DEER.ID)
+        let action = "CREATE"
+        if (formId) {
+            action = "OVERWRITE"
+            record["@id"] = formId
+        }
+        if(Object.keys(record).length > 0){
+            if (this.context) { record["@context"] = this.context }
+            if (this.evidence) { record.evidence = this.evidence }
+            return fetch(DEER.URLS[action], {
+                method: (formId) ? "PUT" : "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                body: JSON.stringify(record)
+            })
+            .then(response => response.json())
+            .then(obj => this.elem.setAttribute(DEER.ID, obj.new_obj_state["@id"]))
+        }
+        else{
+            UTILS.warning("You attemped to create an empty simple JSON object.  Make sure your simple form has at least one descriptive input.", this.elem)
+        }
     }
 }
 
