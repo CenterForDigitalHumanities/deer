@@ -206,6 +206,7 @@ export default class DeerReport {
         }
         if (this.elem.getAttribute(DEER.ITEMTYPE) === "simple") {
             return this.simpleUpsert(event).then(entity => {
+                //Notice that sipleUpsert may return {} in certain controlled situations, causing an undefined error here, on purpose.
                 this.elem.setAttribute(DEER.ID, entity["@id"])
                 new DeerReport(this.elem)
             })
@@ -356,25 +357,28 @@ export default class DeerReport {
             action = "OVERWRITE"
             record["@id"] = formId
         }
-        if(Object.keys(record).length > 0){
-            //This is a decision that the user cannot submit a form that has no input fields.  There is no good reason for a completely undescribed object of some type.
-            if(this.type) {record.type = this.type}
-            if (this.context) { record["@context"] = this.context }
-            if (this.evidence) { record.evidence = this.evidence }
-            return fetch(DEER.URLS[action], {
-                method: (formId) ? "PUT" : "POST",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8"
-                },
-                body: JSON.stringify(record)
-            })
-            .then(response => response.json())
-            .then(obj => {return obj.new_obj_state})
+        if(Object.keys(record).length === 0){
+            //There is no good reason for this, but DEER allows it.  However, there better a type otherwise it is completely undescribed.
+            UTILS.warning("The form submitted does not contain any inputs.  The resulting object will not be described.", this.elem)
         }
+        if(this.type) {record.type = this.type}
         else{
-            UTILS.warning("You attemped to create a completely undescribed simple object.  Make sure your simple form has at least one input.", this.elem)
-            return {}
+            //DEER does not abide.  A completely undescribed object, even with evidence and context, is useless, especially in this 'simple' context. 
+            UTILS.warning("Form submission should not result in a completely undescribed object,.  At least a 'type' property must be present.  Please add information to the form.", this.elem)
+            //Deny outright and send an empty object upstream (see processRecord).
+            return{}
         }
+        if (this.context) { record["@context"] = this.context }
+        if (this.evidence) { record.evidence = this.evidence }
+        return fetch(DEER.URLS[action], {
+            method: (formId) ? "PUT" : "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify(record)
+        })
+        .then(response => response.json())
+        .then(obj => {return obj.new_obj_state})
     }
 }
 
