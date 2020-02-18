@@ -360,13 +360,13 @@ export default class DeerReport {
         if(Object.keys(record).length === 0){
             //There is no good reason for this, but DEER allows it.  However, there better a type otherwise it is completely undescribed.
             UTILS.warning("The form submitted does not contain any inputs.  The resulting object will not be described.", this.elem)
-        }
-        if(this.type) {record.type = this.type}
-        else{
-            //DEER does not abide.  A completely undescribed object, even with evidence and context, is useless, especially in this 'simple' context. 
-            UTILS.warning("Form submission should not result in a completely undescribed object,.  At least a 'type' property must be present.  Please add information to the form.", this.elem)
-            //Deny outright and send an empty object upstream (see processRecord).
-            return{}
+            if(this.type) {record.type = this.type}
+            else{
+                //DEER does not abide.  A completely undescribed object, even with evidence and context, is useless, especially in this 'simple' context. 
+                UTILS.warning("Form submission should not result in a completely undescribed object,.  At least a 'type' property must be present.  Please add information to the form.", this.elem)
+                //Deny outright and send an empty object upstream (see processRecord).
+                return{}
+            }
         }
         if (this.context) { record["@context"] = this.context }
         if (this.evidence) { record.evidence = this.evidence }
