@@ -205,7 +205,8 @@ export default class DeerReport {
             UTILS.warning(event.target.id + " form submitted unchanged.")
         }
         if (this.elem.getAttribute(DEER.ITEMTYPE) === "simple") {
-            return this.simpleUpsert(event).bind(this).then(entity => {
+            return this.simpleUpsert(event).then(entity => {
+                //Notice that sipleUpsert may return {} in certain controlled situations, causing an undefined error here, on purpose.
                 this.elem.setAttribute(DEER.ID, entity["@id"])
                 new DeerReport(this.elem)
             })
@@ -336,45 +337,48 @@ export default class DeerReport {
     }
 
     simpleUpsert(event) {
-        let record = {
-            "@type": this.type
-        }
-        if (this.context) { record["@context"] = this.context }
-        if (this.evidence) { record.evidence = this.evidence }
+        let record = {}
         Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).map(input => {
             let key = input.getAttribute(DEER.KEY)
             let val = input.value
             let title = input.getAttribute("title")
             let evidence = input.getAttribute(DEER.EVIDENCE)
-
             if (title || evidence) {
                 val = { "@value": val }
                 if (title) val.name = title
                 if (evidence) val.evidence = evidence
             }
-
             record[key] = (record.hasOwnProperty(key)) ?
-                ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val]) :
-                val
-
-            let formId = this.elem.getAttribute(DEER.ID)
-            let action = "CREATE"
-
-            if (formId) {
-                action = "OVERWRITE"
-                record["@id"] = formId
-            }
-
-            return fetch(DEER.URLS[action], {
-                    method: (formId) ? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json; charset=utf-8"
-                    },
-                    body: JSON.stringify(record)
-                })
-                .then(response => response.json())
-                .then(obj => input.setAttribute(DEER.ID, obj.new_obj_state["@id"]))
+                ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val]) : val
         })
+        if(Object.keys(record).length === 0){
+            //There is no good reason for this, but DEER allows it.  However, there better a type otherwise it is completely undescribed.
+            UTILS.warning("The form submitted does not contain any inputs.  The resulting object will not be described.", this.elem)
+            if(this.type) {record.type = this.type}
+            else{
+                //DEER does not abide.  A completely undescribed object, even with evidence and context, is useless, especially in this 'simple' context. 
+                UTILS.warning("Form submission should not result in a completely undescribed object,.  At least a 'type' property must be present.  Please add information to the form.", this.elem)
+                //Deny outright and send an empty object upstream (see processRecord).
+                return{}
+            }
+        }
+        if (this.context) { record["@context"] = this.context }
+        if (this.evidence) { record.evidence = this.evidence }
+        let formId = this.elem.getAttribute(DEER.ID)
+        let action = "CREATE"
+        if (formId) {
+            action = "OVERWRITE"
+            record["@id"] = formId
+        }
+        return fetch(DEER.URLS[action], {
+            method: (formId) ? "PUT" : "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify(record)
+        })
+        .then(response => response.json())
+        .then(obj => {return obj.new_obj_state})
     }
 }
 

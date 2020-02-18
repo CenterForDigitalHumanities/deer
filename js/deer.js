@@ -24,6 +24,7 @@ DEER.URLS = {
     CREATE: "http://tinydev.rerum.io/app/create",
     UPDATE: "http://tinydev.rerum.io/app/update",
     QUERY: "http://tinydev.rerum.io/app/query",
+    OVERWRITE: "http://tinydev.rerum.io/app/overwrite",
     SINCE: "http://devstore.rerum.io/v1/since"
 }
 // Render is probably needed by all items, but can be removed.
