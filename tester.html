@@ -1,0 +1,38 @@
+<html>
+
+<head>
+    <title>List Anno Tester</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+</head>
+
+<body>
+    <form id="newStuffForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple">
+        <input type="hidden" deer-key="creator" value="simpleFixTest">
+        <label>Stuff:</label>
+        <input type="hidden" deer-key="LR:formerUses" deer-input-type="Set" >
+        <select multiple oninput="handleMulti(event)">
+            <option value="Place.Accommodation" >Accommodation</option>
+            <option value="Place.AdministrativeArea" >Administrative Area</option>
+            <option value="Place.CivicStructure" >Civic Structure</option>
+            <option value="Place.Landform" >Landform</option>
+            <option value="Place.LandmarksOrHistoricalBuildings" >Landmarks or Historical Buildings</option>
+            <option value="Place.LocalBusiness" >Local Business</option>
+            <option value="Place.Residence" >Residence</option>
+            <option value="Placed.TouristDestination" >Tourist Destination</option>
+        </select>
+        <input class="button primary" type="submit">
+    </form>
+    <script src="js/deer.js" type="module"></script>
+    <script>
+        function handleMulti(event){
+            let sel = event.target
+            let arr = Array.from(sel.selectedOptions).map(option=>option.value)
+            let str_arr = arr.join(",")
+            sel.previousElementSibling.value=str_arr
+            sel.previousElementSibling.setAttribute("value", str_arr)
+        }
+    </script>
+</body>
+</html>
