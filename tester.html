@@ -11,7 +11,7 @@
     <form id="newStuffForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple">
         <input type="hidden" deer-key="creator" value="simpleFixTest">
         <label>Stuff:</label>
-        <input type="hidden" deer-key="LR:formerUses" deer-input-type="Set" >
+        <input type="hidden" deer-key="LR:formerUses" deer-input-type="Set" deer-array-delimeter=":" >
         <select multiple oninput="handleMultiInput(event)">
             <option value="Place.Accommodation" >Accommodation</option>
             <option value="Place.AdministrativeArea" >Administrative Area</option>
@@ -22,6 +22,9 @@
             <option value="Place.Residence" >Residence</option>
             <option value="Placed.TouristDestination" >Tourist Destination</option>
         </select>
+        <div id="selectedArr">
+
+        </div>
         <input class="button primary" type="submit">
     </form>
     <script src="js/deer.js" type="module"></script>
@@ -33,6 +36,16 @@
             let str_arr = arr.join(delim)
             sel.previousElementSibling.value=str_arr
             sel.previousElementSibling.setAttribute("value", str_arr)
+            selectedArr.innerHTML = str_arr
+        }
+
+        /**
+            * I can catch the DEER-LOADED event, which will let me know all my array type inputs are pre-populated
+            * From there, I can take all annos from the loaded entity and filter out the ones that were array-y
+            * From there, I can do pre-selection logic on areas like multi-select options, radio inputs and checkbox inputs
+        */
+         function prePopulateMultis(event){
+
         }
     </script>
 </body>
