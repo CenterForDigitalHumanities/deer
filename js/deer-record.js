@@ -393,14 +393,6 @@ export default class DeerReport {
             } else {
                 //Assuming that a simple object doesn't want the values of key:value pairs to be objects unless it has to, so we won't wrap like key:{value:{}}
                 record[key] = val
-                //OR
-                // if (key === "targetCollection") {
-                //     record[key] = input.value
-                // } else{
-                //     record[key] = {
-                //         "value": val
-                //     }
-                // }
             }
         })
         if(Object.keys(record).length === 0){
