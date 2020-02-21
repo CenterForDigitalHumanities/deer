@@ -265,7 +265,7 @@ export default class DeerReport {
                         target: entity["@id"],
                         body: {}
                     }
-                    let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
+                    let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ?  DEER.DELIMETERDEFAULT : ","
                     let val = input.value
                     let inputType = input.getAttribute(DEER.INPUTTYPE)
                     let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
@@ -352,7 +352,7 @@ export default class DeerReport {
             if (evidence) record[key].evidence = evidence
             let inputType = input.getAttribute(DEER.INPUTTYPE)
             let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
-            let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
+            let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ?  DEER.DELIMETERDEFAULT : ","
             if (input.hasAttribute(DEER.INPUTTYPE)) {
                 switch (inputType) {
                     case "List":
@@ -400,8 +400,8 @@ export default class DeerReport {
             UTILS.warning("The form submitted does not contain any inputs. The resulting entity will not have any descriptive encoding.", this.elem)
             if(this.type) {record.type = this.type}
             else{
-                //DEER does not abide.  A completely undescribed object, even with evidence and context, is useless, especially in this 'simple' context. 
-                UTILS.warning("Form submission should not result in a completely undescribed object,.  At least a 'type' property must be present.  Please add information to submit this simple form.", this.elem)
+                //DEER does not abide.  A completely undescribed object, even if we were to find evidence and context, is useless, especially in this 'simple' context. 
+                UTILS.warning("Form submission should not result in a completely undescribed object.  At least a 'type' property must be present.  Please add information to submit this simple form.", this.elem)
                 //Deny outright and send an empty object upstream (see processRecord).
                 return {}
             }
