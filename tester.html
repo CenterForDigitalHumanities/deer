@@ -12,7 +12,7 @@
         <input type="hidden" deer-key="creator" value="simpleFixTest">
         <label>Stuff:</label>
         <input type="hidden" deer-key="LR:formerUses" deer-input-type="Set" >
-        <select multiple oninput="handleMulti(event)">
+        <select multiple oninput="handleMultiInput(event)">
             <option value="Place.Accommodation" >Accommodation</option>
             <option value="Place.AdministrativeArea" >Administrative Area</option>
             <option value="Place.CivicStructure" >Civic Structure</option>
@@ -26,10 +26,11 @@
     </form>
     <script src="js/deer.js" type="module"></script>
     <script>
-        function handleMulti(event){
+        function handleMultiInput(event){
             let sel = event.target
             let arr = Array.from(sel.selectedOptions).map(option=>option.value)
-            let str_arr = arr.join(",")
+            let delim = (sel.previousElementSibling.hasAttribute(DEER.ARRAYDELIMETER)) ? sel.previousElementSibling.getAttribute(DEER.ARRAYDELIMETER) : ","
+            let str_arr = arr.join(delim)
             sel.previousElementSibling.value=str_arr
             sel.previousElementSibling.setAttribute("value", str_arr)
         }
