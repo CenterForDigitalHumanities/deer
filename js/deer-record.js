@@ -229,137 +229,189 @@ export default class DeerReport {
         } else {
             let self = this
             formAction = fetch(DEER.URLS.CREATE, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json; charset=utf-8"
-                    },
-                    body: JSON.stringify(record)
-                })
-                .then(response => response.json())
-                .then(data =>{
-                    UTILS.broadcast(undefined, DEER.EVENTS.CREATED, self.elem, data.new_obj_state)
-                    return data.new_obj_state
-                })
-                .catch(err => {})
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8"
+                },
+                body: JSON.stringify(record)
+            })
+            .then(response => response.json())
+            .then(data =>{
+                UTILS.broadcast(undefined, DEER.EVENTS.CREATED, self.elem, data.new_obj_state)
+                return data.new_obj_state
+            })
+            .catch(err => {})
         }
 
         formAction.then((function(entity) {
-                let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).filter(el => Boolean(el.$isDirty))
-                let flatKeys = annotations.map(input => input.getAttribute(DEER.KEY))
-                annotations = annotations.filter((el, i) => {
-                        //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
-                        if (flatKeys.indexOf(el.getAttribute(DEER.KEY)) !== i) {
-                            UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
+            let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).filter(el => Boolean(el.$isDirty))
+            if(annotations.length === 0){
+                //May be worthwhile to call out the lack of descriptive information in this form submission.
+            }
+            let flatKeys = annotations.map(input => input.getAttribute(DEER.KEY))
+            annotations = annotations.filter((el, i) => {
+                    //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
+                    if (flatKeys.indexOf(el.getAttribute(DEER.KEY)) !== i) {
+                        UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
+                    }
+                    return flatKeys.indexOf(el.getAttribute(DEER.KEY)) === i
+                })
+                .map(input => {
+                    let inputId = input.getAttribute(DEER.SOURCE)
+                    let action = (inputId) ? "UPDATE" : "CREATE"
+                    let annotation = {
+                        type: "Annotation",
+                        creator: DEER.ATTRIBUTION,
+                        target: entity["@id"],
+                        body: {}
+                    }
+                    let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
+                    let val = input.value
+                    let inputType = input.getAttribute(DEER.INPUTTYPE)
+                    let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
+                    if (input.hasAttribute(DEER.INPUTTYPE)) {
+                        switch (inputType) {
+                            case "List":
+                            case "Set":
+                            case "set":
+                            case "list":
+                            case "@set":
+                            case "@list":
+                                if (arrKey === "") {
+                                    arrKey = "items"
+                                    UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
+                                }
+                                annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
+                                annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
+                                break
+                            case "ItemList":
+                                if (arrKey === "") {
+                                    arrKey = "itemListElement"
+                                    UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
+                                }
+                                annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
+                                annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
+                                break
+                            case "object":
+                                let body = {
+                                    profile: "http://www.w3.org/ns/anno.jsonld",
+                                    value: val
+                                }
+                                try {
+                                    body = JSON.parse(val)
+                                } catch (err) {}
+                                annotation.body[input.getAttribute(DEER.KEY)] = body
+                                break
+                            default:
+                                UTILS.warning("Cannot save value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
+                                return false
                         }
-                        return flatKeys.indexOf(el.getAttribute(DEER.KEY)) === i
-                    })
-                    .map(input => {
-                        let inputId = input.getAttribute(DEER.SOURCE)
-                        let action = (inputId) ? "UPDATE" : "CREATE"
-                        let annotation = {
-                            type: "Annotation",
-                            creator: DEER.ATTRIBUTION,
-                            target: entity["@id"],
-                            body: {}
+                    } else {
+                        annotation.body[input.getAttribute(DEER.KEY)] = {
+                            "value": val
                         }
-                        let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
-                        let val = input.value
-                        let inputType = input.getAttribute(DEER.INPUTTYPE)
-                        let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
-                        if (input.hasAttribute(DEER.INPUTTYPE)) {
-                            switch (inputType) {
-                                case "List":
-                                case "Set":
-                                case "set":
-                                case "list":
-                                case "@set":
-                                case "@list":
-                                    if (arrKey === "") {
-                                        arrKey = "items"
-                                        UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
-                                    }
-                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
-                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
-                                    break
-                                case "ItemList":
-                                    if (arrKey === "") {
-                                        arrKey = "itemListElement"
-                                        UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
-                                    }
-                                    annotation.body[input.getAttribute(DEER.KEY)] = { "@type": inputType }
-                                    annotation.body[input.getAttribute(DEER.KEY)][arrKey] = val.split(delim)
-                                    break
-                                case "object":
-                                    let body = {
-                                        profile: "http://www.w3.org/ns/anno.jsonld",
-                                        value: val
-                                    }
-                                    try {
-                                        body = JSON.parse(val)
-                                    } catch (err) {}
-                                    annotation.body[input.getAttribute(DEER.KEY)] = body
-                                    break
-                                default:
-                                    UTILS.warning("Cannot save value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
-                                    return false
-                            }
-                        } else {
-                            annotation.body[input.getAttribute(DEER.KEY)] = {
-                                "value": val
-                            }
-                        }
+                    }
 
-                        if (inputId) { annotation["@id"] = inputId }
-                        // TODO: maybe we need a deer-value to assign things here... or some option...
-                        if (input.getAttribute(DEER.KEY) === "targetCollection") {
-                            annotation.body.targetCollection = input.value
-                        }
-                        let ev = input.getAttribute(DEER.EVIDENCE) || this.evidence
-                        if (ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
-                        let name = input.getAttribute("title")
-                        if (name) { annotation.body[input.getAttribute(DEER.KEY)].name = name }
-                        return fetch(DEER.URLS[action], {
-                                method: (inputId) ? "PUT" : "POST",
-                                headers: {
-                                    "Content-Type": "application/json; charset=utf-8"
-                                },
-                                body: JSON.stringify(annotation)
-                            })
-                            .then(response => response.json())
-                            .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))
-                    })
-                return Promise.all(annotations).then(() => entity)
-            }).bind(this))
-            .then(entity => {
-                this.elem.setAttribute(DEER.ID, entity["@id"])
-                new DeerReport(this.elem)
-            })
+                    if (inputId) { annotation["@id"] = inputId }
+                    // TODO: maybe we need a deer-value to assign things here... or some option...
+                    if (input.getAttribute(DEER.KEY) === "targetCollection") {
+                        annotation.body.targetCollection = input.value
+                    }
+                    let ev = input.getAttribute(DEER.EVIDENCE) || this.evidence
+                    if (ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
+                    let name = input.getAttribute("title")
+                    if (name) { annotation.body[input.getAttribute(DEER.KEY)].name = name }
+                    return fetch(DEER.URLS[action], {
+                            method: (inputId) ? "PUT" : "POST",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                            body: JSON.stringify(annotation)
+                        })
+                        .then(response => response.json())
+                        .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))
+                })
+            return Promise.all(annotations).then(() => entity)
+        }).bind(this))
+        .then(entity => {
+            this.elem.setAttribute(DEER.ID, entity["@id"])
+            new DeerReport(this.elem)
+        })
     }
 
     simpleUpsert(event) {
         let record = {}
+        //Since this is simple, we don't need to filter around $isDirty.
         Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).map(input => {
             let key = input.getAttribute(DEER.KEY)
+            record[key] = {}
             let val = input.value
             let title = input.getAttribute("title")
             let evidence = input.getAttribute(DEER.EVIDENCE)
-            if (title || evidence) {
-                val = { "@value": val }
-                if (title) val.name = title
-                if (evidence) val.evidence = evidence
+            if (title) record[key].name = title
+            if (evidence) record[key].evidence = evidence
+            let inputType = input.getAttribute(DEER.INPUTTYPE)
+            let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
+            let delim = input.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
+            if (input.hasAttribute(DEER.INPUTTYPE)) {
+                switch (inputType) {
+                    case "List":
+                    case "Set":
+                    case "set":
+                    case "list":
+                    case "@set":
+                    case "@list":
+                        if (arrKey === "") {
+                            arrKey = "items"
+                            UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
+                        }
+                        record[key]["@type"] = inputType
+                        record[key][arrKey] = val.split(delim)
+                        break
+                    case "ItemList":
+                        if (arrKey === "") {
+                            arrKey = "itemListElement"
+                            UTILS.warning("Found input with '" + DEER.INPUTTYPE + "' attribute but no '" + DEER.LIST + "' attribute during submission.  DEER will use the default schema '" + arrKey + "' to save the array values for this " + inputType + ".", input)
+                        }
+                        record[key] = { "@type": inputType }
+                        record[key][arrKey] = val.split(delim)
+                        break
+                    case "object":
+                        let body = {
+                            profile: "http://www.w3.org/ns/anno.jsonld",
+                            value: val
+                        }
+                        try {
+                            body = JSON.parse(val)
+                        } catch (err) {}
+                        record[key] = body
+                        break
+                    default:
+                        UTILS.warning("Cannot save value of unsupported type '" + inputType + "'.  This annotation will not be saved or updated.", input)
+                        return false
+                }
+            } else {
+                //Assuming that a simple object doesn't want the values of key:value pairs to be objects unless it has to, so we won't wrap like key:{value:{}}
+                record[key] = val
+                //OR
+                // if (key === "targetCollection") {
+                //     record[key] = input.value
+                // } else{
+                //     record[key] = {
+                //         "value": val
+                //     }
+                // }
             }
-            record[key] = (record.hasOwnProperty(key)) ?
-                ((Array.isArray(record[key])) ? record[key].push(val) : [record[key], val]) : val
         })
         if(Object.keys(record).length === 0){
             //There is no good reason for this, but DEER allows it.  However, there better a type otherwise it is completely undescribed.
-            UTILS.warning("The form submitted does not contain any inputs.  The resulting object will not be described.", this.elem)
+            UTILS.warning("The form submitted does not contain any inputs. The resulting entity will not have any descriptive encoding.", this.elem)
             if(this.type) {record.type = this.type}
             else{
                 //DEER does not abide.  A completely undescribed object, even with evidence and context, is useless, especially in this 'simple' context. 
-                UTILS.warning("Form submission should not result in a completely undescribed object,.  At least a 'type' property must be present.  Please add information to the form.", this.elem)
+                UTILS.warning("Form submission should not result in a completely undescribed object,.  At least a 'type' property must be present.  Please add information to submit this simple form.", this.elem)
                 //Deny outright and send an empty object upstream (see processRecord).
-                return{}
+                return {}
             }
         }
         if (this.context) { record["@context"] = this.context }
