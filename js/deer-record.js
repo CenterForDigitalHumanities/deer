@@ -92,7 +92,7 @@ export default class DeerReport {
                                 let assertedValue = ""
                                 if (flatKeys.indexOf(deerKeyValue) !== i) {
                                     UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + deerKeyValue + "' detected in form.  This input will be ignored upon form submission and only the first instance will be respected.  See duplicate below.", el)
-                                        //Don't skip the input though, let it recieve all warnings and errors per usual in case this happens to be the one the dev means to keep.
+                                    //Don't skip the input though, let it recieve all warnings and errors per usual in case this happens to be the one the dev means to keep.
                                 }
                                 if (obj.hasOwnProperty(deerKeyValue)) {
                                     //Then there is a key on this object that maps to the input.  
@@ -398,14 +398,14 @@ export default class DeerReport {
         if(Object.keys(record).length === 0){
             //There is no good reason for this, but DEER allows it.  However, there better a type otherwise it is completely undescribed.
             UTILS.warning("The form submitted does not contain any inputs. The resulting entity will not have any descriptive encoding.", this.elem)
-            if(this.type) {record.type = this.type}
-            else{
+            if(!this.type) {
                 //DEER does not abide.  A completely undescribed object, even if we were to find evidence and context, is useless, especially in this 'simple' context. 
                 UTILS.warning("Form submission should not result in a completely undescribed object.  At least a 'type' property must be present.  Please add information to submit this simple form.", this.elem)
                 //Deny outright and send an empty object upstream (see processRecord).
                 return {}
             }
         }
+        if (this.type) {record.type = this.type}
         if (this.context) { record["@context"] = this.context }
         if (this.evidence) { record.evidence = this.evidence }
         let formId = this.elem.getAttribute(DEER.ID)

@@ -27,12 +27,12 @@
         </div>
         <input class="button primary" type="submit">
     </form>
-    <script src="js/deer.js" type="module"></script>
     <script>
+
         function handleMultiInput(event){
             let sel = event.target
             let arr = Array.from(sel.selectedOptions).map(option=>option.value)
-            let delim = (sel.previousElementSibling.hasAttribute(DEER.ARRAYDELIMETER)) ? sel.previousElementSibling.getAttribute(DEER.ARRAYDELIMETER) : ","
+            let delim = (sel.previousElementSibling.hasAttribute("deer-array-delimeter")) ? sel.previousElementSibling.getAttribute("deer-array-delimeter") : ","
             let str_arr = arr.join(delim)
             sel.previousElementSibling.value=str_arr
             sel.previousElementSibling.setAttribute("value", str_arr)
@@ -44,9 +44,10 @@
             * From there, I can take all annos from the loaded entity and filter out the ones that were array-y
             * From there, I can do pre-selection logic on areas like multi-select options, radio inputs and checkbox inputs
         */
-         function prePopulateMultis(event){
+        function prePopulateMultis(event){
 
         }
     </script>
+    <script src="js/deer.js" type="module"></script>
 </body>
 </html>
