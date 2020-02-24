@@ -21,11 +21,11 @@
 
 <body>
     <form id="newStuffForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple">
-        <input type="hidden" deer-key="creator" value="simpleFixTest">
+        <input type="hidden" deer-key="creator" value="DEER_RECIPE_LIST_ANNOTATION_GENERATOR">
 
         <h4>Multi Select:</h4>
         <label>
-            Here the user can choose values by selecting the value they wish to include from the multi select area.  The values will be stored in a <pre> Set </pre> or </pre>List</pre> Annotation as an array, depending on which you choose. The values are pre-determined for the user.  The delimeter is provided here in the HTML and can be customized.    
+            Here the user can choose values by selecting the value they wish to include from the multi select area.  The values will be stored in a <pre> Set </pre> or <pre>List</pre> Annotation as an array, depending on which you choose. The values are pre-determined for the user.  The delimeter is provided here in the HTML and can be customized.    
         </label>
         <input type="hidden" deer-key="DEER:multiSelect" deer-input-type="Set" deer-array-delimeter=":" >
         <select multiple oninput="handleMultiSelect(event)">
@@ -120,33 +120,6 @@
             container.previousElementSibling.value=str_arr
             container.previousElementSibling.setAttribute("value", str_arr)
             textChoices.innerHTML = str_arr
-        }
-
-        /**
-            * I can catch the DEER-LOADED event, which will let me know all my array type inputs are pre-populated
-            * From there, I can take all annos from the loaded entity and filter out the ones that were array-y
-            * From there, I can do pre-selection logic on areas like multi-select options, radio inputs and checkbox inputs
-        */
-        function preSelectMultiSelects(event){
-
-        }
-
-        /**
-            * I can catch the DEER-LOADED event, which will let me know all my array type inputs are pre-populated
-            * From there, I can take all annos from the loaded entity and filter out the ones that were array-y
-            * From there, I can do pre-selection logic on areas like multi-select options, radio inputs and checkbox inputs
-        */
-        function preSelectCheckboxGroup(event){
-
-        }
-
-        /**
-            * I can catch the DEER-LOADED event, which will let me know all my array type inputs are pre-populated
-            * From there, I can take all annos from the loaded entity and filter out the ones that were array-y
-            * From there, I can do pre-selection logic on areas like multi-select options, radio inputs and checkbox inputs
-        */
-        function prefillTextGroup(event){
-
         }
     </script>
     <!-- <script src="./releases/alpha-0.9/deer.js" type="module"></script> -->
