@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!--
+    author: Bryan Haberberger <bryan.j.haberberger@slu.edu>
+
+    This is a small set of recipes for handling Lists or Sets of information whereby an Annotation is a List or Set Annotation containing the values that map to specific input groups.  These are simple recipes for how to catch these annotations from DEER and handle UI around correlated HTML DEER inputs.  
+    Ex. http://devstore.rerum.io/v1/id/5e542de5e4b0a6b3a238f1a2
+-->
+<html>
+
+<head>
+    <title>Recipe: Render List Data</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <style>
+        h4{
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="exampleForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple" deer-id="http://devstore.rerum.io/v1/id/5e542de5e4b0a6b3a238f1a2">
+        <input disabled type="hidden" deer-key="creator" value="DEER_RECIPE_DATA_RENDER">
+
+        <h4>Multi Select:</h4>
+        <label>
+            Here the user provided values by selecting various choices in a multi select area.  The list or set annotation contains items correlating to what options should be selected.  The delimeter (<-->) to handle how the array should be represented as a string is provided in the HTML and can be customized.
+        </label>
+        <input disabled type="hidden" deer-key="DEER:multiSelect" deer-input-type="Set" deer-array-delimeter="<-->" >
+        <select multiple oninput="handleMultiSelect(event)">
+            <option value="Accommodation" >Accommodation</option>
+            <option value="Landform" >Landform</option>
+            <option value="Residence" >Residence</option>
+            <option value="Hall" >Hall</option>
+            <option value="Venue" >Venue</option>
+        </select>
+        <pre class="choices" id="multiChoices"></pre>
+
+        <h4>Checkbox Group:</h4>
+        <label>
+            Here the user provided values by selecting various checkboxes from a checkbox group.  The list or set annotation contains items correlating to what checkboxes should be checked.  No delimeter is provided so the comma (,) will be used by default when representing the array as a string.
+        </label>
+        <input disabled type="hidden" deer-key="DEER:checkboxGroup" deer-input-type="List" >
+        <div>
+            <label><input disabled type="checkbox" name="sports[]" value="cycling" onclick="handleCheckboxGroup(event)" /> cycling</label>
+            <label><input disabled type="checkbox" name="sports[]" value="running" onclick="handleCheckboxGroup(event)" /> running</label>
+            <label><input disabled type="checkbox" name="sports[]" value="walking" onclick="handleCheckboxGroup(event)" /> walking</label>
+            <label><input disabled type="checkbox" name="sports[]" value="swimming" onclick="handleCheckboxGroup(event)" /> swimming</label>
+            <label><input disabled type="checkbox" name="sports[]" value="team sports" onclick="handleCheckboxGroup(event)" /> team sport(s)</label>
+            <label><input disabled type="checkbox" name="sports[]" value="fishing" onclick="handleCheckboxGroup(event)" /> fishing</label>
+        </div>
+        <pre class="choices" id="checkboxChoices"></pre>
+
+        <h4>Textual Input Group:</h4>
+        <label>
+            Here the user can typed whatever they wanted into each text input. The list or set annotation contains items correlating to what values should be populated into the text input areas.  The delimeter (|^----^|) to handle how the array should be represented as a string is provided in the HTML and can be customized.  Care was taken to choose a delimeter that would not be something a user would use as common input to avoid unexpected .split() and .join() behavior when trying to convert back and forth between a string and an array.  
+        </label>
+        <input disabled type="hidden" deer-key="DEER:textGroup" deer-input-type="Set" deer-array-delimeter="|^----^|" >
+        <div>
+            <label>User Input 1</label><input disabled type="text" onchange="handleTextGroup(event)" />
+            <label>User Input 2</label><input disabled type="text" onchange="handleTextGroup(event)" />
+            <label>User Input 3</label><input disabled type="text" onchange="handleTextGroup(event)" />
+            <label>User Input 4</label><input disabled type="text" onchange="handleTextGroup(event)" />
+            <label>User Input 5</label><input disabled type="text" onchange="handleTextGroup(event)" />
+        </div>
+        <pre class="choices" id="textChoices"></pre>
+
+        <input disabled class="button primary" type="submit">
+    </form>
+    <script>
+        /**
+            * You can catch "loaded" events from DEER, which lets you know a form loaded and we have the Annotations.
+            * A form is "loaded" when it has the deer-id attribute with a value of an existing JSON-LD data node.
+            * The event will contain the Annotations which have the values you need to pre-select or pre-fill the inputs
+            * that correlate to the Annotation.
+        */
+        addEventListener('deer-loaded', event => {
+            let whatForm = event.target.id
+            let annotationData = event.detail
+            switch(whatForm){
+                case "exampleForm":
+                    //Note this is the DEER event and has a lot of information you may need.
+                    preSelectMultiSelects(annotationData) 
+                    preSelectCheckboxGroup(annotationData)
+                    prefillTextGroup(annotationData)
+                break
+                default:
+                    console.log("I simply do not care.")
+            }
+        })
+        /**
+            * Note that since we generated the annotation, we know exactly what to look for.  In some cases, it may not be so easy.
+        */
+        function preSelectMultiSelects(annotationData){
+            let data_arr = annotationData["DEER:multiSelect"].items
+            let inputElem = document.querySelector("input[deer-key='DEER:multiSelect']")
+            data_arr.forEach(val => {
+                document.querySelector("option[value='"+val+"']").selected = true  
+            })
+            let delim = (inputElem.hasAttribute("deer-array-delimeter")) ? inputElem.getAttribute("deer-array-delimeter") : ","
+            let str_arr = data_arr.join(delim)
+            multiChoices.innerHTML = str_arr
+        }
+
+        /**
+            * Note that since we generated the annotation, we know exactly what to look for.  In some cases, it may not be so easy.
+        */
+        function preSelectCheckboxGroup(annotationData){
+            let data_arr = annotationData["DEER:checkboxGroup"].items
+            let inputElem = document.querySelector("input[deer-key='DEER:checkboxGroup']")
+            data_arr.forEach(val => {
+                document.querySelector("input[value='"+val+"']").checked = true  
+            })
+            let delim = (inputElem.hasAttribute("deer-array-delimeter")) ? inputElem.getAttribute("deer-array-delimeter") : ","
+            let str_arr = data_arr.join(delim)
+            checkboxChoices.innerHTML = str_arr
+        }
+
+        /**
+            * Note that since we generated the annotation, we know exactly what to look for.  In some cases, it may not be so easy.
+        */
+        function prefillTextGroup(annotationData){
+            let data_arr = annotationData["DEER:textGroup"].items
+            let inputElem = document.querySelector("input[deer-key='DEER:textGroup']")
+            let textGroup = document.querySelectorAll("input[type='text']")
+            data_arr.forEach((val, i) => {
+                //Avoid indexOutOfBounds Exception
+                if(i < textGroup.length){
+                    textGroup[i].value = val
+                }
+            })
+            let delim = (inputElem.hasAttribute("deer-array-delimeter")) ? inputElem.getAttribute("deer-array-delimeter") : ","
+            let str_arr = data_arr.join(delim)
+            textChoices.innerHTML = str_arr
+        }
+    </script>
+    <script src="./releases/alpha-0.9/deer.js" type="module"></script>
+</body>
+</html>
