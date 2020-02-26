@@ -8,7 +8,7 @@
 <html>
 
 <head>
-    <title>Recipe: Capture Data</title>
+    <title>Recipe: Simple Data Capture</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://unpkg.com/chota@latest">
@@ -22,14 +22,14 @@
 <body>
     <h4> Capture </h4>
     <p>
-        Use the form below to create something new through DEER.  
+        Here the user can use the form below to make something new through DEER.
     </p>
     <!-- Each input will result in a descriptive ke:value pair placed directly in the entity.-->
     <form id="newThingForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple" >
         <input type="hidden" deer-key="creator" value="DEER_RECIPE_SIMPLE_DATA_CAPTURE">
 
         <label>Provide a Type</label>
-        <select  deer-key="type">
+        <select  deer-key="additionalType">
             <option value="Accommodation" >Accommodation</option>
             <option value="Landform" >Landform</option>
             <option value="Residence" >Residence</option>
@@ -61,6 +61,8 @@
         */
         
     </script>
-    <script src="https://centerfordigitalhumanities.github.io/deer/releases/alpha-0.9/deer.js" type="module"></script>
+    <!-- <script src="https://centerfordigitalhumanities.github.io/deer/releases/alpha-0.9/deer.js" type="module"></script> -->
+    <script src="../js/deer.js" type="module"></script>
+</body>
 </body>
 </html>

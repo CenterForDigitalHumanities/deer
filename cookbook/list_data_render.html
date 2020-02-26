@@ -20,7 +20,8 @@
 </head>
 
 <body>
-    <form id="exampleForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple" deer-id="http://devstore.rerum.io/v1/id/5e542de5e4b0a6b3a238f1a2">
+    <!-- see it with a simple object by using this URI instead http://devstore.rerum.io/v1/id/5e542de5e4b0a6b3a238f1a2 -->
+    <form id="exampleForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple" deer-id="http://devstore.rerum.io/v1/id/5e56daabe4b0a6b3a238f1d0">
         <input disabled type="hidden" deer-key="creator" value="DEER_RECIPE_LIST_ANNOTATION_GENERATOR">
 
         <h4>Multi Select:</h4>
@@ -96,7 +97,8 @@
             * it as selected.  Then populate any area that should represent the values as a string with the string representation of the array of values.
         */
         function preSelectMultiSelects(annotationData){
-            let data_arr = annotationData["DEER:multiSelect"].items
+            //Check whether or not the array we want is further noted wrapped in a value{} object or available at this level.  This is to support simple entities.
+            let data_arr = annotationData["DEER:multiSelect"].hasOwnProperty("value") ? annotationData["DEER:multiSelect"].value.items : annotationData["DEER:multiSelect"].items
             let inputElem = document.querySelector("input[deer-key='DEER:multiSelect']")
             data_arr.forEach(val => {
                 document.querySelector("option[value='"+val+"']").selected = true  
@@ -113,7 +115,8 @@
             * it as checked.  Then populate any area that should represent the values as a string with the string representation of the array of values.
         */
         function preSelectCheckboxGroup(annotationData){
-            let data_arr = annotationData["DEER:checkboxGroup"].items
+            //Check whether or not the array we want is further noted wrapped in a value{} object or available at this level.  This is to support simple entities.
+            let data_arr = annotationData["DEER:checkboxGroup"].hasOwnProperty("value") ? annotationData["DEER:checkboxGroup"].value.items : annotationData["DEER:checkboxGroup"].items
             let inputElem = document.querySelector("input[deer-key='DEER:checkboxGroup']")
             data_arr.forEach(val => {
                 document.querySelector("input[type='checkbox'][value='"+val+"']").checked = true  
@@ -130,7 +133,8 @@
             * noted in the annotation data, place that item into the input area in the group.  Note to watch out for the indexOutOfBounds exception.
         */
         function prefillTextGroup(annotationData){
-            let data_arr = annotationData["DEER:textGroup"].items
+            //Check whether or not the array we want is further noted wrapped in a value{} object or available at this level.  This is to support simple entities.
+            let data_arr = annotationData["DEER:multiSelect"].hasOwnProperty("value") ? annotationData["DEER:textGroup"].value.items : annotationData["DEER:textGroup"].items
             let inputElem = document.querySelector("input[deer-key='DEER:textGroup']")
             let textGroup = document.querySelectorAll("input[type='text']")
             data_arr.forEach((val, i) => {
@@ -144,6 +148,7 @@
             textChoices.innerHTML = str_arr
         }
     </script>
-    <script src="https://centerfordigitalhumanities.github.io/deer/releases/alpha-0.9/deer.js" type="module"></script>
+    <!-- <script src="https://centerfordigitalhumanities.github.io/deer/releases/alpha-0.9/deer.js" type="module"></script> -->
+    <script src="../js/deer.js" type="module"></script>
 </body>
 </html>
