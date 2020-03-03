@@ -188,6 +188,11 @@ export default class DeerReport {
                             }
                         }
                     } catch (err) { console.log(err) }
+                    setTimeout(function(){
+                        console.log("hello world 2")
+                        //For this to really work, we have to be assured that all <deer-view> pertaining to this form (record) are drawn!
+                        UTILS.broadcast(undefined, "RECORDDRAWN", elem, obj)
+                    }, 100)
                     UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
                 }).bind(this))
                 .then(() => elem.click())

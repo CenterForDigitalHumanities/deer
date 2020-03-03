@@ -73,20 +73,22 @@ RENDER.element = function(elem, obj) {
             config: DEER
         }
         let templateResponse = template(obj, options)
-
         elem.innerHTML = (typeof templateResponse.html === "string") ? templateResponse.html : templateResponse
-
-        let newViews = elem.querySelectorAll(config.VIEW)
-        if (newViews.length > 0) {
-            UTILS.broadcast(undefined, DEER.EVENTS.NEW_VIEW, elem, { set: newViews })
-        }
-        let newForms = elem.querySelectorAll(config.FORM)
-        if (newForms.length > 0) {
-            UTILS.broadcast(undefined, DEER.EVENTS.NEW_FORM, elem, { set: newForms })
-        }
-
+        
+        setTimeout(function(){
+            console.log("hello world")
+            let newViews = (elem.querySelectorAll(config.VIEW).length) ? elem.querySelectorAll(config.VIEW) : []
+            let newForms = (elem.querySelectorAll(config.FORM).length) ? elem.querySelectorAll(config.VIEW) : []
+            if(newForms.length){
+                UTILS.broadcast(undefined, DEER.EVENTS.NEW_FORM, elem, { set: newForms })
+            }
+            if(newViews.length){
+                UTILS.broadcast(undefined, DEER.EVENTS.NEW_VIEW, elem, { set: newViews })
+            } 
+            UTILS.broadcast(undefined, "VIEWDRAWN", elem, obj)
+        }, 0)
+        
         if (typeof templateResponse.then === "function") { templateResponse.then(elem, obj, options) }
-
         UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
     })
 }
