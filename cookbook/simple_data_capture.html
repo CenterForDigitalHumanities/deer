@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+    author: Bryan Haberberger <bryan.j.haberberger@slu.edu>
+
+    This is a recipe for creating a new simple described entity through DEER.  Simple objects are noted as such because
+    descriptive properties are stored with the entity directly instead of as discrete annotations targeting the entity.
+-->
+<html>
+
+<head>
+    <title>Recipe: Simple Data Capture</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <style>
+        h4{
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <h4> Capture </h4>
+    <p>
+        Here the user can use the form below to make something new through DEER.
+    </p>
+    <!-- Each input will result in a descriptive ke:value pair placed directly in the entity.-->
+    <form id="newThingForm" deer-type="Thing" deer-context="http://schema.org" deer-item-type="simple" >
+        <input type="hidden" deer-key="creator" value="DEER_RECIPE_SIMPLE_DATA_CAPTURE">
+
+        <label>Provide a Type</label>
+        <select  deer-key="additionalType">
+            <option value="Accommodation" >Accommodation</option>
+            <option value="Landform" >Landform</option>
+            <option value="Residence" >Residence</option>
+            <option value="Hall" >Hall</option>
+            <option value="Venue" >Venue</option>
+        </select>
+
+        <label>Provide a Label or Name for this new entity.</label>
+        <input type="text" deer-key="label" />
+
+        <label>Provide a date associated with this entity.</label>
+        <input type="date" deer-key="date"/>
+
+        <label>Provide the name of your favorite fictional character to associate with this entity.</label>
+        <textarea deer-key="character"></textarea>
+
+        <input class="button primary" type="submit">
+    </form>
+    
+    <h4> Result </h4>
+    <!-- You can listen to a form on the page for changes, which will render here to the desired template. -->
+    <deer-view deer-listening="newThingForm" deer-template="entity">
+        No result yet
+    </deer-view>
+    <script>
+
+        /**
+            * Notice that no custom scripting is required for basic functionality.
+        */
+        
+    </script>
+    <script src="https://centerfordigitalhumanities.github.io/deer/releases/alpha-0.9/deer.js" type="module"></script>
+</body>
+</body>
+</html>
