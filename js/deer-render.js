@@ -74,7 +74,7 @@ RENDER.element = function(elem, obj) {
         }
         let templateResponse = template(obj, options)
         elem.innerHTML = (typeof templateResponse.html === "string") ? templateResponse.html : templateResponse
-        
+        //innerHTML may need a little time to finish to actually populate the template to the DOM, so do the timeout trick here.
         setTimeout(function(){
             console.log("hello world")
             let newViews = (elem.querySelectorAll(config.VIEW).length) ? elem.querySelectorAll(config.VIEW) : []
@@ -85,11 +85,11 @@ RENDER.element = function(elem, obj) {
             if(newViews.length){
                 UTILS.broadcast(undefined, DEER.EVENTS.NEW_VIEW, elem, { set: newViews })
             } 
-            UTILS.broadcast(undefined, "VIEWDRAWN", elem, obj)
+            UTILS.broadcast(undefined, "VIEW_ELEMENT_RENDERED", elem, obj)
         }, 0)
         
         if (typeof templateResponse.then === "function") { templateResponse.then(elem, obj, options) }
-        UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
+        UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj) // I don't think this should be the same loaded as in record.
     })
 }
 
@@ -303,7 +303,14 @@ export default class DeerRender {
 }
 
 export function initializeDeerViews(config) {
-    const views = document.querySelectorAll(config.VIEW)
-    Array.from(views).forEach(elem => new DeerRender(elem, config))
-    document.addEventListener(DEER.EVENTS.NEW_VIEW, e => Array.from(e.detail.set).forEach(elem => new DeerRender(elem, config)))
+    //This really needs to treat each DeerRender as a Promise and return a Promise.all() if we don't want to use the setTimeout trick.
+    return new Promise((res) => {
+        const views = document.querySelectorAll(config.VIEW)
+        Array.from(views).forEach(elem => new DeerRender(elem, config))
+        document.addEventListener(DEER.EVENTS.NEW_VIEW, e => Array.from(e.detail.set).forEach(elem => new DeerRender(elem, config)))
+        //Really each render should be a promise and we should return a Promise.all() here of some kind, but that would onlu work if DeerRender resulted in a Promise where we could return Promise.all(renderPromises).
+        setTimeout(res, 200)
+        //Failed 5 times at 100
+        //Failed 0 times at 200
+    })
 }

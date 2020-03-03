@@ -188,12 +188,23 @@ export default class DeerReport {
                             }
                         }
                     } catch (err) { console.log(err) }
+                    //Since we are populating strings into the DOM, lets do the timeout trick here as well.
                     setTimeout(function(){
                         console.log("hello world 2")
-                        //For this to really work, we have to be assured that all <deer-view> pertaining to this form (record) are drawn!
-                        UTILS.broadcast(undefined, "RECORDDRAWN", elem, obj)
-                    }, 100)
-                    UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
+                        //For this to really work, we have to be assured that all <deer-view> pertaining to this form (record) are drawn
+                        /*
+                         *  I think what we are missing is that loading a view and loading are form are in fact very different.  
+                         *  You should not say a form is 'loaded' until all views contained in that form have announced they are drawn.  
+                         *  The difference between a view and a form is that a view does not need to know the annotation data of its sibling views.  
+                         *  A form needs to know the annotation data of all its child views to populate values, but this hierarchy does not exist.
+                         *  
+                         *  This event works because of deerInitializer.js.  It loads all views (which are a part of forms) in a promise then uses a timeout
+                         *  for resolving that promise, giving all innerHTML = `something` things time to make it to the DOM.  You will notice that the element render events
+                         *  all happen before this event is fired, which lets the script know forms are open for dynamic interaction.
+                         */
+                        UTILS.broadcast(undefined, "FORM_DATA_LOADED", elem, obj)
+                    }, 0)
+                    UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj) //I dont think this should be the same loaded as used in render.
                 }).bind(this))
                 .then(() => elem.click())
         } else {
