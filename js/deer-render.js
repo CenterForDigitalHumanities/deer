@@ -89,7 +89,7 @@ RENDER.element = function(elem, obj) {
             if(newViews.length){
                 UTILS.broadcast(undefined, DEER.EVENTS.NEW_VIEW, elem, { set: newViews })
             } 
-            UTILS.broadcast(undefined, DEER.EVENTS.FORM_RENDERED, elem, obj)
+            UTILS.broadcast(undefined, DEER.EVENTS.VIEW_RENDERED, elem, obj)
         }, 0)
         
         if (typeof templateResponse.then === "function") { templateResponse.then(elem, obj, options) }
