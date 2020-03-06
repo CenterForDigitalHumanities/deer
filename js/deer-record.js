@@ -188,7 +188,20 @@ export default class DeerReport {
                             }
                         }
                     } catch (err) { console.log(err) }
-                    UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
+                    setTimeout(function(){
+                        /*
+                         *  The difference between a view and a form is that a view does not need to know the annotation data of its sibling views.  
+                         *  A form needs to know the annotation data of all its child views to populate values, but this hierarchy is not inherent.
+                         *  
+                         *  This event works because of deerInitializer.js.  It loads all views in a Promise that uses a timeout
+                         *  in its resolve state, giving all innerHTML = `something` calls time to make it to the DOM before this event broadcasts.  
+                         *  You will notice that the "deer-view-rendered" events all happen before this event is fired on respective HTML pages.
+                         *  This lets the script know forms are open for dynamic rendering interaction, like pre-filling or pre-selecting values.
+                         */
+                        UTILS.broadcast(undefined, DEER.EVENTS.FORM_RENDERED, elem, obj)
+                    }, 0)
+                    //Note this is deprecated for the "deer-form-rendered" event.
+                    UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj) 
                 }).bind(this))
                 .then(() => elem.click())
         } else {
