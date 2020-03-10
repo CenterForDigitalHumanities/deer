@@ -36,6 +36,8 @@ export default {
         LOADED: "deer-loaded",
         NEW_VIEW: "deer-view",
         NEW_FORM: "deer-form",
+        VIEW_RENDERED : "deer-view-rendered",
+        FORM_RENDERED : "deer-form-rendered",
         CLICKED: "deer-clicked"
     },
 
