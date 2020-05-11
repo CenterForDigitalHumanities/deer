@@ -272,7 +272,7 @@ export default class DeerReport {
             .filter(el => {
                 //If this is a DEER.PRIMITIVES entry DO NOT repeat it as an annotation.  
                 if (DEER.PRIMITIVES.includes(el.getAttribute(DEER.KEY))) {
-                    UTILS.warning("A DEER.PRIMITIVES entry was detected (" + DEER.KEY + ") attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
+                    UTILS.warning("A DEER.PRIMITIVES entry was detected (" + el.getAttribute(DEER.KEY) + ") attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
                 }
                 return !DEER.PRIMITIVES.includes(el.getAttribute(DEER.KEY))
             })
