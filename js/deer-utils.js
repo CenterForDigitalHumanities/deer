@@ -130,53 +130,52 @@ export default {
                         if (!Array.isArray(body)) {
                             body = [body]
                         }
+                        if (body.evidence) {
+                            obj.evidence = (typeof body.evidence === "object") ? body.evidence["@id"] : body.evidence;
+                        }
                         Leaf: for (let j = 0; j < body.length; j++) {
-                            if (body[j].evidence) {
-                                obj.evidence = (typeof body[j].evidence === "object") ? body[j].evidence["@id"] : body[j].evidence;
-                            } else {
-                                try {
-                                    let val = body[j];
-                                    buildValueObject(val)
-                                    if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
-                                        // this is not the most recent available
-                                        // TODO: maybe check generator, etc.
-                                        continue Leaf;
-                                    } else {
-                                        // Assign this to the main object.
-                                        if (obj.hasOwnProperty(k)) {
-                                            // It may be already there as an Array with some various labels
-                                            if (Array.isArray(obj[k])) {
-                                                if (checkMatch(obj, annos[i], matchOn)) {
-                                                    const annoValues = (Array.isArray(val)) ? val : [val]
-                                                    annoValues.forEach(assertion => {
-                                                        const foundAt = obj[k].indexOf(assertion)
-                                                        if (foundAt > -1) {
-                                                            obj[k][foundAt] = assertion
-                                                        }
-                                                    });
-                                                } else {
-                                                    obj[k].push(buildValueObject(val))
-                                                }
+                            try {
+                                let val = body[j];
+                                buildValueObject(val)
+                                if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
+                                    // this is not the most recent available
+                                    // TODO: maybe check generator, etc.
+                                    continue Leaf;
+                                } else {
+                                    // Assign this to the main object.
+                                    if (obj.hasOwnProperty(k)) {
+                                        // It may be already there as an Array with some various labels
+                                        if (Array.isArray(obj[k])) {
+                                            if (checkMatch(obj, annos[i], matchOn)) {
+                                                const annoValues = (Array.isArray(val)) ? val : [val]
+                                                annoValues.forEach(assertion => {
+                                                    const foundAt = obj[k].indexOf(assertion)
+                                                    if (foundAt > -1) {
+                                                        obj[k][foundAt] = assertion
+                                                    }
+                                                });
                                             } else {
-                                                if (checkMatch(obj, annos[i], matchOn)) {
-                                                    // update value without creating an array
-                                                    obj[k] = buildValueObject(val)
-                                                } else {
-                                                    // Serialize both existing and new value as an Array
-                                                    obj[k] = [obj[k], buildValueObject(val)]
-                                                }
+                                                obj[k].push(buildValueObject(val))
                                             }
                                         } else {
                                             if (checkMatch(obj, annos[i], matchOn)) {
+                                                // update value without creating an array
                                                 obj[k] = buildValueObject(val)
                                             } else {
-                                                // or just tack it on
-                                                obj = Object.assign(obj, buildValueObject(val));
+                                                // Serialize both existing and new value as an Array
+                                                obj[k] = [obj[k], buildValueObject(val)]
                                             }
                                         }
+                                    } else {
+                                        if (checkMatch(obj, annos[i], matchOn)) {
+                                            obj[k] = buildValueObject(val)
+                                        } else {
+                                            // or just tack it on
+                                            obj = Object.assign(obj, buildValueObject(val));
+                                        }
                                     }
-                                } catch (err_1) { }
-                            }
+                                }
+                            } catch (err_1) { }
                         }
                     }
                     return obj
