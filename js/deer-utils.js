@@ -136,18 +136,22 @@ export default {
                             } else {
                                 try {
                                     let val = body[j];
-                                    let k = Object.keys(val)[0];
-                                    if (!val.source) {
-                                        // include an origin for this property, placehold madsrdf:Source
-                                        let aVal = getVal(val[k])
-                                        val[k] = {
-                                            value: aVal,
-                                            source: {
-                                                citationSource: annos[i]["@id"],
-                                                citationNote: annos[i].label || "Composed object from DEER",
-                                                comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                                    buildValueObject(val)
+                                    function buildValueObject(val){
+                                        let k = Object.keys(val)[0]
+                                        if (!val.source) {
+                                            // include an origin for this property, placehold madsrdf:Source
+                                            let aVal = getVal(val)
+                                            val = {
+                                                value: aVal,
+                                                source: {
+                                                    citationSource: annos[i]["@id"],
+                                                    citationNote: annos[i].label || "Composed object from DEER",
+                                                    comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                                                }
                                             }
                                         }
+                                        return val
                                     }
                                     if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
                                         // this is not the most recent available
@@ -158,32 +162,32 @@ export default {
                                         if (obj.hasOwnProperty(k)) {
                                             // It may be already there as an Array with some various labels
                                             if (Array.isArray(obj[k])) {
-                                                let deepMatch = false
-                                                for (const e of obj[k]) {
-                                                    if(checkMatch(obj,annos[i],matchOn)) {
-
-                                                    }
-                                                    if (e.name === val.name) {
-                                                        deepMatch = true
-                                                        break
-                                                    }
+                                                if(checkMatch(obj,annos[i],matchOn)) {
+                                                    const annoValues = (Array.isArray(val)) ? val : [val]
+                                                    annoValues.forEach(assertion => {
+                                                        const foundAt = obj[k].indexOf(assertion)
+                                                        if(foundAt > -1) {
+                                                            obj[k][foundAt] = assertion
+                                                        }
+                                                    });                                                    
+                                                } else {
+                                                    obj[k].push(buildValueObject(val))
                                                 }
-                                                if (!deepMatch) { obj[k].push(val) }
                                             } else {
                                                 if (checkMatch(obj,annos[i],matchOn)) {
                                                     // update value without creating an array
-                                                    obj[k] = getVal(val[k])
+                                                    obj[k] = buildValueObject(val)
                                                 } else {
                                                     // Serialize both existing and new value as an Array
-                                                    obj[k] = [obj[k], val]
+                                                    obj[k] = [obj[k], buildValueObject(val)]
                                                 }
                                             }
                                         } else {
                                             if (checkMatch(obj,annos[i],matchOn)) {
-                                                obj[k] = getVal(val[k])
+                                                obj[k] = buildValueObject(val)
                                             } else {
                                                 // or just tack it on
-                                                obj = Object.assign(obj, val);
+                                                obj = Object.assign(obj, buildValueObject(val));
                                             }
                                         }
                                     }
@@ -216,11 +220,14 @@ export default {
                 // check for match within Arrays as well
                 if ( !Array.isArray(obj_match) ) { obj_match = [obj_match] }
                 if ( !Array.isArray(anno_match) ) { anno_match = [anno_match] }
-                if ( anno_match.forEach(item => obj_match.includes(item)) ) {
+                if ( !anno_match.every(item => obj_match.includes(item)) ) {
                     // Any mismatch (generous typecasting) will return a false result.
-                    // NOTE: this mismatches if some of the Anno assertion is missing, which
-                    // may lead to duplicates downstream.
-                    // TODO: ticket this as an issue...
+                    if ( anno_match.some(item => obj_match.includes(item)) ) {
+                        // NOTE: this mismatches if some of the Anno assertion is missing, which
+                        // may lead to duplicates downstream.
+                        // TODO: ticket this as an issue...
+                        console.warn("Incomplete match may require additional handling. ", obj_match, anno_match)
+                    }
                     break
                 } else {
                     // High confidence this match is affirmative, continue checking others.
