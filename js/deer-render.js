@@ -124,7 +124,7 @@ DEER.TEMPLATES.json = function(obj, options = {}) {
  */
 DEER.TEMPLATES.prop = function(obj, options = {}) {
     let key = options.key || "@id"
-    let prop = obj[key]
+    let prop = obj[key] || "[ undefined ]"
     let label = options.label || UTILS.getLabel(obj, prop)
     try {
         return `<span class="${prop}">${label}: ${UTILS.getValue(prop) || "[ undefined ]"}</span>`

@@ -145,7 +145,7 @@ export default {
                                     continue Leaf;
                                 }
                                 let val = body[j];
-                                buildValueObject(val)
+                                val = buildValueObject(val)
                                 // Assign this to the main object.
                                 if (obj.hasOwnProperty(k)) {
                                     // It may be already there as an Array with some various labels
