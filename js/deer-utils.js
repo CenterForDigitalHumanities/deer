@@ -110,7 +110,7 @@ export default {
      * Discovered annotations are attached to the original object and returned.
      * @param {Object} entity Target object to search for description
      */
-    async expand(entity, matchOn = [".__rerum.generatedBy", "creator"]) {
+    async expand(entity, matchOn = ["__rerum.generatedBy", "creator"]) {
         let UTILS = this
         let findId = entity["@id"] || entity.id || entity
         if (typeof findId !== "string") {
@@ -135,7 +135,7 @@ export default {
                         }
                         Leaf: for (let j = 0; j < body.length; j++) {
                             try {
-                                if (checkMatch(obj, annos[i], matchOn)) {
+                                if (!checkMatch(obj, annos[i], matchOn)) {
                                     // this is not recognized as an annotation of interest by the interface
                                     continue Leaf
                                 }
@@ -193,11 +193,11 @@ export default {
          * @param Object a asserting Annotation to compare
          * @returns Boolean if annotation should be considered a replacement for the current value.
          **/
-        function checkMatch(o, a, matchOn) {
+        function checkMatch(expanding, asserting, matchOn) {
             let match = false
             CheckMatch: for (const m of matchOn) {
-                let obj_match = o[m]
-                let anno_match = a[m]
+                let obj_match = m.split('.').reduce((o,i)=>o[i], expanding)
+                let anno_match = m.split('.').reduce((o,i)=>o[i], asserting)
                 if (obj_match === undefined || anno_match === undefined) {
                     // Matching is not violated if one of the checked values is missing from a comparator,
                     // but it is not a match without any positive matches.
