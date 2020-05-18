@@ -144,7 +144,8 @@ export default {
                                     // TODO: this is incorrect. There could be an unrelated @id in the .next
                                     continue Leaf;
                                 }
-                                let val = body[j];
+                                let val = body[j]
+                                let k = Object.keys(val)[0]
                                 val = buildValueObject(val, annos[i])
                                 // Assign this to the main object.
                                 if (obj.hasOwnProperty(k)) {
@@ -171,11 +172,9 @@ export default {
                                         }
                                     }
                                 } else {
+                                    // or just tack it on
                                     if (checkMatch(obj, annos[i], matchOn)) {
                                         obj[k] = buildValueObject(val, annos[i])
-                                    } else {
-                                        // or just tack it on
-                                        obj = Object.assign(obj, buildValueObject(val, annos[i]));
                                     }
                                 }
                             } catch (err_1) { }
