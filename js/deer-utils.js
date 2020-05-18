@@ -137,22 +137,6 @@ export default {
                                 try {
                                     let val = body[j];
                                     buildValueObject(val)
-                                    function buildValueObject(val){
-                                        let k = Object.keys(val)[0]
-                                        if (!val.source) {
-                                            // include an origin for this property, placehold madsrdf:Source
-                                            let aVal = getVal(val)
-                                            val = {
-                                                value: aVal,
-                                                source: {
-                                                    citationSource: annos[i]["@id"],
-                                                    citationNote: annos[i].label || "Composed object from DEER",
-                                                    comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
-                                                }
-                                            }
-                                        }
-                                        return val
-                                    }
                                     if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
                                         // this is not the most recent available
                                         // TODO: maybe check generator, etc.
@@ -162,19 +146,19 @@ export default {
                                         if (obj.hasOwnProperty(k)) {
                                             // It may be already there as an Array with some various labels
                                             if (Array.isArray(obj[k])) {
-                                                if(checkMatch(obj,annos[i],matchOn)) {
+                                                if (checkMatch(obj, annos[i], matchOn)) {
                                                     const annoValues = (Array.isArray(val)) ? val : [val]
                                                     annoValues.forEach(assertion => {
                                                         const foundAt = obj[k].indexOf(assertion)
-                                                        if(foundAt > -1) {
+                                                        if (foundAt > -1) {
                                                             obj[k][foundAt] = assertion
                                                         }
-                                                    });                                                    
+                                                    });
                                                 } else {
                                                     obj[k].push(buildValueObject(val))
                                                 }
                                             } else {
-                                                if (checkMatch(obj,annos[i],matchOn)) {
+                                                if (checkMatch(obj, annos[i], matchOn)) {
                                                     // update value without creating an array
                                                     obj[k] = buildValueObject(val)
                                                 } else {
@@ -183,7 +167,7 @@ export default {
                                                 }
                                             }
                                         } else {
-                                            if (checkMatch(obj,annos[i],matchOn)) {
+                                            if (checkMatch(obj, annos[i], matchOn)) {
                                                 obj[k] = buildValueObject(val)
                                             } else {
                                                 // or just tack it on
@@ -218,11 +202,11 @@ export default {
                     continue
                 }
                 // check for match within Arrays as well
-                if ( !Array.isArray(obj_match) ) { obj_match = [obj_match] }
-                if ( !Array.isArray(anno_match) ) { anno_match = [anno_match] }
-                if ( !anno_match.every(item => obj_match.includes(item)) ) {
+                if (!Array.isArray(obj_match)) { obj_match = [obj_match] }
+                if (!Array.isArray(anno_match)) { anno_match = [anno_match] }
+                if (!anno_match.every(item => obj_match.includes(item))) {
                     // Any mismatch (generous typecasting) will return a false result.
-                    if ( anno_match.some(item => obj_match.includes(item)) ) {
+                    if (anno_match.some(item => obj_match.includes(item))) {
                         // NOTE: this mismatches if some of the Anno assertion is missing, which
                         // may lead to duplicates downstream.
                         // TODO: ticket this as an issue...
@@ -235,6 +219,22 @@ export default {
                 }
             }
             return match
+        }
+        function buildValueObject(val) {
+            let k = Object.keys(val)[0]
+            if (!val.source) {
+                // include an origin for this property, placehold madsrdf:Source
+                let aVal = getVal(val)
+                val = {
+                    value: aVal,
+                    source: {
+                        citationSource: annos[i]["@id"],
+                        citationNote: annos[i].label || "Composed object from DEER",
+                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                    }
+                }
+            }
+            return val
         }
     },
     /**
