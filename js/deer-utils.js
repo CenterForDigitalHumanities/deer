@@ -145,7 +145,7 @@ export default {
                                     continue Leaf;
                                 }
                                 let val = body[j];
-                                val = buildValueObject(val)
+                                val = buildValueObject(val, annos[i])
                                 // Assign this to the main object.
                                 if (obj.hasOwnProperty(k)) {
                                     // It may be already there as an Array with some various labels
@@ -159,23 +159,23 @@ export default {
                                                 }
                                             });
                                         } else {
-                                            obj[k].push(buildValueObject(val))
+                                            obj[k].push(buildValueObject(val, annos[i]))
                                         }
                                     } else {
                                         if (checkMatch(obj, annos[i], matchOn)) {
                                             // update value without creating an array
-                                            obj[k] = buildValueObject(val)
+                                            obj[k] = buildValueObject(val, annos[i])
                                         } else {
                                             // Serialize both existing and new value as an Array
-                                            obj[k] = [obj[k], buildValueObject(val)]
+                                            obj[k] = [obj[k], buildValueObject(val, annos[i])]
                                         }
                                     }
                                 } else {
                                     if (checkMatch(obj, annos[i], matchOn)) {
-                                        obj[k] = buildValueObject(val)
+                                        obj[k] = buildValueObject(val, annos[i])
                                     } else {
                                         // or just tack it on
-                                        obj = Object.assign(obj, buildValueObject(val));
+                                        obj = Object.assign(obj, buildValueObject(val, annos[i]));
                                     }
                                 }
                             } catch (err_1) { }
@@ -196,8 +196,8 @@ export default {
         function checkMatch(expanding, asserting, matchOn) {
             let match = false
             CheckMatch: for (const m of matchOn) {
-                let obj_match = m.split('.').reduce((o,i)=>o[i], expanding)
-                let anno_match = m.split('.').reduce((o,i)=>o[i], asserting)
+                let obj_match = m.split('.').reduce((o, i) => o[i], expanding)
+                let anno_match = m.split('.').reduce((o, i) => o[i], asserting)
                 if (obj_match === undefined || anno_match === undefined) {
                     // Matching is not violated if one of the checked values is missing from a comparator,
                     // but it is not a match without any positive matches.
@@ -222,17 +222,16 @@ export default {
             }
             return match
         }
-        function buildValueObject(val) {
-            let k = Object.keys(val)[0]
+        function buildValueObject(val, fromAnno) {
             if (!val.source) {
                 // include an origin for this property, placehold madsrdf:Source
                 let aVal = getVal(val)
                 val = {
                     value: aVal,
                     source: {
-                        citationSource: annos[i]["@id"],
-                        citationNote: annos[i].label || "Composed object from DEER",
-                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/TinyThings"
+                        citationSource: fromAnno["@id"] || fromAnno.id,
+                        citationNote: fromAnno.label || fromAnno.name || "Composed object from DEER",
+                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
                     }
                 }
             }
