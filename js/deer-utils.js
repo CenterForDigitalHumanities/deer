@@ -135,13 +135,13 @@ export default {
                         }
                         Leaf: for (let j = 0; j < body.length; j++) {
                             try {
-                                let val = body[j];
-                                buildValueObject(val)
                                 if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
                                     // this is not the most recent available
                                     // TODO: maybe check generator, etc.
                                     continue Leaf;
                                 } else {
+                                    let val = body[j];
+                                    buildValueObject(val)
                                     // Assign this to the main object.
                                     if (obj.hasOwnProperty(k)) {
                                         // It may be already there as an Array with some various labels
