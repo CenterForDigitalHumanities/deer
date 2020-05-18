@@ -13,26 +13,26 @@
 import { default as DEER } from './deer-config.js'
 
 export default {
-    listFromCollection: function(collectionId) {
+    listFromCollection: function (collectionId) {
         let queryObj = {
             body: {
                 targetCollection: collectionId
             }
         }
         return fetch(DEER.URLS.QUERY, {
-                method: "POST",
-                body: JSON.stringify(queryObj)
-            }).then(response => response.json())
-            .then(function(pointers) {
+            method: "POST",
+            body: JSON.stringify(queryObj)
+        }).then(response => response.json())
+            .then(function (pointers) {
                 let list = []
                 pointers.map(tc => list.push(fetch(tc.target).then(response => response.json())))
                 return Promise.all(list)
             })
-            .then(function(list) {
+            .then(function (list) {
                 return list
             })
     },
-    getValue: function(property, alsoPeek = [], asType) {
+    getValue: function (property, alsoPeek = [], asType) {
         // TODO: There must be a best way to do this...
         let prop;
         if (property === undefined || property === "") {
@@ -110,7 +110,7 @@ export default {
      * Discovered annotations are attached to the original object and returned.
      * @param {Object} entity Target object to search for description
      */
-    async expand(entity) {
+    async expand(entity, matchOn = [".__rerum.generatedBy", "creator"]) {
         let UTILS = this
         let findId = entity["@id"] || entity.id || entity
         if (typeof findId !== "string") {
@@ -120,7 +120,7 @@ export default {
         let getVal = this.getValue
         return fetch(findId).then(response => response.json())
             .then(obj => UTILS.findByTargetId(findId)
-                .then(function(annos) {
+                .then(function (annos) {
                     for (let i = 0; i < annos.length; i++) {
                         let body
                         try {
@@ -160,6 +160,9 @@ export default {
                                             if (Array.isArray(obj[k])) {
                                                 let deepMatch = false
                                                 for (const e of obj[k]) {
+                                                    if(checkMatch(obj,annos[i],matchOn)) {
+
+                                                    }
                                                     if (e.name === val.name) {
                                                         deepMatch = true
                                                         break
@@ -167,24 +170,65 @@ export default {
                                                 }
                                                 if (!deepMatch) { obj[k].push(val) }
                                             } else {
-                                                //It is already there and is an object, string, or number, perhaps from another annotation with a similar body.  
-                                                //Add in the body of this annotation we found,  DEER will aribitrarily pick a value from the array down the road and preference Annotations.
-                                                obj[k] = [obj[k], val]
+                                                if (checkMatch(obj,annos[i],matchOn)) {
+                                                    // update value without creating an array
+                                                    obj[k] = getVal(val[k])
+                                                } else {
+                                                    // Serialize both existing and new value as an Array
+                                                    obj[k] = [obj[k], val]
+                                                }
                                             }
                                         } else {
-                                            //or just tack it on
-                                            obj = Object.assign(obj, val);
+                                            if (checkMatch(obj,annos[i],matchOn)) {
+                                                obj[k] = getVal(val[k])
+                                            } else {
+                                                // or just tack it on
+                                                obj = Object.assign(obj, val);
+                                            }
                                         }
                                     }
-                                } catch (err_1) {}
+                                } catch (err_1) { }
                             }
                         }
                     }
                     return obj
                 })).catch(err => {
-                console.error("Error expanding object:" + err)
-                return err
-            })
+                    console.error("Error expanding object:" + err)
+                    return err
+                })
+        /**
+         * Check for match on [matchOn] (if exists) 
+         * TODO: consider moving this up in scope, if useful
+         * @param Object o existing Object with values to check
+         * @param Object a asserting Annotation to compare
+         * @returns Boolean if annotation should be considered a replacement for the current value.
+         **/
+        function checkMatch(o, a, matchOn) {
+            let match = false
+            CheckMatch: for (const m of matchOn) {
+                let obj_match = o[m]
+                let anno_match = a[m]
+                if (obj_match === undefined || anno_match === undefined) {
+                    // Matching is not violated if one of the checked values is missing from a comparator,
+                    // but it is not a match without any positive matches.
+                    continue
+                }
+                // check for match within Arrays as well
+                if ( !Array.isArray(obj_match) ) { obj_match = [obj_match] }
+                if ( !Array.isArray(anno_match) ) { anno_match = [anno_match] }
+                if ( anno_match.forEach(item => obj_match.includes(item)) ) {
+                    // Any mismatch (generous typecasting) will return a false result.
+                    // NOTE: this mismatches if some of the Anno assertion is missing, which
+                    // may lead to duplicates downstream.
+                    // TODO: ticket this as an issue...
+                    break
+                } else {
+                    // High confidence this match is affirmative, continue checking others.
+                    match = true
+                }
+            }
+            return match
+        }
     },
     /**
      * Execute query for any annotations in RERUM which target the
@@ -192,7 +236,7 @@ export default {
      * @param {String} id URI for the targeted entity
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-    findByTargetId: async function(id, targetStyle = []) {
+    findByTargetId: async function (id, targetStyle = []) {
         let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
         if (!Array.isArray(targetStyle)) {
             targetStyle = [targetStyle]
@@ -210,12 +254,12 @@ export default {
             }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
-                method: "POST",
-                body: JSON.stringify(obj),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
+            method: "POST",
+            body: JSON.stringify(obj),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
             .then(response => response.json())
             .catch((err) => console.error(err))
         let local_matches = everything.filter(o => o.target === id)
@@ -226,7 +270,7 @@ export default {
     /**
      * An error handler for various HTTP traffic scenarios
      */
-    handleHTTPError: function(response) {
+    handleHTTPError: function (response) {
         let UTILS = this
         if (!response.ok) {
             let status = response.status
@@ -260,7 +304,7 @@ export default {
     /**
      * Broadcast a message about DEER
      */
-    broadcast: function(event = {}, type, element, obj = {}) {
+    broadcast: function (event = {}, type, element, obj = {}) {
         let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
         element.dispatchEvent(e)
     },
@@ -268,7 +312,7 @@ export default {
     /**
      * Remove array values that are objects or arrays.  We have decided these are not meant to be put to the interface.
      */
-    cleanArray: function(arr) {
+    cleanArray: function (arr) {
         let UTILS = this
         return arr.filter((arrItem) => {
             if (Array.isArray(arrItem)) {
@@ -286,10 +330,10 @@ export default {
     /**
      * Get the array of data from the container object, so long at it is one of the containers we support (so we know where to look.) 
      */
-    getArrayFromObj: function(containerObj, inputElem) {
+    getArrayFromObj: function (containerObj, inputElem) {
         let UTILS = this
         let cleanArray = []
-            //Handle if what we are actualy looking for is inside containObj.value (DEER templates do that)
+        //Handle if what we are actualy looking for is inside containObj.value (DEER templates do that)
         let alsoPeek = ["@value", "value", "$value", "val"]
         for (let k of alsoPeek) {
             if (containerObj.hasOwnProperty(k)) {
@@ -340,7 +384,7 @@ export default {
     /**
      * Given an array, turn the array into a string where the values are separated by the given delimeter.
      */
-    stringifyArray: function(arr, delim) {
+    stringifyArray: function (arr, delim) {
         //TODO warn if arr is empty?
         try {
             return (arr.length) ? arr.join(delim) : ""
@@ -361,7 +405,7 @@ export default {
      * @param fromAnno Boolean for if the value is from a DEER annotation as opposed to part of the object (noted in deer-id on the form) directly.
      * 
     */
-    assertElementValue: function(elem, val, mapsToAnno) {
+    assertElementValue: function (elem, val, mapsToAnno) {
         let UTILS = this
         if (elem.type === "hidden") {
             if (elem.hasAttribute("value") && elem.value !== undefined) {
@@ -397,7 +441,7 @@ export default {
     /**
      * Send a warning message to the console if dev has this feature turned on through the ROBUSTFEEDBACK config option.
      */
-    warning: function(msg, logMe) {
+    warning: function (msg, logMe) {
         if (DEER.ROBUSTFEEDBACK.valueOf() && msg) {
             console.warn(msg)
             if (logMe) {
