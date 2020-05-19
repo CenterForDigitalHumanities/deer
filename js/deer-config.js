@@ -5,6 +5,7 @@ export default {
     KEY: "deer-key", // attribute, key to use for annotation
     LABEL: "title", // attribute, alternate label for properties
     CONTEXT: "deer-context", // attribute, JSON-LD @context, scoped
+    ATTRIBUTION: "deer-creator", // attribute, Web Annotation `creator`, scoped
     LIST: "deer-list", // attribute, property with resource array
     COLLECTION: "deer-collection", // attribute, name of aggregating collection
     LISTENING: "deer-listening", // attribute, name of container to watch for clicks
@@ -42,7 +43,6 @@ export default {
     },
 
     SUPPRESS: ["__rerum", "@context"], //properties to ignore
-    ATTRIBUTION: "testMachine", //replace with user to attribute assertions
     DELIMETERDEFAULT: ",", //Default delimeter for .split()ing and .join()ing 
     ROBUSTFEEDBACK: true, //Show warnings along with errors in the web console.  Set to false to only see errors.  
 

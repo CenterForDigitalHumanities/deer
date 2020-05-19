@@ -67,6 +67,7 @@ export default class DeerReport {
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
         this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
+        this.attribution = elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))
         changeLoader.observe(elem, {
@@ -274,13 +275,14 @@ export default class DeerReport {
             })
                 .map(input => {
                     let inputId = input.getAttribute(DEER.SOURCE)
+                    let creatorId = input.getAttribute(DEER.ATTRIBUTION) || this.attribution
                     let action = (inputId) ? "UPDATE" : "CREATE"
                     let annotation = {
                         type: "Annotation",
-                        creator: DEER.ATTRIBUTION,
                         target: entity["@id"],
                         body: {}
                     }
+                    if(creatorId) { annotation.creator = creatorId }
                     let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ? DEER.DELIMETERDEFAULT : ","
                     let val = input.value
                     let inputType = input.getAttribute(DEER.INPUTTYPE)
