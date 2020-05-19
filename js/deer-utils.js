@@ -141,34 +141,44 @@ export default {
                                 }
                                 if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
                                     // this may not be the most recent available
-                                    // TODO: this is incorrect. There could be an unrelated @id in the .next
+                                    // TODO: this is incorrect. There could be an unrelated @id in the .next and isUpdatedBy() will never fire
                                     continue Leaf;
                                 }
                                 let assertion = body[j]
                                 let keys = Object.keys(assertion)
                                 let k = keys[0]
-                                if (keys.length>1 || k===0) {
-                                    console.warn("This assertion is not as expected and may not have been interpreted correctly.",assertion)
+                                if (keys.length > 1 || k === 0) {
+                                    console.warn("This assertion is not as expected and may not have been interpreted correctly.", assertion)
                                 }
                                 let val = assertion[k]
                                 val = buildValueObject(val, annos[i])
                                 // Assign this to the main object.
                                 if (obj.hasOwnProperty(k)) {
                                     // It may be already there as an Array with some various labels
-                                    if (Array.isArray(obj[k])) {
-                                        if (checkMatch(obj, annos[i], matchOn)) {
+                                    if (typeof obj[k] === "string") {
+                                        // This is probably a primitive and may be updated/replaced.
+                                        console.log("Updating primitive value " + obj[k] + " with annotation.", annos[i])
+                                        obj[k] = buildValueObject(val, annos[i])
+                                    } else if (Array.isArray(obj[k])) {
+                                        if (isUpdatedBy(obj[k].source.citationSource, annos[i])) {
                                             const annoValues = (Array.isArray(val)) ? val : [val]
-                                            annoValues.forEach(assertion => {
-                                                const foundAt = obj[k].indexOf(assertion)
-                                                if (foundAt > -1) {
-                                                    obj[k][foundAt] = assertion
+                                            annoValues.forEach(a => {
+                                                // TODO: This is a brute force and not great.
+                                                for (const v,foundAt of obj[k]) {
+                                                    try {
+                                                        if (isUpdatedBy(v.source.citationSource), a) {
+                                                            obj[k][foundAt] = a
+                                                        }
+                                                    } catch (err) {
+                                                        console.warn("I think a primitive got buried in here, but I'm moving on.")
+                                                    }
                                                 }
-                                            });
+                                            })
                                         } else {
                                             obj[k].push(buildValueObject(val, annos[i]))
                                         }
                                     } else {
-                                        if (checkMatch(obj, annos[i], matchOn)) {
+                                        if (isUpdatedBy(obj[k].source.citationSource, annos[i])) {
                                             // update value without creating an array
                                             obj[k] = buildValueObject(val, annos[i])
                                         } else {
@@ -188,6 +198,18 @@ export default {
                     console.error("Error expanding object:" + err)
                     return err
                 })
+        /**
+         * Test if the metadata states that the second is an update to the first.
+         * @param String assertion URI of the existing source of the assertion
+         * @param Object anno the complete object of the new assertion
+         * @returns Boolean if the first is updated by the second
+         */
+        function isUpdatedBy(assertionID, anno) {
+            if (anno.__rerum.history.next.includes(assertionID)) {
+                console.warn("You may be looking for updates backwards.", anno, assertionID)
+            }
+            return anno.__rerum.history.previous === assertionID
+        }
         /**
          * Match on criteria(if exists) and return true if it appears to match on the values specified.
          * A true result means that the incoming assertion is likely to be relevant and authorized to 
