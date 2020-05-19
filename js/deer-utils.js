@@ -178,9 +178,7 @@ export default {
                                     }
                                 } else {
                                     // or just tack it on
-                                    if (checkMatch(obj, annos[i], matchOn)) {
-                                        obj[k] = buildValueObject(val, annos[i])
-                                    }
+                                    obj[k] = buildValueObject(val, annos[i])
                                 }
                             } catch (err_1) { }
                         }
