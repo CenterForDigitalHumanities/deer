@@ -107,7 +107,7 @@ export default {
     },
     /**
      * Take a known object with an id and query for annotations targeting it.
-     * Discovered annotations are attached to the original object and returned.
+     * Discovered annotations are asserted on the original object and returned.
      * @param {Object} entity Target object to search for description
      */
     async expand(entity, matchOn = ["__rerum.generatedBy", "creator"]) {
@@ -186,10 +186,13 @@ export default {
                     return err
                 })
         /**
-         * Check for match on [matchOn] (if exists) 
+         * Match on criteria(if exists) and return true if it appears to match on the values specified.
+         * A true result means that the incoming assertion is likely to be relevant and authorized to 
+         * augment the original object.
          * TODO: consider moving this up in scope, if useful
-         * @param Object o existing Object with values to check
-         * @param Object a asserting Annotation to compare
+         * @param Object o existing Object with values to check.
+         * @param Object a asserting Annotation to compare.
+         * @param Array<String> matchOn dot-separated property paths on the two Objects to compare.
          * @returns Boolean if annotation should be considered a replacement for the current value.
          **/
         function checkMatch(expanding, asserting, matchOn) {
@@ -221,20 +224,23 @@ export default {
             }
             return match
         }
+        /**
+         * Regularizes assertions on expanded objects to enforce the existence of a `source` key.
+         * The return is only the value of the assertion, so the desired key must be applied upstream
+         * from the scope of this function.
+         * @param any val asserted value of the incoming annotation.
+         * @param Object fromAnno parent annotation of the asserted value, as a handy metadata container.
+         * @returns Object with `value` and `source` keys.
+         */
         function buildValueObject(val, fromAnno) {
-            if (!val.source) {
-                // include an origin for this property, placehold madsrdf:Source
-                let aVal = getVal(val)
-                val = {
-                    value: aVal,
-                    source: {
-                        citationSource: fromAnno["@id"] || fromAnno.id,
-                        citationNote: fromAnno.label || fromAnno.name || "Composed object from DEER",
-                        comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
-                    }
-                }
+            let valueObject = {}
+            valueObject.source = val.source || {
+                citationSource: fromAnno["@id"] || fromAnno.id,
+                citationNote: fromAnno.label || fromAnno.name || "Composed object from DEER",
+                comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
             }
-            return val
+            valueObject.value = val.value || getVal(val)
+            return valueObject
         }
     },
     /**
