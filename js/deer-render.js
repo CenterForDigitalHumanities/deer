@@ -193,8 +193,8 @@ DEER.TEMPLATES.list = function(obj, options = {}) {
 DEER.TEMPLATES.person = function(obj, options = {}) {
         try {
             let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
-            let dob = DEER.TEMPLATES.prop(obj, { key: "birthDate", title: "Birth Date" }) || ``
-            let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", title: "Death Date" }) || ``
+            let dob = DEER.TEMPLATES.prop(obj, { key: "birthDate", label: "Birth Date" }) || ``
+            let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", label: "Death Date" }) || ``
             let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
             let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
             tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``

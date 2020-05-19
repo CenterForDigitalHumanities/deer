@@ -40,7 +40,7 @@ export default {
             return undefined
         }
         if (Array.isArray(property)) {
-            //It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
+            // It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
             return property
         } else {
             if (typeof property === "object") {
@@ -117,7 +117,7 @@ export default {
             UTILS.warning("Unable to find URI in object:", entity)
             return entity
         }
-        let getVal = this.getValue
+        let getVal = UTILS.getValue
         return fetch(findId).then(response => response.json())
             .then(obj => UTILS.findByTargetId(findId)
                 .then(function (annos) {
