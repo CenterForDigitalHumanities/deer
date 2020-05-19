@@ -127,11 +127,11 @@ export default {
                             body = annos[i].body
                         } catch (err) { continue }
                         if (!body) { continue }
-                        if (!Array.isArray(body)) {
-                            body = [body]
-                        }
                         if (body.evidence) {
                             obj.evidence = (typeof body.evidence === "object") ? body.evidence["@id"] : body.evidence;
+                        }
+                        if (!Array.isArray(body)) {
+                            body = [body]
                         }
                         Leaf: for (let j = 0; j < body.length; j++) {
                             try {
@@ -144,8 +144,13 @@ export default {
                                     // TODO: this is incorrect. There could be an unrelated @id in the .next
                                     continue Leaf;
                                 }
-                                let val = body[j]
-                                let k = Object.keys(val)[0]
+                                let assertion = body[j]
+                                let keys = Object.keys(assertion)
+                                let k = keys[0]
+                                if (keys.length>1 || k===0) {
+                                    console.warn("This assertion is not as expected and may not have been interpreted correctly.",assertion)
+                                }
+                                let val = assertion[k]
                                 val = buildValueObject(val, annos[i])
                                 // Assign this to the main object.
                                 if (obj.hasOwnProperty(k)) {
@@ -240,6 +245,7 @@ export default {
                 comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
             }
             valueObject.value = val.value || getVal(val)
+            valueObject.evidence = val.evidence || fromAnno.evidence || ""
             return valueObject
         }
     },
