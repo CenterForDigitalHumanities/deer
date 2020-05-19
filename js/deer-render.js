@@ -162,7 +162,7 @@ DEER.TEMPLATES.entity = function (obj, options = {}) {
             } else {
                 // a single, probably
                 // TODO: export buildValueObject() from UTILS for use here
-                if(typeof value === "string") { 
+                if (typeof value === "string") {
                     value = {
                         value: value,
                         source: {
@@ -170,7 +170,7 @@ DEER.TEMPLATES.entity = function (obj, options = {}) {
                             citationNote: "Primitive object from DEER",
                             comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
                         }
-                    } 
+                    }
                 }
                 let v = UTILS.getValue(value)
                 if (typeof v === "object") { v = UTILS.getLabel(v) }

@@ -37,7 +37,7 @@ import { default as record, initializeDeerForms } from './deer-record.js'
 
 // fire up the element detection as needed
 try {
-    initializeDeerViews(DEER) 
+    initializeDeerViews(DEER)
     initializeDeerForms(DEER)
 } catch (err) {
     // silently fail if render or record is not loaded

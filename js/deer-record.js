@@ -29,7 +29,7 @@ async function renderChange(mutationsList) {
                 let obj = {}
                 try {
                     obj = JSON.parse(localStorage.getItem(id))
-                } catch (err) {}
+                } catch (err) { }
                 if (!obj || !obj["@id"]) {
                     obj = await fetch(id).then(response => response.json()).catch(error => error)
                     if (obj) {
@@ -39,7 +39,7 @@ async function renderChange(mutationsList) {
                     }
                 }
                 new DeerReport(mutation.target, DEER)
-                    // TODO: This is too heavy. Create a "populateFormFields" method and call it instead.
+                // TODO: This is too heavy. Create a "populateFormFields" method and call it instead.
                 break
             case DEER.LISTENING:
                 let listensTo = mutation.target.getAttribute(DEER.LISTENING)
@@ -78,7 +78,7 @@ export default class DeerReport {
         if (this.id) {
             //Do we want to expand for all types?
             UTILS.expand({ "@id": this.id })
-                .then((function(obj) {
+                .then((function (obj) {
                     try {
                         let inputElems = Array.from(this.inputs)
                         let flatKeys = inputElems.map(input => input.getAttribute(DEER.KEY))
@@ -191,7 +191,7 @@ export default class DeerReport {
                             }
                         }
                     } catch (err) { console.log(err) }
-                    setTimeout(function(){
+                    setTimeout(function () {
                         /*
                          *  The difference between a view and a form is that a view does not need to know the annotation data of its sibling views.  
                          *  A form needs to know the annotation data of all its child views to populate values, but this hierarchy is not inherent.
@@ -204,7 +204,7 @@ export default class DeerReport {
                         UTILS.broadcast(undefined, DEER.EVENTS.FORM_RENDERED, elem, obj)
                     }, 0)
                     //Note this is deprecated for the "deer-form-rendered" event.
-                    UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj) 
+                    UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
                 }).bind(this))
                 .then(() => elem.click())
         } else {
@@ -251,27 +251,27 @@ export default class DeerReport {
                 },
                 body: JSON.stringify(record)
             })
-            .then(response => response.json())
-            .then(data =>{
-                UTILS.broadcast(undefined, DEER.EVENTS.CREATED, self.elem, data.new_obj_state)
-                return data.new_obj_state
-            })
-            .catch(err => {})
+                .then(response => response.json())
+                .then(data => {
+                    UTILS.broadcast(undefined, DEER.EVENTS.CREATED, self.elem, data.new_obj_state)
+                    return data.new_obj_state
+                })
+                .catch(err => { })
         }
 
-        formAction.then((function(entity) {
+        formAction.then((function (entity) {
             let annotations = Array.from(this.elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))).filter(el => Boolean(el.$isDirty))
-            if(annotations.length === 0){
+            if (annotations.length === 0) {
                 //May be worthwhile to call out the lack of descriptive information in this form submission.
             }
             let flatKeys = annotations.map(input => input.getAttribute(DEER.KEY))
             annotations = annotations.filter((el, i) => {
-                    //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
-                    if (flatKeys.indexOf(el.getAttribute(DEER.KEY)) !== i) {
-                        UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
-                    }
-                    return flatKeys.indexOf(el.getAttribute(DEER.KEY)) === i
-                })
+                //Throw a soft error if we detect duplicate deer-key entries, and only respect the first one.
+                if (flatKeys.indexOf(el.getAttribute(DEER.KEY)) !== i) {
+                    UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
+                }
+                return flatKeys.indexOf(el.getAttribute(DEER.KEY)) === i
+            })
                 .map(input => {
                     let inputId = input.getAttribute(DEER.SOURCE)
                     let action = (inputId) ? "UPDATE" : "CREATE"
@@ -281,7 +281,7 @@ export default class DeerReport {
                         target: entity["@id"],
                         body: {}
                     }
-                    let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ?  DEER.DELIMETERDEFAULT : ","
+                    let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ? DEER.DELIMETERDEFAULT : ","
                     let val = input.value
                     let inputType = input.getAttribute(DEER.INPUTTYPE)
                     let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
@@ -315,7 +315,7 @@ export default class DeerReport {
                                 }
                                 try {
                                     body = JSON.parse(val)
-                                } catch (err) {}
+                                } catch (err) { }
                                 annotation.body[input.getAttribute(DEER.KEY)] = body
                                 break
                             default:
@@ -338,21 +338,21 @@ export default class DeerReport {
                     let name = input.getAttribute("title")
                     if (name) { annotation.body[input.getAttribute(DEER.KEY)].name = name }
                     return fetch(DEER.URLS[action], {
-                            method: (inputId) ? "PUT" : "POST",
-                            headers: {
-                                "Content-Type": "application/json; charset=utf-8"
-                            },
-                            body: JSON.stringify(annotation)
-                        })
+                        method: (inputId) ? "PUT" : "POST",
+                        headers: {
+                            "Content-Type": "application/json; charset=utf-8"
+                        },
+                        body: JSON.stringify(annotation)
+                    })
                         .then(response => response.json())
                         .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))
                 })
             return Promise.all(annotations).then(() => entity)
         }).bind(this))
-        .then(entity => {
-            this.elem.setAttribute(DEER.ID, entity["@id"])
-            new DeerReport(this.elem)
-        })
+            .then(entity => {
+                this.elem.setAttribute(DEER.ID, entity["@id"])
+                new DeerReport(this.elem)
+            })
     }
 
     simpleUpsert(event) {
@@ -368,7 +368,7 @@ export default class DeerReport {
             if (evidence) record[key].evidence = evidence
             let inputType = input.getAttribute(DEER.INPUTTYPE)
             let arrKey = (input.hasAttribute(DEER.LIST)) ? input.getAttribute(DEER.LIST) : ""
-            let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ?  DEER.DELIMETERDEFAULT : ","
+            let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ? DEER.DELIMETERDEFAULT : ","
             if (input.hasAttribute(DEER.INPUTTYPE)) {
                 switch (inputType) {
                     case "List":
@@ -399,7 +399,7 @@ export default class DeerReport {
                         }
                         try {
                             body = JSON.parse(val)
-                        } catch (err) {}
+                        } catch (err) { }
                         record[key] = body
                         break
                     default:
@@ -411,17 +411,17 @@ export default class DeerReport {
                 record[key] = val
             }
         })
-        if(Object.keys(record).length === 0){
+        if (Object.keys(record).length === 0) {
             //There is no good reason for this, but DEER allows it.  However, there better a type otherwise it is completely undescribed.
             UTILS.warning("The form submitted does not contain any inputs. The resulting entity will not have any descriptive encoding.", this.elem)
-            if(!this.type) {
+            if (!this.type) {
                 //DEER does not abide.  A completely undescribed object, even if we were to find evidence and context, is useless, especially in this 'simple' context. 
                 UTILS.warning("Form submission should not result in a completely undescribed object.  At least a 'type' property must be present.  Please add information to submit this simple form.", this.elem)
                 //Deny outright and send an empty object upstream (see processRecord).
                 return {}
             }
         }
-        if (this.type) {record.type = this.type}
+        if (this.type) { record.type = this.type }
         if (this.context) { record["@context"] = this.context }
         if (this.evidence) { record.evidence = this.evidence }
         let formId = this.elem.getAttribute(DEER.ID)
@@ -437,8 +437,8 @@ export default class DeerReport {
             },
             body: JSON.stringify(record)
         })
-        .then(response => response.json())
-        .then(obj => {return obj.new_obj_state})
+            .then(response => response.json())
+            .then(obj => { return obj.new_obj_state })
     }
 }
 
@@ -459,12 +459,12 @@ async function create(obj, attribution, evidence) {
         mint.evidence = evidence
     }
     const newObj = await fetch(CREATE_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json; charset=utf-8"
-            },
-            body: JSON.stringify(mint)
-        })
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify(mint)
+    })
         .then(this.handleHTTPError)
         .then(response => response.json())
     const listID = localStorage.getItem("CURRENT_LIST_ID") || this.DEFAULT_LIST_ID
@@ -476,16 +476,16 @@ async function create(obj, attribution, evidence) {
     })
     try {
         list = await fetch(UPDATE_URL, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json; charset=utf-8"
-                },
-                body: JSON.stringify(list)
-            })
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify(list)
+        })
             .then(this.handleHTTPError)
             .then(response => response.json().new_obj_state)
             .catch(err => Promise.reject(err))
-    } catch (err) {}
+    } catch (err) { }
     localStorage.setItem(list["@id"], JSON.stringify(list))
     localStorage.setItem("CURRENT_LIST_ID", list["@id"])
     let annotations = []
