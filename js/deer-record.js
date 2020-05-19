@@ -121,16 +121,19 @@ export default class DeerReport {
                                                 //We found it and understand it, but we preference annotation objects so look at the rest of the entries.
                                                 //Consequently, if no annotations are found, the last string/number entry will be the one DEER uses.
                                                 mapsToAnno = false
+                                                el.setAttribute(DEER.SOURCE, UTILS.getValue(entry.source, "citationSource"))
                                                 assertedValue = arbitraryAssertedValue = UTILS.getValue(entry)
                                             } else if (typeof entry === "object") {
                                                 if (entry.hasOwnProperty(deerKeyValue) && entry[deerKeyValue].hasOwnProperty("source")) {
                                                     //Then this is an object like {deerKeyValue:{value:"hopefully", source:"anno/123"}} and can be preferenced
                                                     mapsToAnno = true
+                                                    el.setAttribute(DEER.SOURCE, UTILS.getValue(entry.source, "citationSource"))
                                                     assertedValue = arbitraryAssertedValue = UTILS.getValue(entry[deerKeyValue])
                                                     break
                                                 } else if (entry.hasOwnProperty("source")) {
                                                     //Then this is an object like {value:"hopefully", source:"anno/123"} and can be preferenced
                                                     mapsToAnno = true
+                                                    el.setAttribute(DEER.SOURCE, UTILS.getValue(entry.source, "citationSource"))
                                                     assertedValue = arbitraryAssertedValue = UTILS.getValue(entry)
                                                     break
                                                 }

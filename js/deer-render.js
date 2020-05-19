@@ -34,7 +34,7 @@ async function renderChange(mutationsList) {
                 let obj = {}
                 try {
                     obj = JSON.parse(localStorage.getItem(id))
-                } catch (err) {}
+                } catch (err) { }
                 if (!obj || !obj["@id"]) {
                     obj = await fetch(id).then(response => response.json()).catch(error => error)
                     if (obj) {
@@ -59,7 +59,7 @@ async function renderChange(mutationsList) {
 
 const RENDER = {}
 
-RENDER.element = function(elem, obj) {
+RENDER.element = function (elem, obj) {
 
     return UTILS.expand(obj).then(obj => {
         let tmplName = elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")
@@ -80,21 +80,21 @@ RENDER.element = function(elem, obj) {
          * would be a Promise.  That way, something that looped and did may of these could do something like
          * Promise.all() before firing a completion/failure event (or something).  
          */
-        setTimeout(function(){
+        setTimeout(function () {
             let newViews = (elem.querySelectorAll(config.VIEW).length) ? elem.querySelectorAll(config.VIEW) : []
             let newForms = (elem.querySelectorAll(config.FORM).length) ? elem.querySelectorAll(config.VIEW) : []
-            if(newForms.length){
+            if (newForms.length) {
                 UTILS.broadcast(undefined, DEER.EVENTS.NEW_FORM, elem, { set: newForms })
             }
-            if(newViews.length){
+            if (newViews.length) {
                 UTILS.broadcast(undefined, DEER.EVENTS.NEW_VIEW, elem, { set: newViews })
-            } 
+            }
             UTILS.broadcast(undefined, DEER.EVENTS.VIEW_RENDERED, elem, obj)
         }, 0)
-        
+
         if (typeof templateResponse.then === "function") { templateResponse.then(elem, obj, options) }
         //Note this is deprecated for the "deer-view-rendered" event.  above.  
-        UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj) 
+        UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
     })
 }
 
@@ -103,7 +103,7 @@ RENDER.element = function(elem, obj) {
  * @param {Object} obj some json to be drawn as JSON
  * @param {Object} options additional properties to draw with the JSON
  */
-DEER.TEMPLATES.json = function(obj, options = {}) {
+DEER.TEMPLATES.json = function (obj, options = {}) {
     let indent = options.indent || 4
     let replacer = (k, v) => {
         if (DEER.SUPPRESS.indexOf(k) !== -1) return
@@ -122,7 +122,7 @@ DEER.TEMPLATES.json = function(obj, options = {}) {
  * @param {String} key the name of the key in the obj we are looking for
  * @param {String} label The label to be displayed when drawn
  */
-DEER.TEMPLATES.prop = function(obj, options = {}) {
+DEER.TEMPLATES.prop = function (obj, options = {}) {
     let key = options.key || "@id"
     let prop = obj[key] || "[ undefined ]"
     let label = options.label || UTILS.getLabel(obj, prop)
@@ -138,7 +138,7 @@ DEER.TEMPLATES.prop = function(obj, options = {}) {
  * @param {Object} obj some json of type Entity to be drawn
  * @param {Object} options additional properties to draw with the Entity
  */
-DEER.TEMPLATES.entity = function(obj, options = {}) {
+DEER.TEMPLATES.entity = function (obj, options = {}) {
     let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
     let list = ``
 
@@ -148,70 +148,81 @@ DEER.TEMPLATES.entity = function(obj, options = {}) {
         let value = UTILS.getValue(obj[key], key)
         try {
             if ((value.image || value.trim()).length > 0) {
-                list += (label === "depiction") ? `<img title="${label}" src="${value.image || value}" deer-source="${obj[key].source}">` : `<dt deer-source="${obj[key].source}">${label}</dt><dd>${value.image || value}</dd>`
+                list += (label === "depiction") ? `<img title="${label}" src="${value.image || value}" ${DEER.SOURCE}="${UTILS.getValue(obj[key].source, "citationSource")}">` : `<dt deer-source="${UTILS.getValue(obj[key].source, "citationSource")}">${label}</dt><dd>${value.image || value}</dd>`
             }
         } catch (err) {
             // Some object maybe or untrimmable somesuch
             // is it object/array?
             list += `<dt>${label}</dt>`
             if (Array.isArray(value)) {
-                value.forEach((val, index) => {
-                    let name = UTILS.getLabel(val, (val.type || val['@type'] || label + index))
-                    list += (val["@id"]) ? `<dd><a href="#${val["@id"]}">${name}</a></dd>` : `<dd>${name}</dd>`
+                value.forEach((v, index) => {
+                    let name = UTILS.getLabel(v, (v.type || v['@type'] || label + '' + index))
+                    list += (v["@id"]) ? `<dd><a href="#${v["@id"]}">${name}</a></dd>` : `<dd ${DEER.SOURCE}="${UTILS.getValue(v.source, "citationSource")}">${UTILS.getValue(v)}</dd>`
                 })
             } else {
                 // a single, probably
+                // TODO: export buildValueObject() from UTILS for use here
+                if(typeof value === "string") { 
+                    value = {
+                        value: value,
+                        source: {
+                            citationSource: obj['@id'] || obj.id || "",
+                            citationNote: "Primitive object from DEER",
+                            comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
+                        }
+                    } 
+                }
                 let v = UTILS.getValue(value)
                 if (typeof v === "object") { v = UTILS.getLabel(v) }
                 if (v === "[ unlabeled ]") { v = v['@id'] || v.id || "[ complex value unknown ]" }
-                list += (value['@id']) ? `<dd><a href="${options.link||""}#${value['@id']}">${v}</a></dd>` : `<dd>${v}</dd>`
+                list += (value['@id']) ? `<dd ${DEER.SOURCE}="${UTILS.getValue(value.source, "citationSource")}"><a href="${options.link || ""}#${value['@id']}">${v}</a></dd>` : `<dd ${DEER.SOURCE}="${UTILS.getValue(value, "citationSource")}">${v}</dd>`
             }
         }
     }
-    tmpl += (list.includes("<dd>")) ? `<dl>${list}</dl>` : ``
+    tmpl += (list.includes("</dd>")) ? `<dl>${list}</dl>` : ``
     return tmpl
 }
 
-DEER.TEMPLATES.list = function(obj, options = {}) {
-        let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
-        if (options.list) {
-            tmpl += `<ul>`
-            obj[options.list].forEach((val, index) => {
-                let name = UTILS.getLabel(val, (val.type || val['@type'] || index))
-                tmpl += (val["@id"] && options.link) ? `<li ${DEER.ID}="${val["@id"]}"><a href="${options.link}${val["@id"]}">${name}</a></li>` : `<li ${DEER.ID}="${val["@id"]}">${name}</li>`
-            })
-            tmpl += `</ul>`
-        }
-
-        return tmpl
+DEER.TEMPLATES.list = function (obj, options = {}) {
+    let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
+    if (options.list) {
+        tmpl += `<ul>`
+        obj[options.list].forEach((val, index) => {
+            let name = UTILS.getLabel(val, (val.type || val['@type'] || index))
+            tmpl += (val["@id"] && options.link) ? `<li ${DEER.ID}="${val["@id"]}"><a href="${options.link}${val["@id"]}">${name}</a></li>` : `<li ${DEER.ID}="${val["@id"]}">${name}</li>`
+        })
+        tmpl += `</ul>`
     }
-    /**
-     * The TEMPLATED renderer to draw JSON to the screen
-     * @param {Object} obj some json of type Person to be drawn
-     * @param {Object} options additional properties to draw with the Person
-     */
-DEER.TEMPLATES.person = function(obj, options = {}) {
-        try {
-            let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
-            let dob = DEER.TEMPLATES.prop(obj, { key: "birthDate", label: "Birth Date" }) || ``
-            let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", label: "Death Date" }) || ``
-            let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
-            let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
-            tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
-            tmpl += dob + dod
-            tmpl += `<a href="#${obj["@id"]}">${name}</a>`
-            return tmpl
-        } catch (err) {
-            return null
-        }
+
+    return tmpl
+}
+/**
+ * The TEMPLATED renderer to draw JSON to the screen
+ * @param {Object} obj some json of type Person to be drawn
+ * @param {Object} options additional properties to draw with the Person
+ */
+DEER.TEMPLATES.person = function (obj, options = {}) {
+    try {
+        let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
+        let dob = DEER.TEMPLATES.prop(obj, { key: "birthDate", label: "Birth Date" }) || ``
+        let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", label: "Death Date" }) || ``
+        let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
+        let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
+        tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
+        tmpl += dob + dod
+        tmpl += `<a href="#${obj["@id"]}">${name}</a>`
+        return tmpl
+    } catch (err) {
         return null
     }
-    /**
-     * The TEMPLATED renderer to draw JSON to the screen
-     * @param {Object} obj some json of type Event to be drawn
-     * @param {Object} options additional properties to draw with the Event
-     */
-DEER.TEMPLATES.event = function(obj, options = {}) {
+    return null
+}
+/**
+ * The TEMPLATED renderer to draw JSON to the screen
+ * @param {Object} obj some json of type Event to be drawn
+ * @param {Object} options additional properties to draw with the Event
+ */
+DEER.TEMPLATES.event = function (obj, options = {}) {
     try {
         let tmpl = `<h1>${UTILS.getLabel(obj)}</h1>`
         return tmpl
@@ -259,10 +270,10 @@ export default class DeerRender {
                         "__rerum.history.next": historyWildcard
                     }
                     fetch(DEER.URLS.QUERY, {
-                            method: "POST",
-                            mode: "cors",
-                            body: JSON.stringify(queryObj)
-                        }).then(response => response.json())
+                        method: "POST",
+                        mode: "cors",
+                        body: JSON.stringify(queryObj)
+                    }).then(response => response.json())
                         .then(pointers => {
                             let list = []
                             pointers.map(tc => list.push(fetch(tc.target || tc["@id"] || tc.id).then(response => response.json().catch(err => { __deleted: console.log(err) }))))
@@ -276,7 +287,7 @@ export default class DeerRender {
                             this.elem.setAttribute(DEER.LIST, "itemListElement")
                             try {
                                 listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
-                            } catch (err) {}
+                            } catch (err) { }
                             RENDER.element(this.elem, listObj)
                         })
                 }
@@ -295,7 +306,7 @@ export default class DeerRender {
             elem.addEventListener(DEER.EVENTS.CLICKED, e => {
                 try {
                     if (e.detail.target.closest(DEER.VIEW + "," + DEER.FORM).getAttribute("id") === listensTo) elem.setAttribute(DEER.ID, e.detail.target.closest('[' + DEER.ID + ']').getAttribute(DEER.ID))
-                } catch (err) {}
+                } catch (err) { }
             })
             try {
                 window[listensTo].addEventListener("click", e => UTILS.broadcast(e, DEER.EVENTS.CLICKED, elem))

@@ -97,7 +97,7 @@ export default {
             if (typeof obj === "string") { return obj }
             let label = obj[options.label] || obj.name || obj.label || obj.title
             if (Array.isArray(label)) {
-                label = [...new Set(label.map(l => this.getValue(UTILS.getLabel(l))))]
+                label = [...new Set(label.map(l => this.getValue(l)))]
             }
             if (typeof label === "object") {
                 label = UTILS.getValue(label)
@@ -157,17 +157,17 @@ export default {
                                     // It may be already there as an Array with some various labels
                                     if (typeof obj[k] === "string") {
                                         // This is probably a primitive and may be updated/replaced.
-                                        console.log("Updating primitive value " + obj[k] + " with annotation.", annos[i])
+                                        console.log('Updating primitive value "' + obj[k] + '" with annotation.', annos[i])
                                         obj[k] = buildValueObject(val, annos[i])
                                     } else if (Array.isArray(obj[k])) {
                                         if (isUpdatedBy(obj[k].source.citationSource, annos[i])) {
                                             const annoValues = (Array.isArray(val)) ? val : [val]
                                             annoValues.forEach(a => {
                                                 // TODO: This is a brute force and not great.
-                                                for (const v,foundAt of obj[k]) {
+                                                for (const v of obj[k]) {
                                                     try {
                                                         if (isUpdatedBy(v.source.citationSource), a) {
-                                                            obj[k][foundAt] = a
+                                                            v = a
                                                         }
                                                     } catch (err) {
                                                         console.warn("I think a primitive got buried in here, but I'm moving on.")
