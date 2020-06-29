@@ -6,6 +6,7 @@ export default {
     LABEL: "title", // attribute, alternate label for properties
     CONTEXT: "deer-context", // attribute, JSON-LD @context, scoped
     ATTRIBUTION: "deer-creator", // attribute, Web Annotation `creator`, scoped
+    MOTIVATION: "deer-motivation", // attribute, Web Annotation `motivation`, scoped
     LIST: "deer-list", // attribute, property with resource array
     COLLECTION: "deer-collection", // attribute, name of aggregating collection
     LISTENING: "deer-listening", // attribute, name of container to watch for clicks

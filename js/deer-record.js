@@ -68,6 +68,7 @@ export default class DeerReport {
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
         this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.attribution = elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
+        this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))
         changeLoader.observe(elem, {
@@ -96,6 +97,10 @@ export default class DeerReport {
                                     //Don't skip the input though, let it recieve all warnings and errors per usual in case this happens to be the one the dev means to keep.
                                 }
                                 if (obj.hasOwnProperty(deerKeyValue)) {
+                                    if(obj[deerKeyValue].evidence)el.setAttribute(DEER.EVIDENCE, obj[deerKeyValue].evidence)
+                                    if(obj[deerKeyValue].motivation)el.setAttribute(DEER.MOTIVATION, obj[deerKeyValue].motivation)
+                                    if(obj[deerKeyValue].creator)el.setAttribute(DEER.ATTRIBUTION, obj[deerKeyValue].creator)
+
                                     //Then there is a key on this object that maps to the input.  
                                     //It is either an annotation or was part of the object directly.  If it has a 'source' property, we assume it is an annotation.
                                     assertedValue = UTILS.getValue(obj[deerKeyValue])
@@ -218,6 +223,12 @@ export default class DeerReport {
 
     processRecord(event) {
         event.preventDefault()
+        this.evidence = this.elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
+        this.context = this.elem.getAttribute(DEER.CONTEXT) // inherited to inputs
+        this.attribution = this.elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
+        this.motivation = this.elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
+        this.type = this.elem.getAttribute(DEER.TYPE)
+
         if (!this.$isDirty) {
             UTILS.warning(event.target.id + " form submitted unchanged.")
         }
@@ -276,6 +287,8 @@ export default class DeerReport {
                 .map(input => {
                     let inputId = input.getAttribute(DEER.SOURCE)
                     let creatorId = input.getAttribute(DEER.ATTRIBUTION) || this.attribution
+                    let motivation = input.getAttribute(DEER.MOTIVATION) || this.motivation
+                    let evidence = input.getAttribute(DEER.EVIDENCE) || this.evidence
                     let action = (inputId) ? "UPDATE" : "CREATE"
                     let annotation = {
                         type: "Annotation",
@@ -283,6 +296,8 @@ export default class DeerReport {
                         body: {}
                     }
                     if(creatorId) { annotation.creator = creatorId }
+                    if(motivation) { annotation.motivation = motivation }
+                    if(evidence) { annotation.evidence = evidence }
                     let delim = (input.hasAttribute(DEER.ARRAYDELIMETER)) ? input.getAttribute(DEER.ARRAYDELIMETER) : (DEER.DELIMETERDEFAULT) ? DEER.DELIMETERDEFAULT : ","
                     let val = input.value
                     let inputType = input.getAttribute(DEER.INPUTTYPE)
@@ -335,8 +350,6 @@ export default class DeerReport {
                     if (input.getAttribute(DEER.KEY) === "targetCollection") {
                         annotation.body.targetCollection = input.value
                     }
-                    let ev = input.getAttribute(DEER.EVIDENCE) || this.evidence
-                    if (ev) { annotation.body[input.getAttribute(DEER.KEY)].evidence = ev }
                     let name = input.getAttribute("title")
                     if (name) { annotation.body[input.getAttribute(DEER.KEY)].name = name }
                     return fetch(DEER.URLS[action], {
@@ -347,7 +360,12 @@ export default class DeerReport {
                         body: JSON.stringify(annotation)
                     })
                         .then(response => response.json())
-                        .then(anno => input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"]))
+                        .then(anno => {
+                            input.setAttribute(DEER.SOURCE, anno.new_obj_state["@id"])
+                            if(anno.new_obj_state.evidence)input.setAttribute(DEER.EVIDENCE, anno.new_obj_state.evidence)
+                            if(anno.new_obj_state.motivation)input.setAttribute(DEER.MOTIVATION, anno.new_obj_state.motivation)
+                            if(anno.new_obj_state.creator)input.setAttribute(DEER.ATTRIBUTION, anno.new_obj_state.creator)
+                    })
                 })
             return Promise.all(annotations).then(() => entity)
         }).bind(this))
