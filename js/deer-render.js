@@ -134,10 +134,9 @@ DEER.TEMPLATES.prop = function (obj, options = {}) {
 }
 
 /**
- * Get a certain property from an object and return it formatted as HTML to be drawn.  
- * @param {Object} obj some obj containing a key that needs to be drawn
- * @param {String} key the name of the key in the obj we are looking for
- * @param {String} label The label to be displayed when drawn
+ * Retreive the best label for object and return it formatted as HTML to be drawn.  
+ * @param {Object} obj some obj to be labeled
+ * @param {Object} options for lookup
  */
 DEER.TEMPLATES.label = function (obj, options = {}) {
     let key = options.key || "@id"
