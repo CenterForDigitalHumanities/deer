@@ -71,9 +71,12 @@ export default class DeerReport {
         this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))
-        this.inputs.filter(inpt => { return inpt.hasAttribute(DEER.KEY)} ) //Only consider DEER inputs
+        Array.from(this.inputs).filter(inpt => { return inpt.hasAttribute(DEER.KEY)} ) //Only consider DEER inputs
         this.inputs.forEach(inpt => {
-           inpt.addEventListener('input', (e) => inpt.$isDirty = true) 
+           inpt.addEventListener('input', (e) => {
+               inpt.$isDirty = true //Make the input dirty
+               this.$isDirty = true //Make the DeerReport dirty
+           }) 
            if (inpt.type === "hidden") { inpt.$isDirty = true }
         })
         changeLoader.observe(elem, {
