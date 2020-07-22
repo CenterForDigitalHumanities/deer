@@ -70,8 +70,7 @@ export default class DeerReport {
         this.attribution = elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
-        this.inputs = elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))
-        Array.from(this.inputs).filter(inpt => { return inpt.hasAttribute(DEER.KEY)} ) //Only consider DEER inputs
+        this.inputs = Array.from(elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(",")))
         this.inputs.forEach(inpt => {
            inpt.addEventListener('input', (e) => {
                inpt.$isDirty = true //Make the input dirty
