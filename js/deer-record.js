@@ -91,6 +91,7 @@ export default class DeerReport {
                         let flatKeys = inputElems.map(input => input.getAttribute(DEER.KEY))
                         for (let i = 0; i < inputElems.length; i++) {
                             let el = inputElems[i]
+                            let deerKeyValue = el.getAttribute(DEER.KEY)
                             let mapsToAnno = false                       
                             let assertedValue = ""
                             if (flatKeys.indexOf(deerKeyValue) !== i) {
