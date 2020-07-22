@@ -71,10 +71,14 @@ export default class DeerReport {
         this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
         this.inputs = elem.querySelectorAll(DEER.INPUTS.map(s => s + "[" + DEER.KEY + "]").join(","))
+        this.inputs.filter(inpt => { return inpt.hasAttribute(DEER.KEY)} ) //Only consider DEER inputs
+        this.inputs.forEach(inpt => {
+           inpt.addEventListener('input', (e) => inpt.$isDirty = true) 
+           if (inpt.type === "hidden") { inpt.$isDirty = true }
+        })
         changeLoader.observe(elem, {
             attributes: true
         })
-        elem.oninput = event => this.$isDirty = true
         elem.onsubmit = this.processRecord.bind(this)
 
         if (this.id) {
@@ -90,7 +94,6 @@ export default class DeerReport {
                             let mapsToAnno = false
                             if (deerKeyValue) {
                                 //Then this is a DEER form input.
-                                el.addEventListener('input', (e) => e.target.$isDirty = true)
                                 let assertedValue = ""
                                 if (flatKeys.indexOf(deerKeyValue) !== i) {
                                     UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + deerKeyValue + "' detected in form.  This input will be ignored upon form submission and only the first instance will be respected.  See duplicate below.", el)
@@ -213,11 +216,6 @@ export default class DeerReport {
                     UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
                 }).bind(this))
                 .then(() => elem.click())
-        } else {
-            Array.from(this.inputs).forEach(inpt => {
-                if (inpt.getAttribute(DEER.KEY)) { inpt.addEventListener('input', (e) => e.target.$isDirty = true) }
-                if (inpt.type === "hidden") { inpt.$isDirty = true }
-            })
         }
     }
 
