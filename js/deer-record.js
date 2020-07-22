@@ -77,7 +77,6 @@ export default class DeerReport {
                inpt.$isDirty = true //Make the input dirty
                this.$isDirty = true //Make the DeerReport dirty
            }) 
-           if (inpt.type === "hidden") { inpt.$isDirty = true }
         })
         changeLoader.observe(elem, {
             attributes: true
@@ -219,6 +218,11 @@ export default class DeerReport {
                     UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
                 }).bind(this))
                 .then(() => elem.click())
+        }
+        else{
+            this.inputs.forEach(inpt => {
+               if (inpt.type === "hidden") { inpt.$isDirty = true }
+            })
         }
     }
 
