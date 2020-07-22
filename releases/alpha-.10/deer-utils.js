@@ -446,6 +446,7 @@ export default {
     */
     assertElementValue: function (elem, val, mapsToAnno) {
         let UTILS = this
+        delete elem.$isDirty
         if (elem.type === "hidden") {
             if (elem.hasAttribute("value") && elem.value !== undefined) {
                 if (!mapsToAnno || elem.value !== val) {
