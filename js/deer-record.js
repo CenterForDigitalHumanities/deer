@@ -370,7 +370,7 @@ export default class DeerReport {
                     })
                 })
             return Promise.all(annotations).then(() => {
-                DEER.UTILS.broadcast(undefined,DEER.EVENTS.UPDATED, this.elem, entity)
+                UTILS.broadcast(undefined,DEER.EVENTS.UPDATED, this.elem, entity)
                 return entity
             })
         }).bind(this))
