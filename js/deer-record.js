@@ -369,7 +369,10 @@ export default class DeerReport {
                             if(anno.new_obj_state.creator)input.setAttribute(DEER.ATTRIBUTION, anno.new_obj_state.creator)
                     })
                 })
-            return Promise.all(annotations).then(() => entity)
+            return Promise.all(annotations).then(() => {
+                DEER.UTILS.broadcast(undefined,DEER.EVENTS.UPDATED, this.elem, entity)
+                return entity
+            })
         }).bind(this))
             .then(entity => {
                 this.elem.setAttribute(DEER.ID, entity["@id"])
