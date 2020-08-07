@@ -12,7 +12,11 @@
 
 import { default as DEER } from './deer-config.js'
 
+var worker = new Worker('./js/worker.js')
+worker.postMessage({action:"init"})
+
 export default {
+    worker: worker,
     listFromCollection: function (collectionId) {
         let queryObj = {
             body: {
@@ -36,7 +40,7 @@ export default {
         // TODO: There must be a best way to do this...
         let prop;
         if (property === undefined || property === "") {
-            console.error("Value of property to lookup is missing!")
+            // Value of property to lookup is missing!
             return undefined
         }
         if (Array.isArray(property)) {
@@ -104,6 +108,23 @@ export default {
             }
             return label || noLabel
         }
+    },
+    postView(entity, matchOn = ["__rerum.generatedBy", "creator"]){
+        let UTILS = this
+        let findId = entity["@id"] || entity.id || entity
+        if (typeof findId !== "string") {
+            UTILS.warning("Unable to find URI in object:", entity)
+            return entity
+        }
+        let message = {
+            id:findId,
+            action:"view",
+            args: {
+                matchOn: matchOn,
+                entity: entity
+            }
+        }
+        this.worker.postMessage(message)
     },
     /**
      * Take a known object with an id and query for annotations targeting it.

@@ -55,6 +55,9 @@ async function renderChange(mutationsList) {
 
 export default class DeerReport {
     constructor(elem, deer = {}) {
+
+return false
+
         for (let key in DEER) {
             if (typeof DEER[key] === "string") {
                 DEER[key] = deer[key] || config[key]
