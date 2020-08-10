@@ -63,6 +63,7 @@ function getItem(id, args) {
                 })
             } else {
                 expandEntity(id, args.matchOn).then(obj => {
+                    let objectStore = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
                     objectStore.put(obj, obj['@id'])
                     postMessage({
                         item: obj,

@@ -31,18 +31,8 @@ async function renderChange(mutationsList) {
             case DEER.LIST:
                 let id = mutation.target.getAttribute(DEER.ID)
                 if (id === "null" || mutation.target.getAttribute(DEER.COLLECTION)) return
-                let obj = {}
-                try {
-                    obj = JSON.parse(localStorage.getItem(id))
-                } catch (err) { }
-                if (!obj || !obj["@id"]) {
-                    obj = await fetch(id).then(response => response.json()).catch(error => error)
-                    if (obj) {
-                        localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
-                    } else {
-                        return false
-                    }
-                }
+                let obj = await fetch(id).then(response => response.json()).catch(error => error)
+                if (!obj) return false
                 RENDER.element(mutation.target, obj)
                 break
             case DEER.LISTENING:
@@ -54,7 +44,7 @@ async function renderChange(mutationsList) {
                     })
                 }
         }
-        if(mutation.type === 'childList') {
+        if (mutation.type === 'childList') {
             RENDER.detectInsertions(elem)
         }
     }
@@ -97,14 +87,20 @@ RENDER.applyTemplate = (elem, obj, template) => {
     UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
 }
 RENDER.element = function (elem, obj) {
-    return UTILS.postView(obj,undefined,{
-            list: elem.getAttribute(DEER.LIST),
-            link: elem.getAttribute(DEER.LINK),
-            collection: elem.getAttribute(DEER.COLLECTION),
-            key: elem.getAttribute(DEER.KEY),
-            label: elem.getAttribute(DEER.LABEL),
-            config: DEER
-        })
+    UTILS.worker.addEventListener("message", event => {
+        let templ = DEER.TEMPLATES[elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")]
+        if (event.data.action === "expanded") {
+            RENDER.applyTemplate(elem, event.data.item, templ)
+        }
+    })
+    return UTILS.postView(obj, undefined, {
+        list: elem.getAttribute(DEER.LIST),
+        link: elem.getAttribute(DEER.LINK),
+        collection: elem.getAttribute(DEER.COLLECTION),
+        key: elem.getAttribute(DEER.KEY),
+        label: elem.getAttribute(DEER.LABEL),
+        config: DEER
+    })
 
     return UTILS.expand(obj).then(obj => {
         let tmplName = elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")
@@ -236,7 +232,7 @@ DEER.TEMPLATES.entity = function (obj, options = {}) {
                 let v = UTILS.getValue(value)
                 if (typeof v === "object") { v = UTILS.getLabel(v) }
                 if (v === "[ unlabeled ]") { v = v['@id'] || v.id || "[ complex value unknown ]" }
-                list += (value['@id']) ? `<dd ${DEER.SOURCE}="${UTILS.getValue(value.source, "citationSource")}"><a href="${options.link || ""}#${value['@id']}">${v}</a></dd>` : `<dd ${DEER.SOURCE}="${UTILS.getValue(value, "citationSource")}">${v}</dd>`
+                list += (value && value['@id']) ? `<dd ${DEER.SOURCE}="${UTILS.getValue(value.source, "citationSource")}"><a href="${options.link || ""}#${value['@id']}">${v}</a></dd>` : `<dd ${DEER.SOURCE}="${UTILS.getValue(value, "citationSource")}">${v}</dd>`
             }
         }
     }
@@ -309,14 +305,6 @@ export default class DeerRender {
         this.id = elem.getAttribute(DEER.ID)
         this.collection = elem.getAttribute(DEER.COLLECTION)
         this.elem = elem
-
-        UTILS.worker.onmessage = event => {
-            let id = event.data.id
-            if (id && (id === this.id) && (event.data.action === "expanded")) {
-                // render the loaded object
-                RENDER.applyTemplate(this.elem,event.data.item,DEER.TEMPLATES[elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")] || DEER.TEMPLATES.json)
-            }
-        }
 
         try {
             if (!(this.id || this.collection)) {

@@ -15,7 +15,13 @@ import { default as DEER } from './deer-config.js'
 var worker = new Worker('./js/worker.js')
 worker.postMessage({action:"init"})
 
-export default {
+worker.onmessage = event => {
+    if (event.data.action === "expanded") {
+        utils.broadcast(event,"expanded",document,event.data.item)
+    }
+}
+
+const utils = {
     worker: worker,
     listFromCollection: function (collectionId) {
         let queryObj = {
@@ -512,3 +518,5 @@ export default {
     }
 
 }
+
+export default utils
