@@ -58,5 +58,5 @@ export default {
         cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
     },
 
-    version: "alpha 0.10"
+    version: "1.0.0"
 }
