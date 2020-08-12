@@ -13,11 +13,11 @@
 import { default as DEER } from './deer-config.js'
 
 var worker = new Worker('./js/worker.js')
-worker.postMessage({action:"init"})
+worker.postMessage({ action: "init" })
 
 worker.onmessage = event => {
     if (event.data.action === "expanded") {
-        utils.broadcast(event,"expanded",document,event.data.item)
+        utils.broadcast(event, "expanded", document, event.data.item)
     }
 }
 
@@ -115,7 +115,7 @@ const utils = {
             return label || noLabel
         }
     },
-    postView(entity, matchOn = ["__rerum.generatedBy", "creator"]){
+    postView(entity, matchOn = ["__rerum.generatedBy", "creator"]) {
         let UTILS = this
         let findId = entity["@id"] || entity.id || entity
         if (typeof findId !== "string") {
@@ -123,8 +123,8 @@ const utils = {
             return entity
         }
         let message = {
-            id:findId,
-            action:"view",
+            id: findId,
+            action: "view",
             args: {
                 matchOn: matchOn,
                 entity: entity
@@ -471,15 +471,120 @@ const utils = {
      * @param fromAnno Boolean for if the value is from a DEER annotation as opposed to part of the object (noted in deer-id on the form) directly.
      * 
     */
-    assertElementValue: function (elem, val, mapsToAnno) {
-        let UTILS = this
+    assertElementValue: function (elem,obj) {
         delete elem.$isDirty
+        let deerKeyValue = elem.getAttribute(DEER.KEY)
+        let mapsToAnno = false
+        let assertedValue = ""
+        if (obj.hasOwnProperty(deerKeyValue)) {
+            if (obj[deerKeyValue].evidence) elem.setAttribute(DEER.EVIDENCE, obj[deerKeyValue].evidence)
+            if (obj[deerKeyValue].motivation) elem.setAttribute(DEER.MOTIVATION, obj[deerKeyValue].motivation)
+            if (obj[deerKeyValue].creator) elem.setAttribute(DEER.ATTRIBUTION, obj[deerKeyValue].creator)
+
+            //Then there is a key on this object that maps to the input.  
+            //It is either an annotation or was part of the object directly.  If it has a 'source' property, we assume it is an annotation.
+            assertedValue = this.getValue(obj[deerKeyValue])
+            mapsToAnno = (typeof obj[deerKeyValue] === "object" && obj[deerKeyValue].hasOwnProperty("source"))
+            if (mapsToAnno) {
+                elem.setAttribute(DEER.SOURCE, this.getValue(obj[deerKeyValue].source, "citationSource"))
+            }
+            let annoBodyObjectType = (typeof assertedValue === "object") ? assertedValue.type || assertedValue["@type"] || "" : ""
+            let delim = elem.getAttribute(DEER.ARRAYDELIMETER) || DEER.DELIMETERDEFAULT || ","
+            let arrayOfValues = []
+            if (Array.isArray(assertedValue)) {
+                /**
+                 * This could mean multiple annotations of similar bodies exist so UTILS.expand() put them together.
+                 * This could mean that the key on the orignal object also had annotations existing for it so UTILS.expand() put them together.
+                 * This could mean that the key on the original object was an array already, and may not contain anything we can get a value from.
+                 * We will preference the first entry of the array that is an annotation.  
+                 * If no annotations are found, DEER will aribitrarily pick the last string or number encountered.   
+                 * DEER does not technically support this situation, but can make a best guess and help it along...
+                 */
+                this.warning("There are multiple possible values for key '" + deerKeyValue + "'. See below. ", assertedValue)
+                let arbitraryAssertedValue = ""
+                for (let entry of assertedValue) {
+                    if (["string", "number"].indexOf(typeof entry) > -1) {
+                        //We found it and understand it, but we preference annotation objects so look at the rest of the entries.
+                        //Consequently, if no annotations are found, the last string/number entry will be the one DEER uses.
+                        mapsToAnno = false
+                        elem.setAttribute(DEER.SOURCE, this.getValue(entry.source, "citationSource"))
+                        assertedValue = arbitraryAssertedValue = this.getValue(entry)
+                    } else if (typeof entry === "object") {
+                        if (entry.hasOwnProperty(deerKeyValue) && entry[deerKeyValue].hasOwnProperty("source")) {
+                            //Then this is an object like {deerKeyValue:{value:"hopefully", source:"anno/123"}} and can be preferenced
+                            mapsToAnno = true
+                            elem.setAttribute(DEER.SOURCE, this.getValue(entry.source, "citationSource"))
+                            assertedValue = arbitraryAssertedValue = this.getValue(entry[deerKeyValue])
+                            break
+                        } else if (entry.hasOwnProperty("source")) {
+                            //Then this is an object like {value:"hopefully", source:"anno/123"} and can be preferenced
+                            mapsToAnno = true
+                            elem.setAttribute(DEER.SOURCE, this.getValue(entry.source, "citationSource"))
+                            assertedValue = arbitraryAssertedValue = this.getValue(entry)
+                            break
+                        }
+                    }
+                }
+                if (arbitraryAssertedValue) { this.warning("DEER arbitrarily chose the value '" + arbitraryAssertedValue + "'.") } else {
+                    console.error("DEER did not understand any of these values.  Therefore, the value will be an empty string.")
+                    assertedValue = ""
+                }
+            } else {
+                switch (typeof assertedValue) {
+                    //getValue either returned an object because it could not find obj.value or because obj.value was an object.  
+                    case "object":
+                        if (mapsToAnno) {
+                            //Then getValue found an annotation DEER understood and the body.value was an object.
+                            if (elem.getAttribute(DEER.INPUTTYPE)) {
+                                //Only an element noted as a DEER.INPUTTYPE would have this kind of annotation behind it.  For others, it is an error.  
+                                if (annoBodyObjectType === "" || elem.getAttribute(DEER.INPUTTYPE) !== annoBodyObjectType) {
+                                    //The HTML input should note the same type of container as the annotation so helper functiions can determine if it is a supported in DEER.CONTAINERS
+                                    this.warning("Container type mismatch!.  See attribute '" + DEER.INPUTTYPE + "' on element " + elem.outerHTML + "." +
+                                        " The element is now dirty and will overwrite the type noted in the annotation seen below upon form submission." +
+                                        " If the type of the annotation body is not a supported type then DEER will not be able to get the array of values.", obj[deerKeyValue])
+                                }
+                                if (elem.getAttribute(DEER.INPUTTYPE) === "object") {
+                                    try {
+                                        assertedValue = JSON.stringify(assertedValue)
+                                    } catch (err) {
+                                        assertedValue = ""
+                                    }
+                                } else {
+                                    arrayOfValues = this.getArrayFromObj(assertedValue, el)
+                                    assertedValue = this.stringifyArray(arrayOfValues, delim)
+                                }
+                            } else {
+                                //This should have been a string or number.  We do not support whatever was meant to be here.  
+                                console.error("We do not support annotation body values that are objects, unless they are a supported container object and the element " + elem.outerHTML + " notes '" + DEER.INPUTTYPE + "'.  Therefore, the value of annotation is being ignored.  See annotation below.")
+                                console.log(obj[deerKeyValue])
+                                assertedValue = ""
+                            }
+                        } else {
+                            //Then getValue returned an object and could not confirm it was an annotation.  We cannot find a value. 
+                            console.error("Could not find 'value' in the object body.  See below.")
+                            console.log(obj[deerKeyValue])
+                            assertedValue = ""
+                        }
+                        break
+                    case "string":
+                    case "number":
+                    //getValue either found that obj[deerKeyValue] was a string or found that it was an object with a 'value' that was a string or number. 
+                    //The asserted value is already set and we know whether or not it mapsToAnno, so do nothing.  Keep this here for future handling. 
+                        break
+                    default:
+                        //An undefined situation perhaps?
+                        console.error("We do not support values of this type '" + typeof assertedValue + "'.  Therefore, the value of annotation is being ignored.  See annotation below.")
+                        console.log(obj[deerKeyValue])
+                        assertedValue = ""
+                }
+            }
+        }
         if (elem.type === "hidden") {
             if (elem.hasAttribute("value") && elem.value !== undefined) {
-                if (!mapsToAnno || elem.value !== val) {
+                if (!mapsToAnno || elem.value !== assertedValue) {
                     elem.$isDirty = true
-                    if (elem.value !== val && elem.hasAttribute(DEER.INPUTTYPE)) {
-                        UTILS.warning("Hidden element with a hard coded 'value' also contains attributes '" + DEER.KEY + "' and '" + DEER.INPUTTYPE + "'.  " +
+                    if (elem.value !== assertedValue && elem.hasAttribute(DEER.INPUTTYPE)) {
+                        this.warning("Hidden element with a hard coded 'value' also contains attributes '" + DEER.KEY + "' and '" + DEER.INPUTTYPE + "'.  " +
                             "DEER takes this to mean the '" + elem.getAttribute(DEER.KEY) + "' annotation body value array will .join() into this string and pass a comparison operation. " +
                             "If the array value as string does not match the hidden element's value string (including empty string), it will be considered dirty and a candidate " +
                             "to be updated upon submission even though no interaction has taken place to change it.  Make sure this is what you want. \n" +
@@ -488,20 +593,19 @@ const utils = {
                             "If you want form submission to handle the annotation behind the input, make sure to handle the $isDirty state appropriately and restore the '" + DEER.KEY + "' attribute before submission. " +
                             "See below.", elem)
                     }
-
                 }
             }
         } else {
-            if (elem.hasAttribute("value") && elem.value !== undefined) {
+            if (mapsToAnno && elem.hasAttribute("value") && elem.value !== undefined) {
                 //Empty strings count as a value.
-                UTILS.warning("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '" + val + "'.  See below.", elem)
+                this.warning("Element value is already set.  The element value should not be hard coded and will be overwritten by the annotation value '" + assertedValue + "'.  See below.", elem)
             }
             if (elem.hasAttribute(DEER.INPUTTYPE)) {
-                UTILS.warning("This input element also has attribute '" + DEER.INPUTTYPE + "'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
+                this.warning("This input element also has attribute '" + DEER.INPUTTYPE + "'.  This attribute is only for hidden inputs only.  The attribute is being removed to avoid errors.")
                 elem.removeAttribute(DEER.INPUTTYPE)
             }
-            elem.value = val
-            elem.setAttribute("value", val)
+            elem.value = assertedValue
+            elem.setAttribute("value", assertedValue)
         }
     },
 

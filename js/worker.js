@@ -16,7 +16,7 @@ self.onmessage = message => {
     const args = message.data.args || {}
     switch (message.data.action) {
         case "init": {
-            var DBOpenRequest = self.indexedDB.open(IDBSTORE, 2)
+            var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1)
             DBOpenRequest.onsuccess = event => db = DBOpenRequest.result
 
             DBOpenRequest.onerror = event => console.error(event)

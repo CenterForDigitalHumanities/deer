@@ -89,7 +89,7 @@ RENDER.applyTemplate = (elem, obj, template) => {
 RENDER.element = function (elem, obj) {
     UTILS.worker.addEventListener("message", event => {
         let templ = DEER.TEMPLATES[elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")]
-        if (event.data.action === "expanded") {
+        if (event.data.action === "expanded" && event.data.id === elem.getAttribute(DEER.ID)) {
             RENDER.applyTemplate(elem, event.data.item, templ)
         }
     })
@@ -255,27 +255,7 @@ DEER.TEMPLATES.list = function (obj, options = {}) {
 
     return tmpl
 }
-/**
- * The TEMPLATED renderer to draw JSON to the screen
- * @param {Object} obj some json of type Person to be drawn
- * @param {Object} options additional properties to draw with the Person
- */
-DEER.TEMPLATES.person = function (obj, options = {}) {
-    try {
-        let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
-        let dob = DEER.TEMPLATES.prop(obj, { key: "birthDate", label: "Birth Date" }) || ``
-        let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", label: "Death Date" }) || ``
-        let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
-        let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
-        tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
-        tmpl += dob + dod
-        tmpl += `<a href="#${obj["@id"]}">${name}</a>`
-        return tmpl
-    } catch (err) {
-        return null
-    }
-    return null
-}
+
 /**
  * The TEMPLATED renderer to draw JSON to the screen
  * @param {Object} obj some json of type Event to be drawn
