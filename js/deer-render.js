@@ -93,49 +93,13 @@ RENDER.element = function (elem, obj) {
             RENDER.applyTemplate(elem, event.data.item, templ)
         }
     })
-    return UTILS.postView(obj, undefined, {
+    UTILS.postView(obj, undefined, {
         list: elem.getAttribute(DEER.LIST),
         link: elem.getAttribute(DEER.LINK),
         collection: elem.getAttribute(DEER.COLLECTION),
         key: elem.getAttribute(DEER.KEY),
         label: elem.getAttribute(DEER.LABEL),
         config: DEER
-    })
-
-    return UTILS.expand(obj).then(obj => {
-        let tmplName = elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")
-        let template = DEER.TEMPLATES[tmplName] || DEER.TEMPLATES.json
-        let options = {
-            list: elem.getAttribute(DEER.LIST),
-            link: elem.getAttribute(DEER.LINK),
-            collection: elem.getAttribute(DEER.COLLECTION),
-            key: elem.getAttribute(DEER.KEY),
-            label: elem.getAttribute(DEER.LABEL),
-            config: DEER
-        }
-        let templateResponse = template(obj, options)
-        elem.innerHTML = (typeof templateResponse.html === "string") ? templateResponse.html : templateResponse
-        //innerHTML may need a little time to finish to actually populate the template to the DOM, so do the timeout trick here.
-        /**
-         * A streamlined approach would treat each of these as a Promise-like node and the return of RENDER.element
-         * would be a Promise.  That way, something that looped and did may of these could do something like
-         * Promise.all() before firing a completion/failure event (or something).  
-         */
-        setTimeout(function () {
-            let newViews = (elem.querySelectorAll(config.VIEW).length) ? elem.querySelectorAll(config.VIEW) : []
-            let newForms = (elem.querySelectorAll(config.FORM).length) ? elem.querySelectorAll(config.VIEW) : []
-            if (newForms.length) {
-                UTILS.broadcast(undefined, DEER.EVENTS.NEW_FORM, elem, { set: newForms })
-            }
-            if (newViews.length) {
-                UTILS.broadcast(undefined, DEER.EVENTS.NEW_VIEW, elem, { set: newViews })
-            }
-            UTILS.broadcast(undefined, DEER.EVENTS.VIEW_RENDERED, elem, obj)
-        }, 0)
-
-        if (typeof templateResponse.then === "function") { templateResponse.then(elem, obj, options) }
-        //Note this is deprecated for the "deer-view-rendered" event.  above.  
-        UTILS.broadcast(undefined, DEER.EVENTS.LOADED, elem, obj)
     })
 }
 
@@ -268,7 +232,6 @@ DEER.TEMPLATES.event = function (obj, options = {}) {
     } catch (err) {
         return null
     }
-    return null
 }
 
 export default class DeerRender {
