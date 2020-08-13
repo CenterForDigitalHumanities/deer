@@ -502,7 +502,8 @@ export default {
      * @param contextStringValue This is the value from the DEER.CONTEXT attribute on an HTML form.  It is a string.
     **/
     processContextSyntax: function(contextStringValue){
-
+        // Regex we are thinking contextStringValue.match(?<=\[)(.*?)(?=\])
+        // https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
     }
 
 }
