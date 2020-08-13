@@ -66,7 +66,7 @@ export default class DeerReport {
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
+        this.context = UTILS.processContextSyntax(elem.getAttribute(DEER.CONTEXT)) // inherited to inputs
         this.attribution = elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
@@ -226,7 +226,7 @@ export default class DeerReport {
     processRecord(event) {
         event.preventDefault()
         this.evidence = this.elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = this.elem.getAttribute(DEER.CONTEXT) // inherited to inputs
+        this.context = UTILS.processContextSyntax(this.elem.getAttribute(DEER.CONTEXT)) // inherited to inputs
         this.attribution = this.elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = this.elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = this.elem.getAttribute(DEER.TYPE)
@@ -519,7 +519,7 @@ async function create(obj, attribution, evidence) {
             continue
         }
         let annotation = {
-            "@context": "",
+            "@context": mint["@context"],
             "@type": "Annotation",
             "motivation": "describing",
             "target": objID,
