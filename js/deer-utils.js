@@ -488,6 +488,21 @@ export default {
                 console.log(logMe)
             }
         }
+    },
+
+    /**
+     * Since all Linked Data has the right to be described by multiple contexts, DEER has a special
+     * syntax to support this.  The value of an HTML Attribute DEER.CONTEXT ('deer-context' by default) 
+     * can list multiple URLs like in the example below.
+     *
+     * <span deer-context="[http://example.org/context.json][https://otherexample.org/othercontext.json]"></span>
+     *
+     * Process the value and return either a single string (URL), an array of strings (URLs), or an empty string.
+     *
+     * @param contextStringValue This is the value from the DEER.CONTEXT attribute on an HTML form.  It is a string.
+    **/
+    processContextSyntax: function(contextStringValue){
+
     }
 
 }
