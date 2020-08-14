@@ -299,8 +299,8 @@ export default class DeerReport {
                         body: {}
                     }
                     /**
-                     * Context granularity support, should we seek it.  Each annotation can have its own context, where the entity
-                     * context is included.  Note that expand() should put all unique contexts onto the entity and not repeat them.
+                     * Context granularity support, should we seek it.  Each annotation can have its own context.
+                     * Note that expand() should put all unique contexts onto the entity and not repeat them.
                     */
                     /*  
                     let annoContext = input.getAttribute(DEER.CONTEXT) || this.context
