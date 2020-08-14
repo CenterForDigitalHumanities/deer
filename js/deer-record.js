@@ -324,7 +324,7 @@ export default class DeerReport {
                         }
                         else{
                             //context for the entity was an empty string, so just use the context from the input
-                            annotation["@context"] = UTILS.processContextSyntax(annoContext)
+                            annotation["@context"] = processed_anno_context
                         }
                     }
                     else{
