@@ -301,7 +301,8 @@ export default class DeerReport {
                     }
                     if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
                     /**
-                     * Context granularity support, should we seek it.
+                     * Context granularity support, should we seek it.  Each annotation can have its own context, where the entity
+                     * context is included.  Note that expand() should put all unique contexts onto the entity and not repeat them.
                     */
 
                     /*
