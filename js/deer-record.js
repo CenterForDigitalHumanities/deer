@@ -298,17 +298,17 @@ export default class DeerReport {
                         target: entity["@id"],
                         body: {}
                     }
-                    
                     /**
                      * Context granularity support, should we seek it.  Each annotation can have its own context, where the entity
                      * context is included.  Note that expand() should put all unique contexts onto the entity and not repeat them.
                     */
-
                     /*  
                     let annoContext = input.getAttribute(DEER.CONTEXT) || this.context
                     if(annoContext) {annotation["@context"] = UTILS.processContextSyntax(annoContext)}
                     */
                     if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
+                    // If DEER is promising Web Annotations are being generated, then we need this.
+                    //else { annotation["@context"] = "http://www.w3.org/ns/anno.jsonld" }
                     if(creatorId) { annotation.creator = creatorId }
                     if(motivation) { annotation.motivation = motivation }
                     if(evidence) { annotation.evidence = evidence }
