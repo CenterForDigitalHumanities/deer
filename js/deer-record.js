@@ -292,46 +292,23 @@ export default class DeerReport {
                     let creatorId = input.getAttribute(DEER.ATTRIBUTION) || this.attribution
                     let motivation = input.getAttribute(DEER.MOTIVATION) || this.motivation
                     let evidence = input.getAttribute(DEER.EVIDENCE) || this.evidence
-                    
                     let action = (inputId) ? "UPDATE" : "CREATE"
                     let annotation = {
                         type: "Annotation",
                         target: entity["@id"],
                         body: {}
                     }
-                    if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
+                    
                     /**
                      * Context granularity support, should we seek it.  Each annotation can have its own context, where the entity
                      * context is included.  Note that expand() should put all unique contexts onto the entity and not repeat them.
                     */
 
-                    /*
-                    let annoContext = input.getAttribute(DEER.CONTEXT) ? input.getAttribute(DEER.CONTEXT) : this.context
-                    if(annoContext && annoContext !== this.context) {
-                        let processed_anno_context = UTILS.processContextSyntax(annoContext)
-                        let processed_entity_context = UTILS.processContextSyntax(this.context)
-                        if(processed_entity_context){
-                            //Then we know both have a context that are non-empty strings, and they don't match.  Combine them.
-                            if(!Array.isArray(processed_anno_context)){
-                                //Then it is a single string URL.  Make an array of 1.
-                                processed_anno_context = [processed_anno_context]
-                            }
-                            if(!Array.isArray(processed_entity_context)){
-                                //Then it is a single string URL.  Make an array of 1.
-                                processed_entity_context = [processed_entity_context]
-                            }
-                            annotation["@context"]  = [...new Set([...processed_anno_context, ...processed_entity_context])] //no duplicates
-                        }
-                        else{
-                            //context for the entity was an empty string, so just use the context from the input
-                            annotation["@context"] = processed_anno_context
-                        }
-                    }
-                    else{
-                        //The contexts matched or the annotation context was an empty string.  The entity context could also be an empty string.
-                        if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
-                    }
+                    /*  
+                    let annoContext = input.getAttribute(DEER.CONTEXT) || this.context
+                    if(annoContext) {annotation["@context"] = UTILS.processContextSyntax(annoContext)}
                     */
+                    if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
                     if(creatorId) { annotation.creator = creatorId }
                     if(motivation) { annotation.motivation = motivation }
                     if(evidence) { annotation.evidence = evidence }
