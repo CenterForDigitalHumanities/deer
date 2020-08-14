@@ -66,7 +66,7 @@ export default class DeerReport {
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = UTILS.processContextSyntax(elem.getAttribute(DEER.CONTEXT)) // inherited to inputs
+        this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.attribution = elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
@@ -102,6 +102,7 @@ export default class DeerReport {
                                 if(obj[deerKeyValue].evidence)el.setAttribute(DEER.EVIDENCE, obj[deerKeyValue].evidence)
                                 if(obj[deerKeyValue].motivation)el.setAttribute(DEER.MOTIVATION, obj[deerKeyValue].motivation)
                                 if(obj[deerKeyValue].creator)el.setAttribute(DEER.ATTRIBUTION, obj[deerKeyValue].creator)
+                                //TODO handle @context?
 
                                 //Then there is a key on this object that maps to the input.  
                                 //It is either an annotation or was part of the object directly.  If it has a 'source' property, we assume it is an annotation.
@@ -226,7 +227,7 @@ export default class DeerReport {
     processRecord(event) {
         event.preventDefault()
         this.evidence = this.elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = UTILS.processContextSyntax(this.elem.getAttribute(DEER.CONTEXT)) // inherited to inputs
+        this.context = this.elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.attribution = this.elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = this.elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = this.elem.getAttribute(DEER.TYPE)
@@ -244,7 +245,7 @@ export default class DeerReport {
         let record = {
             "@type": this.type
         }
-        if (this.context) { record["@context"] = this.context }
+        if (this.context) { record["@context"] = UTILS.processContextSyntax(this.context) }
         for (let p of DEER.PRIMITIVES) {
             try {
                 record[p] = this.elem.querySelector("[" + DEER.KEY + "='" + p + "']").value
@@ -297,6 +298,7 @@ export default class DeerReport {
                         target: entity["@id"],
                         body: {}
                     }
+                    if(this.context) { annotation["@context"] = UTILS.processContextSyntax(this.context) } 
                     if(creatorId) { annotation.creator = creatorId }
                     if(motivation) { annotation.motivation = motivation }
                     if(evidence) { annotation.evidence = evidence }
@@ -367,6 +369,7 @@ export default class DeerReport {
                             if(anno.new_obj_state.evidence)input.setAttribute(DEER.EVIDENCE, anno.new_obj_state.evidence)
                             if(anno.new_obj_state.motivation)input.setAttribute(DEER.MOTIVATION, anno.new_obj_state.motivation)
                             if(anno.new_obj_state.creator)input.setAttribute(DEER.ATTRIBUTION, anno.new_obj_state.creator)
+                            //TODO handle @context?
                     })
                 })
             return Promise.all(annotations).then(() => {
@@ -447,7 +450,7 @@ export default class DeerReport {
             }
         }
         if (this.type) { record.type = this.type }
-        if (this.context) { record["@context"] = this.context }
+        if (this.context) { record["@context"] = UTILS.processContextySyntax(this.context) }
         if (this.evidence) { record.evidence = this.evidence }
         let formId = this.elem.getAttribute(DEER.ID)
         let action = "CREATE"
@@ -470,6 +473,9 @@ export default class DeerReport {
 /**
  * Generate a new object URI for a resource. Abstract additional
  * properties to annotations.
+
+ * Note: As of 8/14/2020, this appears to be unused.
+ * 
  * @param {Object} obj complete resource to process
  * @param {Object} attribution creator and generator identities
  */
@@ -519,7 +525,7 @@ async function create(obj, attribution, evidence) {
             continue
         }
         let annotation = {
-            "@context": mint["@context"],
+            "@context": mint["@context"],  //same as entity
             "@type": "Annotation",
             "motivation": "describing",
             "target": objID,

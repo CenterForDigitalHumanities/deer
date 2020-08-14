@@ -504,6 +504,8 @@ export default {
     processContextSyntax: function(contextStringValue){
         // Regex we are thinking contextStringValue.match(/(?<=\[)(.*?)(?=\])/g)
         // https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
+        let processedValue = contextStringValue.match(/(?<=\[)(.*?)(?=\])/g)
+        return (processedValue === null) ? "" : processedValue.length === 1 ? processedValue[0] : processedValue
     }
 
 }
