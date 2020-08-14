@@ -328,7 +328,7 @@ export default class DeerReport {
                         }
                     }
                     else{
-                        //The contexts matched or the annotation context was an empty string.
+                        //The contexts matched or the annotation context was an empty string.  The entity context could also be an empty string.
                         if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
                     }
                     */
