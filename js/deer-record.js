@@ -303,7 +303,7 @@ export default class DeerReport {
                      * Note that expand() should put all unique contexts onto the entity and not repeat them.
                     */
                     /*  
-                    let annoContext = input.getAttribute(DEER.CONTEXT) || this.context
+                    let annoContext = input.getAttribute(DEER.CONTEXT)
                     if(annoContext) {annotation["@context"] = UTILS.processContextSyntax(annoContext)}
                     */
                     if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
