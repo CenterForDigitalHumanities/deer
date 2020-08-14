@@ -66,7 +66,7 @@ export default class DeerReport {
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
+        this.context = elem.getAttribute(DEER.CONTEXT) // unused
         this.attribution = elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
@@ -227,7 +227,7 @@ export default class DeerReport {
     processRecord(event) {
         event.preventDefault()
         this.evidence = this.elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = this.elem.getAttribute(DEER.CONTEXT) ? this.elem.getAttribute(DEER.CONTEXT) : ""  // inherited to inputs
+        this.context = this.elem.getAttribute(DEER.CONTEXT) ? this.elem.getAttribute(DEER.CONTEXT) : "" 
         this.attribution = this.elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = this.elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = this.elem.getAttribute(DEER.TYPE)
@@ -483,7 +483,7 @@ export default class DeerReport {
             }
         }
         if (this.type) { record.type = this.type }
-        if (this.context) { record["@context"] = UTILS.processContextySyntax(this.context) }
+        if (this.context) { record["@context"] = UTILS.processContextSyntax(this.context) }
         if (this.evidence) { record.evidence = this.evidence }
         let formId = this.elem.getAttribute(DEER.ID)
         let action = "CREATE"
