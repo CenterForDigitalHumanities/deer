@@ -328,7 +328,7 @@ export default class DeerReport {
                         }
                     }
                     else{
-                        //The contexts matched, so just process what you know, if it isn't an empty string
+                        //The contexts matched or the annotation context was an empty string.
                         if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
                     }
                     */
