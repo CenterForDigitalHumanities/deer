@@ -510,7 +510,7 @@ export default {
          * b.match(/(?<=\[)(.*?)(?=\])/g)
          * ["URL_", "URL_2", "URL[_3"]
         */
-       let processedValue = (contextStringValue !== null) ? contextStringValue.match(/(?<=\[)(.*?)(?=\])/g) || [] : []
+       let processedValue = (contextStringValue !== null) ? contextStringValue.match(/(?<=\[)(.*?)(?=\])/g) : []
        return (processedValue.length>1) ? processedValue : processedValue[0] || ""
     }
 }
