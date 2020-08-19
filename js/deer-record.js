@@ -66,7 +66,7 @@ export default class DeerReport {
         this.id = elem.getAttribute(DEER.ID)
         this.elem = elem
         this.evidence = elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
+        this.context = elem.getAttribute(DEER.CONTEXT) // unused
         this.attribution = elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = elem.getAttribute(DEER.TYPE)
@@ -102,6 +102,7 @@ export default class DeerReport {
                                 if(obj[deerKeyValue].evidence)el.setAttribute(DEER.EVIDENCE, obj[deerKeyValue].evidence)
                                 if(obj[deerKeyValue].motivation)el.setAttribute(DEER.MOTIVATION, obj[deerKeyValue].motivation)
                                 if(obj[deerKeyValue].creator)el.setAttribute(DEER.ATTRIBUTION, obj[deerKeyValue].creator)
+                                //TODO handle @context?
 
                                 //Then there is a key on this object that maps to the input.  
                                 //It is either an annotation or was part of the object directly.  If it has a 'source' property, we assume it is an annotation.
@@ -226,7 +227,7 @@ export default class DeerReport {
     processRecord(event) {
         event.preventDefault()
         this.evidence = this.elem.getAttribute(DEER.EVIDENCE) // inherited to inputs
-        this.context = this.elem.getAttribute(DEER.CONTEXT) // inherited to inputs
+        this.context = elem.getAttribute(DEER.CONTEXT) // inherited to inputs
         this.attribution = this.elem.getAttribute(DEER.ATTRIBUTION) // inherited to inputs
         this.motivation = this.elem.getAttribute(DEER.MOTIVATION) // inherited to inputs
         this.type = this.elem.getAttribute(DEER.TYPE)
@@ -244,7 +245,7 @@ export default class DeerReport {
         let record = {
             "@type": this.type
         }
-        if (this.context) { record["@context"] = this.context }
+        if (this.context) { record["@context"] = UTILS.processContextSyntax(this.context) }
         for (let p of DEER.PRIMITIVES) {
             try {
                 record[p] = this.elem.querySelector("[" + DEER.KEY + "='" + p + "']").value
@@ -297,6 +298,17 @@ export default class DeerReport {
                         target: entity["@id"],
                         body: {}
                     }
+                    /**
+                     * Context granularity support, should we seek it.  Each annotation can have its own context.
+                     * Note that expand() should put all unique contexts onto the entity and not repeat them.
+                    */
+                    /*  
+                    let annoContext = input.getAttribute(DEER.CONTEXT)
+                    if(annoContext) {annotation["@context"] = UTILS.processContextSyntax(annoContext)}
+                    */
+                    if(this.context) {annotation["@context"] = UTILS.processContextSyntax(this.context)}
+                    // If DEER is promising Web Annotations are being generated, then we need this.
+                    //else { annotation["@context"] = "http://www.w3.org/ns/anno.jsonld" }
                     if(creatorId) { annotation.creator = creatorId }
                     if(motivation) { annotation.motivation = motivation }
                     if(evidence) { annotation.evidence = evidence }
@@ -367,6 +379,7 @@ export default class DeerReport {
                             if(anno.new_obj_state.evidence)input.setAttribute(DEER.EVIDENCE, anno.new_obj_state.evidence)
                             if(anno.new_obj_state.motivation)input.setAttribute(DEER.MOTIVATION, anno.new_obj_state.motivation)
                             if(anno.new_obj_state.creator)input.setAttribute(DEER.ATTRIBUTION, anno.new_obj_state.creator)
+                            //TODO handle @context?
                     })
                 })
             return Promise.all(annotations).then(() => {
@@ -447,7 +460,7 @@ export default class DeerReport {
             }
         }
         if (this.type) { record.type = this.type }
-        if (this.context) { record["@context"] = this.context }
+        if (this.context) { record["@context"] = UTILS.processContextSyntax(this.context) }
         if (this.evidence) { record.evidence = this.evidence }
         let formId = this.elem.getAttribute(DEER.ID)
         let action = "CREATE"
@@ -465,78 +478,6 @@ export default class DeerReport {
             .then(response => response.json())
             .then(obj => { return obj.new_obj_state })
     }
-}
-
-/**
- * Generate a new object URI for a resource. Abstract additional
- * properties to annotations.
- * @param {Object} obj complete resource to process
- * @param {Object} attribution creator and generator identities
- */
-async function create(obj, attribution, evidence) {
-    let mint = {
-        "@context": obj["@context"] || this.default.context,
-        "@type": obj["@type"] || this.default.type,
-        "name": this.getValue(obj.name || obj.label) || this.default.name,
-        "creator": attribution || this.default.creator
-    }
-    if (evidence) {
-        mint.evidence = evidence
-    }
-    const newObj = await fetch(CREATE_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json; charset=utf-8"
-        },
-        body: JSON.stringify(mint)
-    })
-        .then(this.handleHTTPError)
-        .then(response => response.json())
-    const listID = localStorage.getItem("CURRENT_LIST_ID") || this.DEFAULT_LIST_ID
-    let list = await get(listID)
-    const objID = newObj.new_obj_state["@id"]
-    list.resources.push({
-        "@id": objID,
-        "label": newObj.new_obj_state.name
-    })
-    try {
-        list = await fetch(UPDATE_URL, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json; charset=utf-8"
-            },
-            body: JSON.stringify(list)
-        })
-            .then(this.handleHTTPError)
-            .then(response => response.json().new_obj_state)
-            .catch(err => Promise.reject(err))
-    } catch (err) { }
-    localStorage.setItem(list["@id"], JSON.stringify(list))
-    localStorage.setItem("CURRENT_LIST_ID", list["@id"])
-    let annotations = []
-    for (var key of Object.keys(obj)) {
-        if (["@context", "@type", "name"].indexOf(key) > -1) {
-            continue
-        }
-        let annotation = {
-            "@context": "",
-            "@type": "Annotation",
-            "motivation": "describing",
-            "target": objID,
-            "body": {}
-        }
-        annotation.body[key] = obj[key]
-        if (attribution) {
-            annotation.creator = attribution
-        }
-        if (evidence) {
-            annotation.evidence = evidence
-        }
-        annotations.push(annotation)
-    }
-    // just enforcing the delay
-    let temp = await Promise.all(annotations.map(upsert))
-    return newObj.new_obj_state
 }
 
 export function initializeDeerForms(config) {

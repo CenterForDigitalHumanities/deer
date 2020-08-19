@@ -488,6 +488,29 @@ export default {
                 console.log(logMe)
             }
         }
-    }
+    },
 
+    /**
+     * Since all Linked Data has the right to be described by multiple contexts, DEER has a special
+     * syntax to support this.  The value of an HTML Attribute DEER.CONTEXT ('deer-context' by default) 
+     * can list multiple URLs like in the example below.
+     *
+     * <span deer-context="[http://example.org/context.json][https://otherexample.org/othercontext.json]"></span>
+     *
+     * Process the value and return either a single string (URL), an array of strings (URLs), or an empty string.
+     *
+     * @see https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
+     * @param contextStringValue This is the value from the DEER.CONTEXT attribute on an HTML form.  It is a string.
+    **/
+    processContextSyntax: function processContextSyntax(contextStringValue){
+        /**
+         * Note the intricacies of this regex, that perhaps could be improved.
+         *
+         * let b = "[URL_]1][URL_2][URL[_3]"
+         * b.match(/(?<=\[)(.*?)(?=\])/g)
+         * ["URL_", "URL_2", "URL[_3"]
+        */
+       let processedValue = (contextStringValue !== null) ? contextStringValue.match(/(?<=\[)(.*?)(?=\])/g) : []
+       return (processedValue.length>1) ? processedValue : processedValue[0] || ""
+    }
 }
