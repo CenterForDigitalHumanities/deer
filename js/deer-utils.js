@@ -521,7 +521,7 @@ export default {
             }
         }
         else{
-            console.error("This method expect a 'string' parameter, not "+typeof contextStringValue)
+            console.error("This method expects a 'string' parameter, not "+typeof contextStringValue)
             return ""
         }
     }
