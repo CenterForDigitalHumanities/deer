@@ -510,7 +510,19 @@ export default {
          * b.match(/(?<=\[)(.*?)(?=\])/g)
          * ["URL_", "URL_2", "URL[_3"]
         */
-       let processedValue = (contextStringValue !== null) ? contextStringValue.match(/(?<=\[)(.*?)(?=\])/g) : []
-       return (processedValue.length>1) ? processedValue : processedValue[0] || ""
+        if(typeof contextStringValue === "string"){
+            contextStringValue = contextStringValue.trim()
+            if(contextStringValue.indexOf("http:") === 0 || contextStringValue.indexOf("https:") === 0){
+                return contextStringValue
+            }
+            else{
+                let processedValue = contextStringValue.match(/(?<=\[)(.*?)(?=\])/g)
+                return (processedValue.length>1) ? processedValue : processedValue[0] ? processedValue[0] : ""
+            }
+        }
+        else{
+            console.error("This method expects a 'string' parameter, not "+typeof contextStringValue)
+            return ""
+        }
     }
 }
