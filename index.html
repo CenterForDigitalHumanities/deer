@@ -41,7 +41,7 @@
             <h2>Installing DEER</h2>
             <p class="col-12">To install the script on your project, use the <code>deer.js</code> on your page.</p>
             <small class="col-12">
-                <pre>&lt;script src="//centerfordigitalhumanities.github.io/deer/releases/alpha-0.11/deer.js" type="module">&lt;/script></pre>
+                <pre>&lt;script src="//deer.rerum.io/DEER/releases/alpha-0.11/deer.js" type="module">&lt;/script></pre>
             </small>
             <p class="col-12">
                 <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project" target="_blank">
@@ -155,6 +155,11 @@
     deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
 &lt;/deer-view></pre>
 
+<pre class="col-12">
+TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
+    &lt;img src="http://placekitten.com/300/150" style="width:100%;">`
+</pre>
+
             <h4>Configuration</h4>
             <p class="col-12">The <code>deer-config.js</code> file contains all the defaults for using DEER. Any developer wishing to rename watched attributes, to attach new templates, and more can extend this configuration object when initializing DEER.</p>
 
@@ -170,7 +175,7 @@
 
             <h4>Using <code>deer-link</code></h4>
             <p class="col-12">In any <code>&lt;deer-view></code> element, the <code>deer-link</code> attribute instructs the templates how to attach links to the rendered object. For lists, each item with an <code>@id</code> property will include an anchor tag hyperlinking
-                to the <code>deer-link</code> URL joined with the <code>@id</code>. This example simply changes the hash on the current page.
+                to the <code>deer-link</code> URL joined with the <code>@id</code>. This example simply changes the hash on the current page. Be sure to be aware of this default behavior if you are using a SPA framework that relies on hashes for routing and consider "Listening to Events" instead.
             </p>
 
             <div class="card col-6">
@@ -250,23 +255,23 @@
                 Adding new entities and annotations is a simple process (<a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project#create-an-entity" target="_blank">wiki</a>). Update your <code>&lt;form></code> with <code>deer-type</code>                and <code>deer-key</code> attributes.
             </p>
 
-            <pre class="col-12">&lt;form deer-type="Thing" deer-context="http://schema.org" deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+            <pre class="col-12">&lt;form deer-type="Thing" deer-context="http://schema.org" deer-id="<a href="http://devstore.rerum.io/v1/id/11111">https://example.com/id/001</a>">
     &lt;label>Label:&lt;/label>
-    &lt;input type="text" deer-key="name" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+    &lt;input type="text" deer-key="name">
     &lt;input type="hidden" deer-key="creator" value="demoAgent">
-    &lt;input type="date" deer-key="date" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">
+    &lt;input type="date" deer-key="date">
     &lt;select>
         &lt;option>Example choice&lt;/option>
         &lt;option>Unknown to DEER&lt;/option>
         &lt;option>Use as usual&lt;/option>
     &lt;/select>
-    &lt;textarea deer-key="description" deer-source="<a href="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c">https://example.com/id/001</a>">&lt;/textarea>
+    &lt;textarea deer-key="description">&lt;/textarea>
     &lt;input type="submit">
 &lt;/form></pre>
 
             <div class="card col-6">
                 <header>Thing Form</header>
-                <form deer-type="Thing" deer-creator="Anonymous User at Form" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5ca66684e4b0a44e13e61b7c" id="formExample">
+                <form deer-type="Thing" deer-creator="Anonymous User at Form" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/11111" id="formExample">
                     <div class="row">
                         <div class="col">
                             <label>Label:</label>
@@ -309,7 +314,11 @@
                 <header>Listening to the Form</header>
                 <div class="col deer-view" deer-listening="formExample" deer-template="entity"></div>
             </div>
-
+<p>
+    There are many more complex ways to deal with forms to manage multiselects, arrays, and other types of 
+    objects that you may want to record. These are not well-documented yet, but we have many examples in our 
+    public code that we can direct you to upon request.
+</p>
             <h4>Simple Forms</h4>
             <p class="col-12">Sometimes all you need is a simple form. If you add the attribute 
                 <code>deer-item-type="simple"</code> to your form, instead of designating each field
@@ -354,7 +363,7 @@
 &lt;/form></pre>
                         
             <div class="card col-6">
-                <header>Thing Form</header>
+                <header>Simple Thing Form</header>
                 <form deer-type="Thing" deer-creator="Anonymous User" deer-item-type="simple" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" id="simpleFormExample">
                     <div class="row">
                         <div class="col">
@@ -414,8 +423,7 @@
         </footer>
 
 
-        <script src="./releases/alpha-.11/deer.js" type="module"></script>
-        <!-- <script src="./js/deer.js" type="module"></script> -->
+        <script src="./releases/alpha-0.11/deer.js" type="module"></script>
         <script>
             window.onhashchange = onload = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))
 
