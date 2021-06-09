@@ -175,7 +175,7 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
 
             <h4>Using <code>deer-link</code></h4>
             <p class="col-12">In any <code>&lt;deer-view></code> element, the <code>deer-link</code> attribute instructs the templates how to attach links to the rendered object. For lists, each item with an <code>@id</code> property will include an anchor tag hyperlinking
-                to the <code>deer-link</code> URL joined with the <code>@id</code>. This example simply changes the hash on the current page. Be sure to be aware of this default behavior if you are using a SPA framework that relies on hashes for routing and consider "Listening to Events" instead.
+                to the <code>deer-link</code> URL joined with the <code>@id</code>. This example simply changes the hash on the current page. Be aware of this default behavior if you are using a SPA framework that relies on hashes for routing and consider "Listening to Events" instead.
             </p>
 
             <div class="card col-6">
@@ -315,9 +315,9 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
                 <div class="col deer-view" deer-listening="formExample" deer-template="entity"></div>
             </div>
 <p>
-    There are many more complex ways to deal with forms to manage multiselects, arrays, and other types of 
-    objects that you may want to record. These are not well-documented yet, but we have many examples in our 
-    public code that we can direct you to upon request.
+    There are many more complex ways forms acquire data through UI to accommodate more complex data objects 
+    that you may want to record. How to process data from customized UIs is not well-documented yet, but we 
+    have many examples in our public code that we can direct you to upon request.
 </p>
             <h4>Simple Forms</h4>
             <p class="col-12">Sometimes all you need is a simple form. If you add the attribute 
