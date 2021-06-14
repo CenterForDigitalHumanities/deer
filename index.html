@@ -271,7 +271,7 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
 
             <div class="card col-6">
                 <header>Thing Form</header>
-                <form deer-type="Thing" deer-creator="Anonymous User at Form" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/11111" id="formExample">
+                <form deer-type="Thing" deer-creator="Anonymous User at Form" deer-context="http://schema.org" deer-id="http://devstore.rerum.io/v1/id/60c7a956c3fb58284513eda3" id="formExample">
                     <div class="row">
                         <div class="col">
                             <label>Label:</label>
@@ -285,11 +285,11 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
                             <input type="date" deer-key="date" deer-creator="Anonymous User on Input">
                         </div>
                         <div class="col">
-                            <label>A &lt;select> with no effect:</label>
-                            <select>
-                                <option>Example choice</option>
-                                <option>Unknown to DEER</option>
-                                <option>Use as usual</option>
+                            <label>Condition</label>
+                            <select deer-key="condition">
+                                <option>Good</option>
+                                <option>Very Good</option>
+                                <option>Mint</option>
                             </select>
                         </div>
                     </div>
@@ -378,11 +378,11 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
                             <input type="date" deer-key="date">
                         </div>
                         <div class="col">
-                            <label>A &lt;select> with no effect:</label>
-                            <select>
-                                <option>Example choice</option>
-                                <option>Unknown to DEER</option>
-                                <option>Use as usual</option>
+                            <label>Condition</label>
+                            <select deer-key="condition">
+                                <option>Good</option>
+                                <option>Very Good</option>
+                                <option>Mint</option>
                             </select>
                         </div>
                     </div>
