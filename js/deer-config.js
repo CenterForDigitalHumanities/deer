@@ -1,4 +1,5 @@
 export default {
+    PREFIX: "deer", // namespace for this projects custom elements
     ID: "deer-id", // attribute, URI for resource to render
     TYPE: "deer-type", // attribute, JSON-LD @type
     TEMPLATE: "deer-template", // attribute, enum for custom template

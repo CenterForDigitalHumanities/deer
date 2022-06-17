@@ -10,6 +10,7 @@
  * @see tiny.rerum.io
  */
 
+import CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
 import { default as DEER } from './deer-config.js'
 
 var worker = new Worker('./js/worker.js')
@@ -237,7 +238,7 @@ const utils = {
      * @param fromAnno Boolean for if the value is from a DEER annotation as opposed to part of the object (noted in deer-id on the form) directly.
      * 
     */
-    assertElementValue: function (elem,obj) {
+    assertElementValue: function (elem, obj) {
         delete elem.$isDirty
         let deerKeyValue = elem.getAttribute(DEER.KEY)
         let mapsToAnno = false
@@ -334,8 +335,8 @@ const utils = {
                         break
                     case "string":
                     case "number":
-                    //getValue either found that obj[deerKeyValue] was a string or found that it was an object with a 'value' that was a string or number. 
-                    //The asserted value is already set and we know whether or not it mapsToAnno, so do nothing.  Keep this here for future handling. 
+                        //getValue either found that obj[deerKeyValue] was a string or found that it was an object with a 'value' that was a string or number. 
+                        //The asserted value is already set and we know whether or not it mapsToAnno, so do nothing.  Keep this here for future handling. 
                         break
                     default:
                         //An undefined situation perhaps?
@@ -385,8 +386,35 @@ const utils = {
                 console.log(logMe)
             }
         }
-    }
+    },
+    /**
+     * Stringifies a JSON object (not any randon JS object).
+     *
+     * It should be noted that JS objects can have members of
+     * specific type (e.g. function), that are not supported
+     * by JSON.
+     * @license https://github.com/fraunhoferfokus/JSum/blob/master/LICENSE
+     * @param {Object} obj JSON object
+     * @returns {String} stringified JSON object.
+     */
+    serialize: function (obj) {
+        if (Array.isArray(obj)) {
+            return JSON.stringify(obj.map(i => serialize(i)))
+        } else if (typeof obj === 'object' && obj !== null) {
+            return Object.keys(obj)
+                .sort()
+                .map(k => `${k}:${serialize(obj[k])}`)
+                .join('|')
+        }
 
-}
+        return obj
+    },
+    checksum: function (inputData) {
+        if (typeof inputData === "object") {
+            inputData = this.serialize(data)
+        }
+        return CryptoJS.MD5(data)
+    }
+}F
 
 export default utils
