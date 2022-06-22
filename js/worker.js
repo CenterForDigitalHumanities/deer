@@ -1,3 +1,6 @@
+// service worker code
+
+
 const filesToCache = [
     '/',
     '/index.html',

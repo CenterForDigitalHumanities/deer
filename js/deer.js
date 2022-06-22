@@ -43,4 +43,11 @@ try {
     // silently fail if render or record is not loaded
 }
 
+// attach service worker for offline support
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/worker.js')
+} else {
+    console.log('Service workers are not supported in this browser.')
+    importScripts('entities.js')
+}
 
