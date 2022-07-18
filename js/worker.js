@@ -1,36 +1,27 @@
-// service worker code
-
-
-const filesToCache = [
-    '/',
-    '/index.html',
-    '/pages/offline.html',
-    '/pages/404.html'
-]
-
 importScripts('entities.js')
 
-const staticCacheName = 'deer-cache-20200730'
-
 const IDBSTORE = "deer"
-var db, objectStore
+const db = new Promise((resolve, reject) => {
+    var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1)
+    DBOpenRequest.onsuccess = event => {
+        console.log("Successfully opened db")
+        return resolve(DBOpenRequest.result)
+    }
+    
+    DBOpenRequest.onerror = event => reject(event)
+    
+    DBOpenRequest.onupgradeneeded = event => {
+        const db = event.target.result
+        // Create an objectStore for this database
+        objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' })
+        console.log("Successfully upgraded db")
+        return resolve(db)
+    }
+})
 
 self.onmessage = message => {
-    const args = message.data.args || {}
     switch (message.data.action) {
         case "init": {
-            var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1)
-            DBOpenRequest.onsuccess = event => db = DBOpenRequest.result
-
-            DBOpenRequest.onerror = event => console.error(event)
-
-            DBOpenRequest.onupgradeneeded = event => {
-                // db = event.target.result
-                // Create an objectStore for this database
-                objectStore = event.target.result.createObjectStore(IDBSTORE, { autoIncrement: true })
-                objectStore.createIndex("__rerum","__rerum")
-                console.log("Successfully upgraded db")
-            }
         }
             break
         case "view":
@@ -38,9 +29,8 @@ self.onmessage = message => {
              * Check for expanded object in the caches. If it exists, return it and check
              * for an update (will postMessage() twice). Otherwise, get and cache it.
              */
-            if (!message.data || !message.data.id) break // Nothing to see here
-
-            getItem(message.data.id, args)
+            if (!message.data?.id) break // Nothing to see here
+            getItem(message.data.id, message.data.args)
             break
         case "record":
             break
@@ -48,118 +38,50 @@ self.onmessage = message => {
     }
 }
 
-function getItem(id, args) {
-    if(db){
-        let objectStore = db.transaction(IDBSTORE, "readonly").objectStore(IDBSTORE)
-    
-        objectStore.get(id).onsuccess = function (event) {
+function getItem(id, args = {}) {
+    db.then(db => {
+        let lookup = db.transaction(IDBSTORE, "readonly").objectStore(IDBSTORE)
+
+        lookup.get(id).onsuccess = function (event) {
             let item = event.target.result
-            if (!item) {
-                return expandEntity(id, args.matchOn).then(obj => {
-                    let objectStore = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
-                    objectStore.add(obj, obj['@id'])
-                    postMessage({
-                        item: obj,
-                        action: "expanded",
-                        id: obj['@id']
-                    })
-                })
-            } else {
-                expandEntity(id, args.matchOn).then(obj => {
-                    let objectStore = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
-                    objectStore.put(obj, obj['@id'])
-                    postMessage({
-                        item: obj,
-                        action: "expanded",
-                        id: obj['@id']
-                    })
-                })
+            if (item) {
                 postMessage({
                     item: item,
                     action: "expanded",
-                    id: item['@id']
+                    id: item.id
                 })
             }
-        }
-    } else {
-        expandEntity(id, args.matchOn).then(obj => {
-            postMessage({
-                item: obj,
-                action: "expanded",
-                id: obj['@id']
+            expand(id, args.matchOn).then(obj => {
+                obj.id = obj.id ?? obj['@id']
+                if(objectMatch(item, obj)) { return }
+                let enterRecord = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
+                enterRecord.put(obj)
+                postMessage({
+                    item: obj,
+                    action: "expanded",
+                    id: obj.id
+                })
             })
-        })
-    }
+        }
+    })
 }
 
-self.addEventListener('install', event => {
-    console.log('Attempting to install service worker and cache static assets')
-    // self.skipWaiting()
-    event.waitUntil(
-        caches.open(staticCacheName)
-            .then(cache => {
-                return cache.addAll(filesToCache)
-            })
-    )
-})
+function objectMatch (o1, o2) {
+    const keys1 = Object.keys(o1)
+    const keys2 = Object.keys(o2)
+    if (keys1.length !== keys2.length) { return false }
+    for (const k of keys1) {
+      const val1 = o1[k]
+      const val2 = o2[k]
+      const recurseNeeded = isObject(val1) && isObject(val2);
+      if ((recurseNeeded && !this.objectMatch(val1, val2)) 
+        || (!recurseNeeded && val1 !== val2)) {
+        return false
+      }
+    }
+    return true
+    function isObject(object) {
+      return object != null && typeof object === 'object'
+    }
+  }
 
-self.addEventListener('activate', event => {
-    console.log('Activating new service worker...')
-
-    const cacheWhitelist = [staticCacheName]
-
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheWhitelist.indexOf(cacheName) === -1) {
-                        return caches.delete(cacheName)
-                    }
-                })
-            )
-        })
-    )
-    event.waitUntil(() => {
-        let opening = new Promise()
-        var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1)
-        DBOpenRequest.onsuccess = event => db = DBOpenRequest.result
-
-        DBOpenRequest.onerror = event => opening.reject(console.error(event))
-
-        DBOpenRequest.onupgradeneeded = event => {
-            db = event.target.result
-            // Create an objectStore for this database
-            objectStore = db.createObjectStore(IDBSTORE, { keyPath: "id" })
-            console.log("Successfully upgraded db")
-            opening.resolve(db)
-        }
-        return opening
-    })
-})
-
-self.addEventListener('fetch', event => {
-    console.log('Fetch event for ', event.request.url)
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                if (response) {
-                    console.log('Found ', event.request.url, ' in cache')
-                    return response
-                }
-                console.log('Network request for ', event.request.url)
-                return fetch(event.request)
-                    .then(response => {
-                        if (response.status === 404) {
-                            return caches.match('pages/404.html')
-                        }
-                        return caches.open(staticCacheName).then(cache => {
-                            cache.put(event.request.url, response.clone())
-                            return response
-                        })
-                    })
-            }).catch(error => {
-                console.log('Error, ', error)
-                return caches.match('/pages/offline.html')
-            })
-    )
-})
