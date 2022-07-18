@@ -10,7 +10,7 @@
  * @see tiny.rerum.io
  */
 
-import CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+// import * as CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
 import { default as DEER } from './deer-config.js'
 
 var worker = new Worker('./js/worker.js')
@@ -415,6 +415,6 @@ const utils = {
         }
         return CryptoJS.MD5(data)
     }
-}F
+}
 
 export default utils

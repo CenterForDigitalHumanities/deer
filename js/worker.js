@@ -66,7 +66,7 @@ function getItem(id, args = {}) {
     })
 }
 
-function objectMatch (o1, o2) {
+function objectMatch (o1={}, o2={}) {
     const keys1 = Object.keys(o1)
     const keys2 = Object.keys(o2)
     if (keys1.length !== keys2.length) { return false }

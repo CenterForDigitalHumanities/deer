@@ -4,7 +4,7 @@
      * Discovered annotations are asserted on the original object and returned.
      * @param {Object} entity Target object to search for description
      */
-function expandEntity(entity={}, matchOn = ["__rerum.generatedBy", "creator"]) {
+ function expand(entity={}, matchOn = ["__rerum.generatedBy", "creator"]) {
     let findId = entity["@id"] || entity.id || entity
     if (typeof findId !== "string") {
         return Promise.resolve(entity)
