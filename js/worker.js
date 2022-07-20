@@ -51,14 +51,15 @@ function getItem(id, args = {}) {
                     id: item.id
                 })
             }
-            expand(id, args.matchOn).then(obj => {
-                obj.id = obj.id ?? obj['@id']
-                if(objectMatch(item, obj)) { return }
+            item = new Entity(item)
+            item.data.id = item.data.id ?? item.data['@id']
+            item.expand(args.matchOn).then(obj => {
+                if(objectMatch(item.data, obj.data)) { return }
                 const enterRecord = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
-                const insertionRequest = enterRecord.put(obj)
+                const insertionRequest = enterRecord.put(obj.data)
                 insertionRequest.onsuccess = function (event) {
                     postMessage({
-                        item: obj,
+                        item: obj.data,
                         action: "expanded",
                         id: obj.id
                     })

@@ -1,94 +1,115 @@
+class Entity extends Object {
+    constructor(entity) {
+        super()
+        this.data = entity
+    }
+
+    async expand(matchOn) {
+        this.data = await expand(this, matchOn)
+        return this
+    }
+}
+
+class Annotation extends Object {
+    constructor(annotation) {
+        super()
+        this.data = annotation
+        this.normalized = normalize(annotation)
+    }
+
+    assertOn(entity, matchOn) {
+        return applyAssertions(entity, this, matchOn)
+    }
+
+    normalize(annotation) {
+        this.normalized = []
+        if (!Array.isArray(annotation.body)) {
+            annotation.body = [annotation.body]
+        }
+        annotation.body.forEach(body => {
+            if (Array.isArray(body)) { body.forEach(normalizeValues) }
+            Object.entries(body).forEach(([key, value]) => this.normalized.push({ [key]: buildValueObject(value, annotation) }))
+        })
+    }
+}
 
 /**
      * Take a known object with an id and query for annotations targeting it.
      * Discovered annotations are asserted on the original object and returned.
      * @param {Object} entity Target object to search for description
      */
- function expand(entity={}, matchOn = ["__rerum.generatedBy", "creator"]) {
-    let findId = entity["@id"] || entity.id || entity
-    if (typeof findId !== "string") {
-        return Promise.resolve(entity)
+async function expand(entity = new Entity({}), matchOn) {
+    let findId = entity["@id"] ?? entity.id ?? entity
+    if (typeof findId !== "string") { return Promise.resolve(entity) }
+    const obj = fetch(findId).then(res => res.json()).then(res => Object.assign(entity, res))
+    const annos = findByTargetId(findId).then(res => res.json()).then(res => res.map(anno => new Annotation(anno)))
+    await Promise.all([obj, annos])
+    applyAssertions(entity, annos, matchOn)
+    return entity
+}
+
+/**
+ * Extracts the value of an assertion.
+ * @param Object assertOn target of the assertion(s).
+ * @param Object annotation assertion Web Annotation.
+ * @param string matchOn key to match on.
+ * @returns Object with assertions value of the assertion.
+ */
+function applyAssertions(assertOn, annotation, matchOn) {
+    if (Array.isArray(annotation)) { return annotation.map(getAssertion) }
+    if (!annotation.hasOwnProperty('body')) { return }
+    if (!checkMatch(assertOn, annotation, matchOn)) {
+
+        const assertions = {}
+        annotation.body.forEach((k, v) => {
+            if (assertOn.hasOwnProperty(k)) {
+                if (!Array.isArray(assertions[k])) { assertions[k] = [assertions[k]] }
+                assertions[k].push(v)
+            } else {
+                assertions[k] = v
+            }
+        })
+        return Object.assign(assertions, annotation.body)
     }
-    return fetch(findId).then(response => response.json())
-        .then(obj => findByTargetId(findId)
-            .then(function (annos) {
-                for (let i = 0; i < annos.length; i++) {
-                    let body
-                    try {
-                        body = annos[i].body
-                    } catch (err) { continue }
-                    if (!body) { continue }
-                    if (body.evidence) {
-                        obj.evidence = (typeof body.evidence === "object") ? body.evidence["@id"] : body.evidence;
-                    }
-                    if (!Array.isArray(body)) {
-                        body = [body]
-                    }
-                    Leaf: for (let j = 0; j < body.length; j++) {
-                        try {
-                            if (!checkMatch(obj, annos[i], matchOn)) {
-                                // this is not recognized as an annotation of interest by the interface
-                                continue Leaf
-                            }
-                            if (annos[i].hasOwnProperty("__rerum") && annos[i].__rerum.history.next.length) {
-                                // this may not be the most recent available
-                                // TODO: this is incorrect. There could be an unrelated @id in the .next and isUpdatedBy() will never fire
-                                continue Leaf;
-                            }
-                            let assertion = body[j]
-                            let keys = Object.keys(assertion)
-                            let k = keys[0]
-                            if (keys.length > 1 || k === 0) {
-                                console.warn("This assertion is not as expected and may not have been interpreted correctly.", assertion)
-                            }
-                            let val = assertion[k]
-                            val = buildValueObject(val, annos[i])
-                            // Assign this to the main object.
-                            if (obj.hasOwnProperty(k)) {
-                                // It may be already there as an Array with some various labels
-                                if (typeof obj[k] === "string") {
-                                    // This is probably a primitive and may be updated/replaced.
-                                    console.log('Updating primitive value "' + obj[k] + '" with annotation.', annos[i])
-                                    obj[k] = buildValueObject(val, annos[i])
-                                } else if (Array.isArray(obj[k])) {
-                                    if (isUpdatedBy(obj[k].source.citationSource, annos[i])) {
-                                        const annoValues = (Array.isArray(val)) ? val : [val]
-                                        annoValues.forEach(a => {
-                                            // TODO: This is a brute force and not great.
-                                            for (const v of obj[k]) {
-                                                try {
-                                                    if (isUpdatedBy(v.source.citationSource), a) {
-                                                        v = a
-                                                    }
-                                                } catch (err) {
-                                                    console.warn("I think a primitive got buried in here, but I'm moving on.")
-                                                }
-                                            }
-                                        })
-                                    } else {
-                                        obj[k].push(buildValueObject(val, annos[i]))
-                                    }
-                                } else {
-                                    if (isUpdatedBy(obj[k].source.citationSource, annos[i])) {
-                                        // update value without creating an array
-                                        obj[k] = buildValueObject(val, annos[i])
-                                    } else {
-                                        // Serialize both existing and new value as an Array
-                                        obj[k] = [obj[k], buildValueObject(val, annos[i])]
-                                    }
-                                }
-                            } else {
-                                // or just tack it on
-                                obj[k] = buildValueObject(val, annos[i])
-                            }
-                        } catch (err_1) { }
-                    }
-                }
-                return obj
-            })).catch(err => {
-                console.error("Error expanding object:" + err)
-                return err
-            })
+}
+
+/**
+ * Match on criteria(if exists) and return true if it appears to match on the values specified.
+ * A true result means that the incoming assertion is likely to be relevant and authorized to 
+ * augment the original object.
+ * TODO: consider moving this up in scope, if useful
+ * @param Object o existing Object with values to check.
+ * @param Object a asserting Annotation to compare.
+ * @param Array<String> matchOn dot-separated property paths on the two Objects to compare.
+ * @returns Boolean if annotation should be considered a replacement for the current value.
+ **/
+function checkMatch(expanding, asserting, matchOn = ["__rerum.generatedBy", "creator"]) {
+    for (const m of matchOn) {
+        let obj_match = m.split('.').reduce((o, i) => o[i], expanding)
+        let anno_match = m.split('.').reduce((o, i) => o[i], asserting)
+        if (obj_match === undefined || anno_match === undefined) {
+            // Matching is not violated if one of the checked values is missing from a comparator,
+            // but it is not a match without any positive matches.
+            continue
+        }
+        // check for match within Arrays as well
+        if (!Array.isArray(obj_match)) { obj_match = [obj_match] }
+        if (!Array.isArray(anno_match)) { anno_match = [anno_match] }
+        if (!anno_match.every(item => obj_match.includes(item))) {
+            // Any mismatch (generous typecasting) will return a false result.
+            if (anno_match.some(item => obj_match.includes(item))) {
+                // NOTE: this mismatches if some of the Anno assertion is missing, which
+                // may lead to duplicates downstream.
+                // TODO: ticket this as an issue...
+                console.warn("Incomplete match may require additional handling. ", obj_match, anno_match)
+            }
+            break
+        } else {
+            // High confidence this match is affirmative, continue checking others.
+            return true
+        }
+    }
+    return false
 }
 
 /**
@@ -97,7 +118,7 @@
      * @param {String} id URI for the targeted entity
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-async function findByTargetId(id, targetStyle = [],queryUrl="http://tinydev.rerum.io/app/query") {
+async function findByTargetId(id, targetStyle = [], queryUrl = "http://tinydev.rerum.io/app/query") {
     if (!Array.isArray(targetStyle)) {
         targetStyle = [targetStyle]
     }
@@ -200,4 +221,8 @@ function getValue(property, alsoPeek = [], asType) {
     } finally {
         return (prop.length === 1) ? prop[0] : prop
     }
+}
+
+export {
+    Entity, Annotation
 }
