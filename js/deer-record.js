@@ -25,7 +25,7 @@ async function renderChange(mutationsList) {
         switch (mutation.attributeName) {
             case DEER.ID:
                 let id = mutation.target.getAttribute(DEER.ID)
-                if (id === "null") return
+                if (id === null) return
                 let obj = await fetch(id).then(response => response.json()).catch(error => error)
                 new DeerReport(mutation.target, DEER)
                 // TODO: This is too heavy. Create a "populateFormFields" method and call it instead.

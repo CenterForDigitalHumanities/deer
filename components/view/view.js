@@ -1,18 +1,31 @@
-import { default as UTILS } from '../../deer-utils.js'
-import { default as DEER } from '../../deer-config.js'
+import { default as UTILS } from '/js/deer-utils.js'
+import { default as DEER } from '/js/deer-config.js'
 
-class DeerView extends HTMLElement {
+const template = (obj, options = {}) => {
+    let indent = options.indent ?? 4
+    let replacer = (k, v) => {
+        if (DEER.SUPPRESS.indexOf(k) !== -1) return
+        return v
+    }
+    try {
+        return `<pre>${JSON.stringify(obj, replacer, indent)}</pre>`
+    } catch (err) {
+        return null
+    }
+}
+
+export default class DeerView extends HTMLElement {
     static get observedAttributes() { return [`${DEER.PREFIX}-id`,`${DEER.PREFIX}-key`,`${DEER.PREFIX}-list`,`${DEER.PREFIX}-link`,`${DEER.PREFIX}-listening`]; }
 
     constructor() {
         super()
-        this.template = DEER.TEMPLATES[(this.getAttribute(DEER.TEMPLATE) || "default")]
+        this.template = template
     }
 
     connectedCallback() {
         this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
         UTILS.worker.addEventListener('message', e => {
-            if (e.data.id !== this.getAttribute(DEER.ID)) { return }
+            if (e.data.id !== this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)) { return }
             if(e.data.action === "expanded"){
                 console.log("rendering expanded view")
                 this.innerHTML = this.template(e.data.item)
@@ -28,8 +41,8 @@ class DeerView extends HTMLElement {
             case 'key':
             case 'link':
             case 'list':
-                let id = this.getAttribute(DEER.ID)
-                if (id === "null" || this.getAttribute(DEER.COLLECTION)) { return }
+                let id = this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)
+                if (id === null || this.getAttribute(DEER.COLLECTION)) { return }
                 UTILS.postView(id)
                 break
             case 'listening':
@@ -47,4 +60,4 @@ class DeerView extends HTMLElement {
     }
 }
 
-customElements.define(`${DEER.PREFIX}-view`, DeerView)
+customElements.define(`${DEER.PREFIX}-${DEER.VIEW}`, DeerView)

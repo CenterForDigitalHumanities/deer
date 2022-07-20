@@ -2,7 +2,7 @@ importScripts('entities.js')
 
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
-    var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1)
+    var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1) // upgrade version 1 to version 2 if schema changes
     DBOpenRequest.onsuccess = event => {
         console.log("Successfully opened db")
         return resolve(DBOpenRequest.result)
@@ -13,7 +13,7 @@ const db = new Promise((resolve, reject) => {
     DBOpenRequest.onupgradeneeded = event => {
         const db = event.target.result
         // Create an objectStore for this database
-        objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' })
+        objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' }) // @id is an illegal keyPath
         console.log("Successfully upgraded db")
         return resolve(db)
     }
@@ -54,13 +54,23 @@ function getItem(id, args = {}) {
             expand(id, args.matchOn).then(obj => {
                 obj.id = obj.id ?? obj['@id']
                 if(objectMatch(item, obj)) { return }
-                let enterRecord = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
-                enterRecord.put(obj)
-                postMessage({
-                    item: obj,
-                    action: "expanded",
-                    id: obj.id
-                })
+                const enterRecord = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
+                const insertionRequest = enterRecord.put(obj)
+                insertionRequest.onsuccess = function (event) {
+                    postMessage({
+                        item: obj,
+                        action: "expanded",
+                        id: obj.id
+                    })
+                }
+                insertionRequest.onerror = function (event) {
+                    console.log("Error: ", event)
+                    postMessage({
+                        error: event,
+                        action: "error",
+                        id: obj.id
+                    })
+                }
             })
         }
     })
