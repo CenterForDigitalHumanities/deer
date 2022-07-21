@@ -1,3 +1,5 @@
+window.EntityMap = new Map() // get over here!
+
 class Entity extends Object {
     constructor(entity={}) {
         super()
