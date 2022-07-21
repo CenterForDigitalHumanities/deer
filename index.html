@@ -68,17 +68,16 @@
             <p class="col-12">DEER will construct an object combining the resolved <code>deer-id</code> value with the results of a query for annotations targeting it. The JSON template simply displays the result.</p>
 
             <div class="card col-6">
-                <header>JSON Template</header>
+                <header>JSON Template (default)</header>
                 <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"></deer-view>
             </div>
 
             <pre class="col-6">&lt;deer-view 
-    deer-template="json"
     deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
 &lt;/deer-view></pre>
 
             <h4>Entity template</h4>
-            <p class="col-12">The entity template attempts to render the object properties as a definition list, as is typically displayed as metadata or Dublin Core terms.
+            <p class="col-12">The entity template attempts to render the object properties as a description list, as is typically displayed as metadata or Dublin Core terms.
             </p>
 
             <div class="card col-6">
@@ -86,10 +85,9 @@
                 <deer-entity deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"></deer-entity>
             </div>
 
-            <pre class="col-6">&lt;deer-view 
-    deer-template="entity"
+            <pre class="col-6">&lt;deer-entity 
     deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
-&lt;/deer-view></pre>
+&lt;/deer-entity></pre>
 
             <h4>List template</h4>
             <p class="col-12">The list template shows items connected in an aggregation. The same template can be used for static and dynamic lists as explained <a href="https://github.com/CenterForDigitalHumanities/deer/wiki/Using-DEER-in-your-project#rendering-a-list-or-collection"

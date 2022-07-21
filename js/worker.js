@@ -5,7 +5,8 @@ const db = new Promise((resolve, reject) => {
     var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1) // upgrade version 1 to version 2 if schema changes
     DBOpenRequest.onsuccess = event => {
         console.log("Successfully opened db")
-        return resolve(DBOpenRequest.result)
+        resolve(DBOpenRequest.result)
+        return
     }
     
     DBOpenRequest.onerror = event => reject(event)
@@ -14,8 +15,11 @@ const db = new Promise((resolve, reject) => {
         const db = event.target.result
         // Create an objectStore for this database
         objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' }) // @id is an illegal keyPath
-        console.log("Successfully upgraded db")
-        return resolve(db)
+        objectStore.onsuccess = event => {
+            console.log("Successfully upgraded db")
+            resolve(db)
+            return
+        }
     }
 })
 
@@ -40,9 +44,7 @@ self.onmessage = message => {
 
 function getItem(id, args = {}) {
     db.then(db => {
-        let lookup = db.transaction(IDBSTORE, "readonly").objectStore(IDBSTORE)
-
-        lookup.get(id).onsuccess = function (event) {
+        let lookup = db.transaction(IDBSTORE, "readonly").objectStore(IDBSTORE).get(id).onsuccess = (event) => {
             let item = event.target.result
             if (item) {
                 postMessage({
@@ -51,17 +53,18 @@ function getItem(id, args = {}) {
                     id: item.id
                 })
             }
-            item = new Entity(item)
+            item = new Entity(item ?? {id})
+            const oldRecord = JSON.parse(JSON.stringify(item.data))
             item.data.id = item.data.id ?? item.data['@id']
             item.expand(args.matchOn).then(obj => {
-                if(objectMatch(item.data, obj.data)) { return }
+                if(objectMatch(oldRecord, obj.data)) { return }
                 const enterRecord = db.transaction(IDBSTORE, "readwrite").objectStore(IDBSTORE)
                 const insertionRequest = enterRecord.put(obj.data)
                 insertionRequest.onsuccess = function (event) {
                     postMessage({
                         item: obj.data,
                         action: "expanded",
-                        id: obj.id
+                        id: obj.data.id
                     })
                 }
                 insertionRequest.onerror = function (event) {
@@ -69,7 +72,7 @@ function getItem(id, args = {}) {
                     postMessage({
                         error: event,
                         action: "error",
-                        id: obj.id
+                        id: obj.data.id
                     })
                 }
             })

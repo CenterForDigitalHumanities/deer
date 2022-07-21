@@ -18,7 +18,7 @@ worker.postMessage({ action: "init" })
 
 worker.onmessage = event => {
     if (event.data.action === "expanded") {
-        utils.broadcast(event, "expanded", document, event.data.item)
+        // utils.broadcast(event, "expanded", document, event.data.item)
     }
 }
 
@@ -118,13 +118,13 @@ const utils = {
     },
     postView(entity, matchOn = ["__rerum.generatedBy", "creator"]) {
         let UTILS = this
-        let findId = entity["@id"] || entity.id || entity
-        if (typeof findId !== "string") {
+        const id = entity["@id"] ?? entity.id ?? entity
+        if (typeof id !== "string") {
             UTILS.warning("Unable to find URI in object:", entity)
             return entity
         }
-        let message = {
-            id: findId,
+        const message = {
+            id,
             action: "view",
             args: {
                 matchOn: matchOn,

@@ -1,5 +1,5 @@
 class Entity extends Object {
-    constructor(entity) {
+    constructor(entity={}) {
         super()
         this.data = entity
     }
@@ -14,21 +14,17 @@ class Annotation extends Object {
     constructor(annotation) {
         super()
         this.data = annotation
-        this.normalized = normalize(annotation)
     }
 
     assertOn(entity, matchOn) {
-        return applyAssertions(entity, this, matchOn)
+        return applyAssertions(entity, this.data, matchOn)
     }
 
-    normalize(annotation) {
-        this.normalized = []
-        if (!Array.isArray(annotation.body)) {
-            annotation.body = [annotation.body]
-        }
-        annotation.body.forEach(body => {
-            if (Array.isArray(body)) { body.forEach(normalizeValues) }
-            Object.entries(body).forEach(([key, value]) => this.normalized.push({ [key]: buildValueObject(value, annotation) }))
+    get normalized() {
+        let processedData = []
+        const sourceData = (!Array.isArray(this.data.body)) ? [this.data.body] : this.data.body
+        sourceData.flat(2).forEach(body => {
+            Object.entries(body).forEach(([key, value]) => this.normalized.push({ [key]: buildValueObject(value, this) }))
         })
     }
 }
@@ -39,13 +35,16 @@ class Annotation extends Object {
      * @param {Object} entity Target object to search for description
      */
 async function expand(entity = new Entity({}), matchOn) {
-    let findId = entity["@id"] ?? entity.id ?? entity
-    if (typeof findId !== "string") { return Promise.resolve(entity) }
-    const obj = fetch(findId).then(res => res.json()).then(res => Object.assign(entity, res))
-    const annos = findByTargetId(findId).then(res => res.json()).then(res => res.map(anno => new Annotation(anno)))
-    await Promise.all([obj, annos])
-    applyAssertions(entity, annos, matchOn)
-    return entity
+    let findId = entity.data["@id"] ?? entity.data.id ?? entity.data
+    if (typeof findId !== "string") { return Promise.resolve(entity.data) }
+    let obj = fetch(findId).then(res => res.json()).then(res => Object.assign(entity.data, res))
+    let annos = findByTargetId(findId,[],`http://${findId.includes("dev")?"tinydev":"tiny"}.rerum.io/app/query`).then(res => res.map(anno => new Annotation(anno)))
+    await Promise.all([obj, annos]).then(res => {
+        annos = res[1]
+        obj = res[0]
+    })
+    annos.forEach(a=>a.assertOn(entity.data, matchOn))
+    return entity.data
 }
 
 /**
@@ -56,21 +55,21 @@ async function expand(entity = new Entity({}), matchOn) {
  * @returns Object with assertions value of the assertion.
  */
 function applyAssertions(assertOn, annotation, matchOn) {
-    if (Array.isArray(annotation)) { return annotation.map(getAssertion) }
-    if (!annotation.hasOwnProperty('body')) { return }
-    if (!checkMatch(assertOn, annotation, matchOn)) {
+    if (Array.isArray(annotation)) { return annotation.map(a=>applyAssertions(assertOn,a,matchOn)) }
 
-        const assertions = {}
-        annotation.body.forEach((k, v) => {
-            if (assertOn.hasOwnProperty(k)) {
-                if (!Array.isArray(assertions[k])) { assertions[k] = [assertions[k]] }
-                assertions[k].push(v)
-            } else {
-                assertions[k] = v
-            }
-        })
-        return Object.assign(assertions, annotation.body)
-    }
+    if (!annotation.hasOwnProperty('body')) { return }
+    if (!checkMatch(assertOn, annotation, matchOn)) { return }
+
+    const assertions = {}
+    Object.entries(annotation.body).forEach(([k, v]) => {
+        if(v === undefined) { return }
+        if (assertOn.hasOwnProperty(k) && assertOn[k] !== undefined && assertOn[k] !== null && assertOn[k] !== "" && assertOn[k] !== []) {
+            Array.isArray(assertions[k]) ? assertions[k].push(v) : assertions[k] = [v]
+        } else {
+            assertions[k] = v
+        }
+    })
+    return Object.assign(assertOn, assertions)
 }
 
 /**
@@ -169,32 +168,32 @@ function buildValueObject(val, fromAnno) {
 function getValue(property, alsoPeek = [], asType) {
     // TODO: There must be a best way to do this...
     let prop;
-    if (property === undefined || property === "") {
+    if (!property) {
         console.error("Value of property to lookup is missing!")
         return undefined
     }
     if (Array.isArray(property)) {
         // It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
         return property
-    } else {
-        if (typeof property === "object") {
-            // TODO: JSON-LD insists on "@value", but this is simplified in a lot
-            // of contexts. Reading that is ideal in the future.
-            if (!Array.isArray(alsoPeek)) {
-                alsoPeek = [alsoPeek]
-            }
-            alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
-            for (let k of alsoPeek) {
-                if (property.hasOwnProperty(k)) {
-                    prop = property[k]
-                    break
-                } else {
-                    prop = property
-                }
-            }
-        } else {
-            prop = property
+    }
+
+    if (typeof property === "object") {
+        // TODO: JSON-LD insists on "@value", but this is simplified in a lot
+        // of contexts. Reading that is ideal in the future.
+        if (!Array.isArray(alsoPeek)) {
+            alsoPeek = [alsoPeek]
         }
+        alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
+        for (let k of alsoPeek) {
+            if (property.hasOwnProperty(k)) {
+                prop = property[k]
+                break
+            } else {
+                prop = property
+            }
+        }
+    } else {
+        prop = property
     }
     try {
         switch (asType.toUpperCase()) {
@@ -221,8 +220,4 @@ function getValue(property, alsoPeek = [], asType) {
     } finally {
         return (prop.length === 1) ? prop[0] : prop
     }
-}
-
-export {
-    Entity, Annotation
 }
