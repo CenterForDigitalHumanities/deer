@@ -14,13 +14,6 @@
 import { default as DEER } from './deer-config.js'
 
 var worker = new Worker('./js/worker.js')
-worker.postMessage({ action: "init" })
-
-worker.onmessage = event => {
-    if (event.data.action === "expanded") {
-        // utils.broadcast(event, "expanded", document, event.data.item)
-    }
-}
 
 const utils = {
     worker: worker,

@@ -1,14 +1,87 @@
-window.EntityMap = new Map() // get over here!
+const EntityMap = new Map() // get over here!
 
 class Entity extends Object {
     constructor(entity={}) {
         super()
+        // accomodate Entity(String) and Entity(Object) or Entity(JSONString)
+        if(typeof entity === "string") {
+            try {
+                entity = JSON.parse(entity)
+            } catch(e) {
+                entity = { id: entity }
+            }
+        }
+        const id = entity.id ?? entity["@id"] ?? entity // id is primary key
+        if(!id) { throw new Error("Entity must have an id") }
+        if(EntityMap.has(id)) { throw new Error("Entity already exists")}
+        this.Annotations = new Map()
         this.data = entity
     }
+    
+    get assertions() {
+        let clone = JSON.parse(JSON.stringify(this.data))
+        this.Annotations.forEach(annotation => applyAssertions(clone, annotation.normalized))
+        return clone
+    }
+    
+    get data() {
+        return this._data
+    }
+    
+    get id() {
+        return this.data.id
+    }
+    
+    set data(entity) {
+        entity.id = entity.id ?? entity["@id"] ?? entity // id is primary key
+        if(objectMatch(this._data, entity)) {
+            console.warn("Entity data unchanged")
+            return
+        }
+        const oldRecord = this._data ? JSON.parse(JSON.stringify(this._data)) : {}
+        this._data = entity
+        EntityMap.set(this.id, this)
+        this.#announceUpdate()
+        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI().then(this.#findAssertions).then(this.#announceNewEntity) }
+    }
 
-    async expand(matchOn) {
-        this.data = await expand(this, matchOn)
-        return this
+    attachAnnotation(annotation) {
+        this.Annotations.set(annotation.id, annotation)
+    }
+
+    #findAssertions = () => {
+        findByTargetId(this.id,[],`http://${this.id.includes("dev")?"tinydev":"tiny"}.rerum.io/app/query`)
+            .then(annotations => annotations.map(anno => new Annotation(anno)))
+            .then(this.#announceUpdate)
+            .catch(err => console.log(err))
+    }
+
+    #resolveURI = () =>{
+        return fetch(this.id)
+        .then(res => res.ok ? res.json() : Promise.reject(res))
+        .then(entity => this.data = entity)
+        .catch(err => console.log(err))
+    }
+
+    #announceUpdate = () =>{
+        const updateAnnouncement = new CustomEvent("update", {
+            detail: {
+                action: "update",
+                id: this.id,
+                payload: this.assertions
+            }
+        })
+        document.dispatchEvent(updateAnnouncement)
+    }
+    #announceNewEntity = () =>{
+        const reloadAnnouncement = new CustomEvent("reload", {
+            detail: {
+                action: "reload",
+                id: this.id,
+                payload: this
+            }
+        })
+        document.dispatchEvent(reloadAnnouncement)
     }
 }
 
@@ -16,17 +89,31 @@ class Annotation extends Object {
     constructor(annotation) {
         super()
         this.data = annotation
-    }
-
-    assertOn(entity, matchOn) {
-        return applyAssertions(entity, this.data, matchOn)
+        this.#registerTargets()
     }
 
     get normalized() {
         let processedData = []
         const sourceData = (!Array.isArray(this.data.body)) ? [this.data.body] : this.data.body
         sourceData.flat(2).forEach(body => {
-            Object.entries(body).forEach(([key, value]) => this.normalized.push({ [key]: buildValueObject(value, this) }))
+            Object.entries(body).forEach(([key, value]) => processedData.push({ [key]: buildValueObject(value, this) }))
+        })
+        return processedData
+    }
+
+    get id() {
+        return this.data.id
+    }
+
+    #registerTargets = () => {
+        let targets = this.data.target
+        if(!Array.isArray(targets)) { targets = [targets] }
+
+        targets.forEach(target => {
+            target = target.id ?? target['@id'] ?? target.toString()
+            if (!target) { return }
+            const targetEntity = EntityMap.has(target) ? EntityMap.get(target) : new Entity({id: target})
+            targetEntity.attachAnnotation(this)
         })
     }
 }

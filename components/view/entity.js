@@ -48,43 +48,6 @@ export default class ViewEntity extends DeerView {
         super()
         this.template = template
     }
-
-    connectedCallback() {
-        this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
-        UTILS.worker.addEventListener('message', e => {
-            if (e.data.id !== this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)) { return }
-            if(e.data.action === DEER.EVENTS.EXPANDED) {
-                console.log("rendering expanded view")
-                this.innerHTML = this.template(e.data.item)
-            }
-        })
-    }
-
-    disconnectedCallback(){}
-    adoptedCallback(){}
-    attributeChangedCallback(name, oldValue, newValue){
-        switch (name.split('-')[1]) {
-            case 'id':
-            case 'key':
-            case 'link':
-            case 'list':
-                let id = this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)
-                if (id === null || this.getAttribute(DEER.COLLECTION)) { return }
-                UTILS.postView(id)
-                break
-            case 'listening':
-                let listensTo = this.getAttribute(DEER.LISTENING)
-                if (listensTo) {
-                    this.addEventListener(DEER.EVENTS.CLICKED, e => {
-                        let loadId = e.detail["@id"]
-                        if (loadId === listensTo) { this.setAttribute("deer-id", loadId) }
-                    })
-                }
-        }
-        if (name === 'childList') {
-            RENDER.detectInsertions(elem)
-        }
-    }
 }
 
 customElements.define(`${DEER.PREFIX}-entity`, ViewEntity)

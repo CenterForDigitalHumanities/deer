@@ -26,9 +26,13 @@ export default class DeerView extends HTMLElement {
         this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
         UTILS.worker.addEventListener('message', e => {
             if (e.data.id !== this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)) { return }
-            if(e.data.action === "expanded"){
-                console.log("rendering expanded view")
-                this.innerHTML = this.template(e.data.item)
+            switch (e.data.action) {
+                case "update":
+                this.innerHTML = this.template(e.data.payload)
+                break
+                case "reload":
+                    this.Entity = e.data.payload 
+                default:
             }
         })
     }
@@ -37,15 +41,15 @@ export default class DeerView extends HTMLElement {
     adoptedCallback(){}
     attributeChangedCallback(name, oldValue, newValue){
         switch (name.split('-')[1]) {
-            case 'id':
-            case 'key':
-            case 'link':
-            case 'list':
+            case DEER.ID:
+            case DEER.KEY:
+            case DEER.LINK:
+            case DEER.LIST:
                 let id = this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)
                 if (id === null || this.getAttribute(DEER.COLLECTION)) { return }
                 UTILS.postView(id)
                 break
-            case 'listening':
+            case DEER.LISTENING:
                 let listensTo = this.getAttribute(DEER.LISTENING)
                 if (listensTo) {
                     this.addEventListener(DEER.EVENTS.CLICKED, e => {
@@ -53,9 +57,6 @@ export default class DeerView extends HTMLElement {
                         if (loadId === listensTo) { this.setAttribute("deer-id", loadId) }
                     })
                 }
-        }
-        if (name === 'childList') {
-            RENDER.detectInsertions(elem)
         }
     }
 }
