@@ -21,7 +21,8 @@ class Entity extends Object {
     get assertions() {
         let clone = JSON.parse(JSON.stringify(this.data))
         this.Annotations.forEach(annotation => applyAssertions(clone, annotation.normalized))
-        return clone
+        this._assertions = clone
+        return this._assertions
     }
     
     get data() {
@@ -42,25 +43,54 @@ class Entity extends Object {
         this._data = entity
         EntityMap.set(this.id, this)
         this.#announceUpdate()
-        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI().then(this.#findAssertions).then(this.#announceNewEntity) }
+        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(true).then(this.#findAssertions).then(this.#announceNewEntity) }
     }
 
     attachAnnotation(annotation) {
         this.Annotations.set(annotation.id, annotation)
     }
 
-    #findAssertions = () => {
-        findByTargetId(this.id,[],`http://${this.id.includes("dev")?"tinydev":"tiny"}.rerum.io/app/query`)
-            .then(annotations => annotations.map(anno => new Annotation(anno)))
-            .then(this.#announceUpdate)
+    #findAssertions = (assertions) => {
+        var annos = Array.isArray(assertions) ? Promise.resolve(assertions) : findByTargetId(this.id,[],`http://${this.id.includes("dev")?"tinydev.rerum.io/app":"tinypaul.rerum.io/dla"}/query`)
+        return annos
+            .then(annotations => annotations.filter(a=>(a.type ?? a['@type'])?.includes("Annotation")).map(anno => new Annotation(anno)))
+            .then(newAssertions => newAssertions?.length ? this.#announceUpdate() : this.#announceComplete())
             .catch(err => console.log(err))
     }
 
-    #resolveURI = () =>{
-        return fetch(this.id)
+    #resolveURI = (withAssertions) =>{
+        const targetStyle = ["target", "target.@id", "target.id"]
+        let historyWildcard = { "$exists": true, "$size": 0 }
+        let obj = { "$or": [{'@id': this.id}], "__rerum.history.next": historyWildcard }
+        for (let target of targetStyle) {
+            let o = {}
+            o[target] = this.id
+            obj["$or"].push(o)
+        }
+        var results = Boolean(withAssertions) ? fetch(`http://${this.id.includes("dev")?"tinydev.rerum.io/app":"tinypaul.rerum.io/dla"}/query`,{
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(obj)
+        }) : fetch(this.id)
+        return results
         .then(res => res.ok ? res.json() : Promise.reject(res))
-        .then(entity => this.data = entity)
-        .catch(err => console.log(err))
+        .then(finds => {
+            if(finds.length === 0) { return Promise.reject({status:404}) }
+            this.data = finds?.find(e => e['@id'] === this.id) ?? finds
+            if (withAssertions) {
+                this.#findAssertions(finds)
+            }
+        })
+        .catch(err => {
+            switch(err.status) {
+                case 404: console.log(`${this.id} not found`)
+                case 500: console.log(`${this.id} encountered a server error`)
+                this.#announceError(err)
+                break
+
+                default: console.log(err)
+            }
+        })
     }
 
     #announceUpdate = () =>{
@@ -82,6 +112,25 @@ class Entity extends Object {
             }
         })
         document.dispatchEvent(reloadAnnouncement)
+    }
+    #announceComplete = () =>{
+        const completeAnnouncement = new CustomEvent("complete", {
+            detail: {
+                action: "complete",
+                id: this.id
+            }
+        })
+        document.dispatchEvent(completeAnnouncement)
+    }
+    #announceError = (err) =>{
+        const errorAnnouncement = new CustomEvent("error", {
+            detail: {
+                action: "error",
+                id: this.id,
+                payload: err
+            }
+        })
+        document.dispatchEvent(errorAnnouncement)
     }
 }
 
