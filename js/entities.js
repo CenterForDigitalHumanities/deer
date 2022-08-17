@@ -51,7 +51,7 @@ class Entity extends Object {
     }
 
     #findAssertions = (assertions) => {
-        var annos = Array.isArray(assertions) ? Promise.resolve(assertions) : findByTargetId(this.id,[],`http://${this.id.includes("dev")?"tinydev.rerum.io/app":"tinypaul.rerum.io/dla"}/query`)
+        var annos = Array.isArray(assertions) ? Promise.resolve(assertions) : findByTargetId(this.id,[],DEER.URLS.QUERY)
         return annos
             .then(annotations => annotations.filter(a=>(a.type ?? a['@type'])?.includes("Annotation")).map(anno => new Annotation(anno)))
             .then(newAssertions => newAssertions?.length ? this.#announceUpdate() : this.#announceComplete())
@@ -67,7 +67,7 @@ class Entity extends Object {
             o[target] = this.id
             obj["$or"].push(o)
         }
-        var results = Boolean(withAssertions) ? fetch(`http://${this.id.includes("dev")?"tinydev.rerum.io/app":"tinypaul.rerum.io/dla"}/query`,{
+        var results = Boolean(withAssertions) ? fetch(DEER.URLS.QUERY,{
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(obj)
@@ -176,7 +176,7 @@ async function expand(entity = new Entity({}), matchOn) {
     let findId = entity.data["@id"] ?? entity.data.id ?? entity.data
     if (typeof findId !== "string") { return Promise.resolve(entity.data) }
     let obj = fetch(findId).then(res => res.json()).then(res => Object.assign(entity.data, res))
-    let annos = findByTargetId(findId,[],`http://${findId.includes("dev")?"tinydev":"tiny"}.rerum.io/app/query`).then(res => res.map(anno => new Annotation(anno)))
+    let annos = findByTargetId(findId,[],DEER.URLS.QUERY).then(res => res.map(anno => new Annotation(anno)))
     await Promise.all([obj, annos]).then(res => {
         annos = res[1]
         obj = res[0]
@@ -255,7 +255,7 @@ function checkMatch(expanding, asserting, matchOn = ["__rerum.generatedBy", "cre
      * @param {String} id URI for the targeted entity
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
-async function findByTargetId(id, targetStyle = [], queryUrl = "http://tinydev.rerum.io/app/query") {
+async function findByTargetId(id, targetStyle = [], queryUrl = DEER.URLS.QUERY) {
     if (!Array.isArray(targetStyle)) {
         targetStyle = [targetStyle]
     }
@@ -359,3 +359,5 @@ function getValue(property, alsoPeek = [], asType) {
         return (prop.length === 1) ? prop[0] : prop
     }
 }
+
+export { EntityMap, Entity, Annotation }

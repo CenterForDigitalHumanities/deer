@@ -7,6 +7,7 @@
 <head>
     <title>Data Encoding and Exhibition for RERUM</title>
     <meta charset="UTF-8">
+    <!-- <link rel="modulepreload" href="js/worker.js"> -->
     <link rel="stylesheet" href="https://unpkg.com/chota@latest">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>    
     <style>
@@ -387,7 +388,7 @@
         <script src="./js/deer.js" type="module"></script>
         <!-- <script src="./js/deer.js" type="module"></script> -->
         <script>
-            window.onhashchange = onload = () => hashExample.setAttribute(DEER.ID, window.location.hash.substr(1))
+            window.onhashchange = onload = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))
 
             document.onscroll = () => {
                 let y = window.scrollY

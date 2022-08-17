@@ -24,7 +24,9 @@ export default class DeerView extends HTMLElement {
 
     connectedCallback() {
         this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
-        UTILS.worker.addEventListener('message', e => {
+        this.addEventListener('message', e => this.innerHTML+=`msg!`)
+        // UTILS.worker.
+        addEventListener('message', e => {
             if (e.data.id !== this.getAttribute(DEER.ID)) { return }
             switch (e.data.action) {
                 case "update":
@@ -40,7 +42,7 @@ export default class DeerView extends HTMLElement {
     disconnectedCallback() { }
     adoptedCallback() { }
     attributeChangedCallback(name, oldValue, newValue) {
-        switch (name.split('-')[1]) {
+        switch (name) {
             case DEER.ID:
             case DEER.KEY:
             case DEER.LINK:

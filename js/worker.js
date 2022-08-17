@@ -1,4 +1,6 @@
-importScripts('entities.js')
+import {Entity, Annotation, EntityMap} from 'entities.js'
+
+
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
     var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1) // upgrade version 1 to version 2 if schema changes
