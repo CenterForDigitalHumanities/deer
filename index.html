@@ -176,7 +176,7 @@
             </p>
 
             <small class="col-12">
-                <pre>window.onhashchange = () => hashExample.setAttribute(`${DEER-PREFIX}-${DEER.ID}`, window.location.hash.substr(1))</pre>
+                <pre>window.onhashchange = () => hashExample.setAttribute(DEER.ID, window.location.hash.substr(1))</pre>
             </small>
 
 
@@ -387,7 +387,7 @@
         <script src="./js/deer.js" type="module"></script>
         <!-- <script src="./js/deer.js" type="module"></script> -->
         <script>
-            window.onhashchange = onload = () => hashExample.setAttribute(`${DEER-PREFIX}-${DEER.ID}`, window.location.hash.substr(1))
+            window.onhashchange = onload = () => hashExample.setAttribute(DEER.ID, window.location.hash.substr(1))
 
             document.onscroll = () => {
                 let y = window.scrollY

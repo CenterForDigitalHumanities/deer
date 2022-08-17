@@ -15,7 +15,7 @@ const template = (obj, options = {}) => {
 }
 
 export default class DeerView extends HTMLElement {
-    static get observedAttributes() { return [`${DEER.PREFIX}-id`,`${DEER.PREFIX}-key`,`${DEER.PREFIX}-list`,`${DEER.PREFIX}-link`,`${DEER.PREFIX}-listening`]; }
+    static get observedAttributes() { return [DEER.ID, DEER.KEY, DEER.LIST, DEER.LINK, DEER.LISTENING]; }
 
     constructor() {
         super()
@@ -25,40 +25,47 @@ export default class DeerView extends HTMLElement {
     connectedCallback() {
         this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
         UTILS.worker.addEventListener('message', e => {
-            if (e.data.id !== this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)) { return }
+            if (e.data.id !== this.getAttribute(DEER.ID)) { return }
             switch (e.data.action) {
                 case "update":
-                this.innerHTML = this.template(e.data.payload)
-                break
+                    this.innerHTML = this.template(e.data.payload)
+                    break
                 case "reload":
-                    this.Entity = e.data.payload 
+                    this.Entity = e.data.payload
                 default:
             }
         })
     }
 
-    disconnectedCallback(){}
-    adoptedCallback(){}
-    attributeChangedCallback(name, oldValue, newValue){
+    disconnectedCallback() { }
+    adoptedCallback() { }
+    attributeChangedCallback(name, oldValue, newValue) {
         switch (name.split('-')[1]) {
             case DEER.ID:
             case DEER.KEY:
             case DEER.LINK:
             case DEER.LIST:
-                let id = this.getAttribute(`${DEER.PREFIX}-${DEER.ID}`)
+                const id = this.getAttribute(DEER.ID)
                 if (id === null || this.getAttribute(DEER.COLLECTION)) { return }
                 UTILS.postView(id)
                 break
             case DEER.LISTENING:
-                let listensTo = this.getAttribute(DEER.LISTENING)
-                if (listensTo) {
-                    this.addEventListener(DEER.EVENTS.CLICKED, e => {
-                        let loadId = e.detail["@id"]
-                        if (loadId === listensTo) { this.setAttribute(`${DEER-PREFIX}-${DEER.ID}`, loadId) }
-                    })
+                const listensTo = this.getAttribute(DEER.LISTENING)
+                if (!listensTo) {
+                    console.warn(`There is no HTML element with id ${this.getAttribute(DEER.LISTENING)} to attach an event to`)
+                    return
                 }
+                this.addEventListener(DEER.EVENTS.SELECTED, e => {
+                    let selectID = e.detail.target?.closest(`[${DEER.ID}]`)?.id
+                    if (selectID === listensTo) {
+                        this.setAttribute(DEER.ID, selectID.getAttribute(DEER.ID))
+                    }
+                })
+                window[listensTo]?.addEventListener("click", e => UTILS.broadcast(e, DEER.EVENTS.SELECTED, window[listensTo]))
+            default:
+                break
         }
     }
 }
 
-customElements.define(`${DEER.PREFIX}-${DEER.VIEW}`, DeerView)
+customElements.define(`deer-view`, DeerView)

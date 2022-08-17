@@ -18,17 +18,6 @@ import { default as DEER } from './deer-config.js'
 // new template
 DEER.TEMPLATES.cat = (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
 
-// sandbox repository URLS
-const base_id = "http://devstore.rerum.io/v1"
-const base_tt = "http://tinydev.rerum.io/app"
-
-DEER.URLS = {
-    CREATE: base_tt + "/create",
-    UPDATE: base_tt + "/update",
-    QUERY: base_tt + "/query",
-    OVERWRITE: base_tt + "/overwrite",
-    SINCE: base_id + "/since"
-}
 // Render is probably needed by all items, but can be removed.
 // Record is only needed for saving or updating items.
 // CDN at https://centerfordigitalhumanities.github.io/deer/releases/
