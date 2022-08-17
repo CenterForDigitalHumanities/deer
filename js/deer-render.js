@@ -44,7 +44,7 @@ async function renderChange(mutationsList) {
                 if (listensTo) {
                     mutation.target.addEventListener(DEER.EVENTS.CLICKED, e => {
                         let loadId = e.detail["@id"]
-                        if (loadId === listensTo) { mutation.target.setAttribute("deer-id", loadId) }
+                        if (loadId === listensTo) { mutation.target.setAttribute(`${DEER-PREFIX}-${DEER.ID}`, loadId) }
                     })
                 }
         }

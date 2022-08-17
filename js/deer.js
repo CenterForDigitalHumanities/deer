@@ -19,29 +19,19 @@ import { default as DEER } from './deer-config.js'
 DEER.TEMPLATES.cat = (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
 
 // sandbox repository URLS
+const base_id = "http://devstore.rerum.io/v1"
+const base_tt = "http://tinydev.rerum.io/app"
+
 DEER.URLS = {
-    BASE_ID: "http://devstore.rerum.io/v1",
-    CREATE: "http://tinydev.rerum.io/app/create",
-    UPDATE: "http://tinydev.rerum.io/app/update",
-    QUERY: "http://tinydev.rerum.io/app/query",
-    OVERWRITE: "http://tinydev.rerum.io/app/overwrite",
-    SINCE: "http://devstore.rerum.io/v1/since"
+    CREATE: base_tt + "/create",
+    UPDATE: base_tt + "/update",
+    QUERY: base_tt + "/query",
+    OVERWRITE: base_tt + "/overwrite",
+    SINCE: base_id + "/since"
 }
 // Render is probably needed by all items, but can be removed.
-// CDN at https://centerfordigitalhumanities.github.io/deer/releases/
-// import { default as renderer, initializeDeerViews } from './deer-render.js'
-
 // Record is only needed for saving or updating items.
 // CDN at https://centerfordigitalhumanities.github.io/deer/releases/
-// import { default as record, initializeDeerForms } from './deer-record.js'
-
-// fire up the element detection as needed
-try {
-    // initializeDeerViews(DEER)
-    // initializeDeerForms(DEER)
-} catch (err) {
-    // silently fail if render or record is not loaded
-}
 
 // attach service worker for offline support
 if ('serviceWorker' in navigator) {
@@ -51,5 +41,5 @@ if ('serviceWorker' in navigator) {
     importScripts('entities.js')
 }
 
-import ('/components/view/view.js')
-import ('/components/view/entity.js')
+import('/components/view/view.js')
+import('/components/view/entity.js')

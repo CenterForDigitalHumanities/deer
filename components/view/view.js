@@ -54,7 +54,7 @@ export default class DeerView extends HTMLElement {
                 if (listensTo) {
                     this.addEventListener(DEER.EVENTS.CLICKED, e => {
                         let loadId = e.detail["@id"]
-                        if (loadId === listensTo) { this.setAttribute("deer-id", loadId) }
+                        if (loadId === listensTo) { this.setAttribute(`${DEER-PREFIX}-${DEER.ID}`, loadId) }
                     })
                 }
         }
