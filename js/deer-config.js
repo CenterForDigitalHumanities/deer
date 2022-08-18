@@ -46,7 +46,7 @@ export default {
         SELECTED: "selected"
     },
 
-    SUPPRESS: ["__rerum", "@context"], //properties to ignore
+    SUPPRESS: ["__rerum", "@context", "@id"], //properties to ignore
     DELIMETERDEFAULT: ",", // Default delimeter for .split()ing and .join()ing 
     ROBUSTFEEDBACK: true,  // Show warnings along with errors in the web console.  Set to false to only see errors.  
 
