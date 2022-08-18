@@ -121,8 +121,6 @@
     deer-template="prop"
     deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
 &lt;/deer-view>
-
-DEER.TEMPLATES.cat = (obj,options) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
 </pre>
         </section>
 
@@ -143,7 +141,10 @@ DEER.TEMPLATES.cat = (obj,options) => `<h5>${obj.name}</h5><img src="http://plac
             <pre class="col-6">&lt;deer-view 
     deer-template="cat"
     deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
-&lt;/deer-view></pre>
+&lt;/deer-view>
+
+DEER.TEMPLATES.cat = (obj,options) => `&lt;h5>${obj.name}&lt;/h5>&lt;img src="http://placekitten.com/300/150" style="width:100%;">`
+</pre>
 
             <h4>Configuration</h4>
             <p class="col-12">The <code>deer-config.js</code> file contains all the defaults for using DEER. Any developer wishing to rename watched attributes, to attach new templates, and more can extend this configuration object when initializing DEER.</p>
