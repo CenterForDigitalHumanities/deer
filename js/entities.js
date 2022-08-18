@@ -1,3 +1,5 @@
+import { default as DEER } from './deer-config.js'
+
 const EntityMap = new Map() // get over here!
 
 class Entity extends Object {
@@ -249,6 +251,25 @@ function checkMatch(expanding, asserting, matchOn = ["__rerum.generatedBy", "cre
     return false
 }
 
+function objectMatch(o1 = {}, o2 = {}) {
+    const keys1 = Object.keys(o1)
+    const keys2 = Object.keys(o2)
+    if (keys1.length !== keys2.length) { return false }
+    for (const k of keys1) {
+        const val1 = o1[k]
+        const val2 = o2[k]
+        const recurseNeeded = isObject(val1) && isObject(val2);
+        if ((recurseNeeded && !this.objectMatch(val1, val2))
+            || (!recurseNeeded && val1 !== val2)) {
+            return false
+        }
+    }
+    return true
+    function isObject(object) {
+        return object != null && typeof object === 'object'
+    }
+}
+
 /**
      * Execute query for any annotations in RERUM which target the
      * id passed in. Promise resolves to an array of annotations.
@@ -360,4 +381,21 @@ function getValue(property, alsoPeek = [], asType) {
     }
 }
 
-export { EntityMap, Entity, Annotation }
+export { EntityMap, Entity, Annotation,objectMatch }
+
+/**
+ * Careful with this. It's a global event listener simulation. The `document` object 
+ * is not a real DOM element, so it doesn't have a `dispatchEvent` method. If more 
+ * than one action type is needed, this should be refactored.
+ */
+if(WorkerGlobalScope) {
+    var document = {}
+     document.dispatchEvent = msg => {
+         const id = msg.detail.id
+         const action = msg.detail.action
+         const payload = msg.detail.payload
+     
+         postMessage({ id, action, payload})
+     }
+} 
+ 

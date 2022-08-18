@@ -1,5 +1,4 @@
-import {Entity, Annotation, EntityMap} from 'entities.js'
-
+import {Entity, Annotation, EntityMap, objectMatch} from './entities.js'
 
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
@@ -88,25 +87,6 @@ function getItem(id, args = {}) {
             })
         }
     })
-}
-
-function objectMatch(o1 = {}, o2 = {}) {
-    const keys1 = Object.keys(o1)
-    const keys2 = Object.keys(o2)
-    if (keys1.length !== keys2.length) { return false }
-    for (const k of keys1) {
-        const val1 = o1[k]
-        const val2 = o2[k]
-        const recurseNeeded = isObject(val1) && isObject(val2);
-        if ((recurseNeeded && !this.objectMatch(val1, val2))
-            || (!recurseNeeded && val1 !== val2)) {
-            return false
-        }
-    }
-    return true
-    function isObject(object) {
-        return object != null && typeof object === 'object'
-    }
 }
 
 /**
