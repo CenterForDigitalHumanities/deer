@@ -33,7 +33,6 @@ export default class DeerView extends HTMLElement {
 
     connectedCallback() {
         this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
-        this.addEventListener('message', e => this.innerHTML+=`msg!`)
         UTILS.worker.addEventListener('message', e => {
             if (e.data.id !== this.getAttribute(DEER.ID)) { return }
             switch (e.data.action) {
@@ -74,6 +73,7 @@ export default class DeerView extends HTMLElement {
                 window[listensTo]?.addEventListener("click", e => UTILS.broadcast(e, DEER.EVENTS.SELECTED, window[listensTo]))
             default:
                 break
+
         }
     }
 }
