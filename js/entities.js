@@ -78,7 +78,10 @@ class Entity extends Object {
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(finds => {
             if(finds.length === 0) { return Promise.reject({status:404}) }
-            this.data = finds?.find(e => e['@id'] === this.id) ?? finds
+            const originalObject = finds?.find(e => e['@id'] === this.id)
+            if(typeof originalObject === "object") {
+                this.data = originalObject
+            }
             if (withAssertions) {
                 this.#findAssertions(finds)
             }
@@ -398,4 +401,3 @@ if(WorkerGlobalScope) {
          postMessage({ id, action, payload})
      }
 } 
- 
