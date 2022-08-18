@@ -98,7 +98,7 @@
 
             <div class="card col-6">
                 <header>List Template</header>
-                <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></div>
+                <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></deer-view>
             </div>
 
             <pre class="col-6">&lt;deer-view 
@@ -112,7 +112,7 @@
 
             <div class="card col-6">
                 <header>Property Template</header>
-                <div class="deer-view" title="Sample Prop" deer-key="name" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="prop"></div>
+                <deer-view title="Sample Prop" deer-key="name" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="prop"></deer-view>
             </div>
 
             <pre class="col-6">&lt;deer-view 
@@ -134,11 +134,31 @@
 
             <div class="card col-6">
                 <header>Cat Template</header>
-                <div class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="cat"></div>
+                <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="cat"></deer-view>
             </div>
 
             <pre class="col-6">&lt;deer-view 
     deer-template="cat"
+    deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
+&lt;/deer-view></pre>
+
+            <h4>Configuration</h4>
+            <p class="col-12">The <code>deer-config.js</code> file contains all the defaults for using DEER. Any developer wishing to rename watched attributes, to attach new templates, and more can extend this configuration object when initializing DEER.</p>
+
+        </section>
+
+        <section class="row">
+            <h2>Lazy Loading</h2>
+            <p class="col-12">By default, the request for each URI includes documents that annotate it using the Web Annotation pattern. This adds a minimal lag to the query into RERUM, but 
+                may be longer for objects with a very long history or wide network of annotations. In these cases, the <code>deer-lazy</code> attribute may be added. In this case, the 
+                object at the URI will be rendered immediately and then updated with further annotations as they are loaded.
+            </p>
+            <div class="card col-6">
+                <header>Lazy Loading</header>
+                <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"></deer-view>
+            </div>
+            <pre class="col-6">&lt;deer-view 
+    deer-lazy="true"
     deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
 &lt;/deer-view></pre>
 
@@ -162,7 +182,7 @@
 
             <div class="card col-6">
                 <header>List Template with Links</header>
-                <div class="deer-view" deer-link="#" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></div>
+                <deer-view deer-link="#" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></deer-view>
             </div>
 
             <pre class="col-6">&lt;deer-view 
@@ -183,7 +203,7 @@
 
             <div class="card col-6">
                 <header>List Template with Links</header>
-                <div class="deer-view" deer-link="#" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></div>
+                <deer-view deer-link="#" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></deer-view>
                 <footer class="text-primary"><img src="https://icongr.am/fontawesome/bolt.svg?size=18"> Click on a link in the list to update the rendered element on the right.</footer>
             </div>
 
