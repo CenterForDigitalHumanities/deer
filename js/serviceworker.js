@@ -43,7 +43,7 @@ self.addEventListener('activate', event => {
         DBOpenRequest.onupgradeneeded = event => {
             db = event.target.result
             // Create an objectStore for this database
-            objectStore = db.createObjectStore(IDBSTORE, { keyPath: "id" })
+            var objectStore = db.createObjectStore(IDBSTORE, { keyPath: "id" })
             console.log("Successfully upgraded db")
             opening.resolve(db)
         }

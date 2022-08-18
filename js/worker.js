@@ -14,7 +14,7 @@ const db = new Promise((resolve, reject) => {
     DBOpenRequest.onupgradeneeded = event => {
         const db = event.target.result
         // Create an objectStore for this database
-        objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' }) // @id is an illegal keyPath
+        var objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' }) // @id is an illegal keyPath
         objectStore.onsuccess = event => {
             console.log("Successfully upgraded db")
             resolve(db)
