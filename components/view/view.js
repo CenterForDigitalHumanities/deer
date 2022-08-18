@@ -18,6 +18,14 @@ const template = (obj, options = {}) => {
 export default class DeerView extends HTMLElement {
     static get observedAttributes() { return [DEER.ID, DEER.KEY, DEER.LIST, DEER.LINK, DEER.LISTENING]; }
 
+    #options = {
+        list: this.getAttribute(DEER.LIST),
+        link: this.getAttribute(DEER.LINK),
+        collection: this.getAttribute(DEER.COLLECTION),
+        key: this.getAttribute(DEER.KEY),
+        label: this.getAttribute(DEER.LABEL),
+        config: DEER
+    }
     constructor() {
         super()
         this.template = DEER.TEMPLATES[this.getAttribute(DEER.TEMPLATE)] ?? template
@@ -30,7 +38,7 @@ export default class DeerView extends HTMLElement {
             if (e.data.id !== this.getAttribute(DEER.ID)) { return }
             switch (e.data.action) {
                 case "update":
-                    this.innerHTML = this.template(e.data.payload)
+                    this.innerHTML = this.template(e.data.payload,this.#options)
                     break
                 case "reload":
                     this.Entity = e.data.payload
@@ -57,10 +65,10 @@ export default class DeerView extends HTMLElement {
                     console.warn(`There is no HTML element with id ${this.getAttribute(DEER.LISTENING)} to attach an event to`)
                     return
                 }
-                this.addEventListener(DEER.EVENTS.SELECTED, e => {
-                    let selectID = e.detail.target?.closest(`[${DEER.ID}]`)?.id
-                    if (selectID === listensTo) {
-                        this.setAttribute(DEER.ID, selectID.getAttribute(DEER.ID))
+                document.addEventListener(DEER.EVENTS.SELECTED, e => {
+                    let listenID = e.detail.target?.closest(`[${DEER.ID}][id]`)?.id
+                    if (listenID === listensTo) {
+                        this.setAttribute(DEER.ID, e.detail.target?.closest(`[${DEER.ID}]`)?.getAttribute(DEER.ID))
                     }
                 })
                 window[listensTo]?.addEventListener("click", e => UTILS.broadcast(e, DEER.EVENTS.SELECTED, window[listensTo]))

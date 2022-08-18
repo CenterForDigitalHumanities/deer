@@ -132,7 +132,7 @@ const utils = {
      */
     broadcast: function (event = {}, type, element, obj = {}) {
         let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
-        element.dispatchEvent(e)
+        document.dispatchEvent(e)
     },
 
     /**

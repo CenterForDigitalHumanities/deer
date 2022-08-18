@@ -120,7 +120,10 @@
     deer-key="name"
     deer-template="prop"
     deer-id="<a href="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706">https://example.com/id/001</a>">
-&lt;/deer-view></pre>
+&lt;/deer-view>
+
+DEER.TEMPLATES.cat = (obj,options) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
+</pre>
         </section>
 
         <section class="row">
@@ -209,9 +212,9 @@
 
             <div class="card col-6">
                 <header>Load from Hash</header>
-                <div class="col deer-view" id="hashExample" deer-template="entity">
+                <deer-view class="col" id="hashExample" deer-template="entity">
                     no hash
-                </div>
+                </deer-view>
             </div>
 
             <h4>Listening to Events</h4>
@@ -221,7 +224,7 @@
 
             <div class="card col-6">
                 <header>List Template with Links</header>
-                <div id="exampleListen" class="deer-view" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></div>
+                <deer-view id="exampleListen" deer-id="http://devstore.rerum.io/v1/id/5c9d15afe4b0a44e13e6170c" deer-list="itemListElement" deer-template="list"></deer-view>
                 <footer class="text-primary">
                     <img src="https://icongr.am/fontawesome/bolt.svg?size=18"> Click on a list item to update the "listening" <code>&lt;deer-view></code> elements below
                 </footer>
@@ -229,7 +232,7 @@
 
             <div class="card col-6">
                 <header>Listening with an Entity Template</header>
-                <div class="col deer-view" deer-listening="exampleListen" deer-template="entity"></div>
+                <deer-view class="col" deer-listening="exampleListen" deer-template="entity"></deer-view>
             </div>
 
         </section>
@@ -416,6 +419,8 @@
                 badge.style.opacity = 1 - y / h * 2
                 tagline.style.top = y / h * -5 + "em"
             }
+
+            document.addEventListener("selected", console.log, true)
         </script>
 </body>
 
