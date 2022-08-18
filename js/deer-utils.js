@@ -10,17 +10,10 @@
  * @see tiny.rerum.io
  */
 
-import CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+// import * as CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
 import { default as DEER } from './deer-config.js'
 
 var worker = new Worker('./js/worker.js')
-worker.postMessage({ action: "init" })
-
-worker.onmessage = event => {
-    if (event.data.action === "expanded") {
-        utils.broadcast(event, "expanded", document, event.data.item)
-    }
-}
 
 const utils = {
     worker: worker,
@@ -118,13 +111,13 @@ const utils = {
     },
     postView(entity, matchOn = ["__rerum.generatedBy", "creator"]) {
         let UTILS = this
-        let findId = entity["@id"] || entity.id || entity
-        if (typeof findId !== "string") {
+        const id = entity["@id"] ?? entity.id ?? entity
+        if (typeof id !== "string") {
             UTILS.warning("Unable to find URI in object:", entity)
             return entity
         }
-        let message = {
-            id: findId,
+        const message = {
+            id,
             action: "view",
             args: {
                 matchOn: matchOn,
@@ -415,6 +408,6 @@ const utils = {
         }
         return CryptoJS.MD5(data)
     }
-}F
+}
 
 export default utils

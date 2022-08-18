@@ -29,25 +29,27 @@ DEER.URLS = {
 }
 // Render is probably needed by all items, but can be removed.
 // CDN at https://centerfordigitalhumanities.github.io/deer/releases/
-import { default as renderer, initializeDeerViews } from './deer-render.js'
+// import { default as renderer, initializeDeerViews } from './deer-render.js'
 
 // Record is only needed for saving or updating items.
 // CDN at https://centerfordigitalhumanities.github.io/deer/releases/
-import { default as record, initializeDeerForms } from './deer-record.js'
+// import { default as record, initializeDeerForms } from './deer-record.js'
 
 // fire up the element detection as needed
 try {
-    initializeDeerViews(DEER)
-    initializeDeerForms(DEER)
+    // initializeDeerViews(DEER)
+    // initializeDeerForms(DEER)
 } catch (err) {
     // silently fail if render or record is not loaded
 }
 
 // attach service worker for offline support
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/worker.js')
+    navigator.serviceWorker.register('/js/serviceworker.js')
 } else {
     console.log('Service workers are not supported in this browser.')
     importScripts('entities.js')
 }
 
+import ('/components/view/view.js')
+import ('/components/view/entity.js')

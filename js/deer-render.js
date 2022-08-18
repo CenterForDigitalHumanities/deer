@@ -14,6 +14,10 @@
 import { default as UTILS } from './deer-utils.js'
 import { default as config } from './deer-config.js'
 
+// import views
+import '../components/view/view.js'
+import '../components/view/entity.js'
+
 const changeLoader = new MutationObserver(renderChange)
 var DEER = config
 
@@ -30,7 +34,7 @@ async function renderChange(mutationsList) {
             case DEER.LINK:
             case DEER.LIST:
                 let id = mutation.target.getAttribute(DEER.ID)
-                if (id === "null" || mutation.target.getAttribute(DEER.COLLECTION)) return
+                if (id === null || mutation.target.getAttribute(DEER.COLLECTION)) return
                 let obj = await fetch(id).then(response => response.json()).catch(error => error)
                 if (!obj) return false
                 RENDER.element(mutation.target, obj)
