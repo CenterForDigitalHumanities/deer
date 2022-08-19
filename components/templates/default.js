@@ -8,10 +8,10 @@ import { default as DEER } from '/js/deer-config.js'
  * @param {String} label The label to be displayed when drawn
  */
 DEER.TEMPLATES.prop = (obj, options = {}) => {
-    let prop = obj[options.key] ?? obj.id ?? obj['@id'] ?? "[ undefined ]"
+    let prop = obj[options.key]
     let key = options.key ?? "[ missing key ]"
     try {
-        return `<span class="${prop}">${key}: ${UTILS.getValue(prop) ?? "[ undefined ]"}</span>`
+        return `<span class="${prop}">${key}: ${UTILS.getValue(prop) ?? `Property <code>${key}</code> is not defined on <a href="${obj.id}" target="_blank">this document</a>`}</span>`
     } catch (err) {
         return null
     }

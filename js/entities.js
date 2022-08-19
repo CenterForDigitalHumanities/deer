@@ -24,6 +24,7 @@ class Entity extends Object {
         let clone = JSON.parse(JSON.stringify(this.data))
         this.Annotations.forEach(annotation => applyAssertions(clone, annotation.normalized))
         this._assertions = clone
+        console.log(this._assertions)
         return this._assertions
     }
     
@@ -50,7 +51,10 @@ class Entity extends Object {
 
     attachAnnotation(annotation) {
         this.Annotations.set(annotation.id, annotation)
-        EntityMap.set(this.id, this)
+        // console.log("Attached annotation", annotation.id)
+        // console.log(this.Annotations)
+        // console.log(EntityMap.get(this.id))
+        // EntityMap.set(this.id, this)
     }
 
     #findAssertions = (assertions) => {
@@ -58,9 +62,8 @@ class Entity extends Object {
         return annos
             .then(annotations => annotations.filter(a=>(a.type ?? a['@type'])?.includes("Annotation")).map(anno => new Annotation(anno)))
             .then(newAssertions => {
-                if (newAssertions?.length === 0) { return this.#announceComplete() }
-                newAssertions.forEach(anno => anno.registerTargets())
-                this.#announceUpdate()
+                if (newAssertions?.length > 0) this.#announceUpdate()
+                this.#announceComplete()
             })
             .catch(err => console.log(err))
     }
@@ -148,6 +151,7 @@ class Annotation extends Object {
     constructor(annotation) {
         super()
         this.data = annotation
+        this.#registerTargets()
     }
 
     get normalized() {
@@ -160,10 +164,10 @@ class Annotation extends Object {
     }
 
     get id() {
-        return this.data.id
+        return this.data.id ?? this.data['@id'] // id is primary key
     }
 
-    registerTargets = () => {
+    #registerTargets = () => {
         let targets = this.data.target
         if(!Array.isArray(targets)) { targets = [targets] }
 
@@ -201,14 +205,13 @@ async function expand(entity = new Entity({}), matchOn) {
  * @param string matchOn key to match on.
  * @returns Object with assertions value of the assertion.
  */
-function applyAssertions(assertOn, annotation, matchOn) {
-    if (Array.isArray(annotation)) { return annotation.map(a=>applyAssertions(assertOn,a,matchOn)) }
+function applyAssertions(assertOn, annotationBody, matchOn) {
+    if (Array.isArray(annotationBody)) { return annotationBody.forEach(a=>applyAssertions(assertOn,a,matchOn)) }
 
-    if (!annotation.hasOwnProperty('body')) { return }
-    if (!checkMatch(assertOn, annotation, matchOn)) { return }
+    if (checkMatch(assertOn, annotationBody, matchOn)) { return }
 
     const assertions = {}
-    Object.entries(annotation.body).forEach(([k, v]) => {
+    Object.entries(annotationBody).forEach(([k, v]) => {
         if(v === undefined) { return }
         if (assertOn.hasOwnProperty(k) && assertOn[k] !== undefined && assertOn[k] !== null && assertOn[k] !== "" && assertOn[k] !== []) {
             Array.isArray(assertions[k]) ? assertions[k].push(v) : assertions[k] = [v]
@@ -216,6 +219,10 @@ function applyAssertions(assertOn, annotation, matchOn) {
             assertions[k] = v
         }
     })
+
+    // Simplify any arrays of length 1, which may not be a good idea.
+    Object.entries(assertions).forEach(([k, v]) => { if (Array.isArray(v) && v.length === 1) { v = v[0] } })
+
     return Object.assign(assertOn, assertions)
 }
 
@@ -231,8 +238,8 @@ function applyAssertions(assertOn, annotation, matchOn) {
  **/
 function checkMatch(expanding, asserting, matchOn = ["__rerum.generatedBy", "creator"]) {
     for (const m of matchOn) {
-        let obj_match = m.split('.').reduce((o, i) => o[i], expanding)
-        let anno_match = m.split('.').reduce((o, i) => o[i], asserting)
+        let obj_match = m.split('.').reduce((o, i) => o?.[i], expanding)
+        let anno_match = m.split('.').reduce((o, i) => o?.[i], asserting)
         if (obj_match === undefined || anno_match === undefined) {
             // Matching is not violated if one of the checked values is missing from a comparator,
             // but it is not a match without any positive matches.
