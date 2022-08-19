@@ -50,6 +50,7 @@ class Entity extends Object {
 
     attachAnnotation(annotation) {
         this.Annotations.set(annotation.id, annotation)
+        EntityMap.set(this.id, this)
     }
 
     #findAssertions = (assertions) => {
