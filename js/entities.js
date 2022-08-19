@@ -24,7 +24,6 @@ class Entity extends Object {
         let clone = JSON.parse(JSON.stringify(this.data))
         this.Annotations.forEach(annotation => applyAssertions(clone, annotation.normalized))
         this._assertions = clone
-        console.log(this._assertions)
         return this._assertions
     }
     
@@ -51,10 +50,6 @@ class Entity extends Object {
 
     attachAnnotation(annotation) {
         this.Annotations.set(annotation.id, annotation)
-        // console.log("Attached annotation", annotation.id)
-        // console.log(this.Annotations)
-        // console.log(EntityMap.get(this.id))
-        // EntityMap.set(this.id, this)
     }
 
     #findAssertions = (assertions) => {
