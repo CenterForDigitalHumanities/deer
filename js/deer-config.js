@@ -6,6 +6,7 @@ export default {
     ID:             namespace + "-id", // attribute, URI for resource to render
     TYPE:           namespace + "-type", // attribute, JSON-LD @type
     TEMPLATE:       namespace + "-template", // attribute, enum for custom template
+    LAZY:           namespace + "-lazy", // set to true for slower rendering
     KEY:            namespace + "-key", // attribute, key to use for annotation
     LABEL:          namespace + "-title", // attribute, alternate label for properties
     CONTEXT:        namespace + "-context", // attribute, JSON-LD @context, scoped

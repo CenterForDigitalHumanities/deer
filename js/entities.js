@@ -1,10 +1,10 @@
-import { default as DEER } from './deer-config.js'
-import { default as UTILS } from './deer-utils.js'
+import { default as UTILS } from '/js/deer-utils.js'
+import { default as DEER } from '/js/deer-config.js'
 
 const EntityMap = new Map() // get over here!
 
 class Entity extends Object {
-    constructor(entity={}) {
+    constructor(entity={},isLazy=false) {
         super()
         // accomodate Entity(String) and Entity(Object) or Entity(JSONString)
         if(typeof entity === "string") {
@@ -18,6 +18,7 @@ class Entity extends Object {
         if(!id) { throw new Error("Entity must have an id") }
         if(EntityMap.has(id)) { throw new Error("Entity already exists")}
         this.Annotations = new Map()
+        this.#isLazy = isLazy
         this.data = entity
     }
     
@@ -46,7 +47,7 @@ class Entity extends Object {
         this._data = entity
         EntityMap.set(this.id, this)
         this.#announceUpdate()
-        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(true).then(this.#announceNewEntity) }
+        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(!this.#isLazy).then(this.#announceNewEntity) }
     }
 
     attachAnnotation(annotation) {
