@@ -11,13 +11,13 @@ const template = obj => {
         let label = key
         let value = UTILS.getValue(obj[key], key)
         if (value.image?.length > 0) {
-            list += (label === "depiction") ? `<img title="${label}" src="${value.image ?? value}" ${DEER.PREFIX}-${DEER.SOURCE}="${UTILS.getValue(obj[key].source, "citationSource")}">` : `<dt ${DEER.PREFIX}-source="${UTILS.getValue(obj[key].source, "citationSource")}">${label}</dt><dd>${value.image ?? value}</dd>`
+            list += (label === "depiction") ? `<img title="${label}" src="${value.image ?? value}" ${DEER.SOURCE}="${UTILS.getValue(obj[key].source, "citationSource")}">` : `<dt ${DEER.SOURCE}="${UTILS.getValue(obj[key].source, "citationSource")}">${label}</dt><dd>${value.image ?? value}</dd>`
             continue
         }
         // is it object/array?
         list += `<dt>${label}</dt>`
         if (Array.isArray(value)) {
-            value.filter(undefinedCheck=>undefinedCheck!==undefined).forEach((v, index) => list += (v["@id"]) ? `<dd><a href="#${v["@id"]}">${UTILS.getLabel(v, (v.type ?? v['@type'] ?? label + '' + index))}</a></dd>` : `<dd ${DEER.PREFIX}-${DEER.SOURCE}="${UTILS.getValue(v.source, "citationSource")}">${UTILS.getValue(v)}</dd>`)
+            value.filter(undefinedCheck=>undefinedCheck!==undefined).forEach((v, index) => list += (v["@id"]) ? `<dd><a href="#${v["@id"]}">${UTILS.getLabel(v, (v.type ?? v['@type'] ?? label + '' + index))}</a></dd>` : `<dd ${DEER.SOURCE}="${UTILS.getValue(v.source, "citationSource")}">${UTILS.getValue(v)}</dd>`)
         } else {
             // a single, probably
             // TODO: export buildValueObject() from UTILS for use here
@@ -42,7 +42,7 @@ const template = obj => {
 }
 
 export default class ViewEntity extends DeerView {
-    static get observedAttributes() { return [`${DEER.PREFIX}-id`,`${DEER.PREFIX}-listening`] }
+    static get observedAttributes() { return [DEER.ID, DEER.LISTENING] }
 
     constructor() {
         super()
@@ -50,4 +50,4 @@ export default class ViewEntity extends DeerView {
     }
 }
 
-customElements.define(`${DEER.PREFIX}-entity`, ViewEntity)
+customElements.define(`deer-entity`, ViewEntity)
