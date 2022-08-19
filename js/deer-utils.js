@@ -45,7 +45,7 @@ const utils = {
         }
         if (Array.isArray(property)) {
             // It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
-            return property
+            return property.map(item => utils.getValue(item, alsoPeek, asType))
         } else {
             if (typeof property === "object") {
                 // TODO: JSON-LD insists on "@value", but this is simplified in a lot
