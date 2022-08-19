@@ -56,7 +56,11 @@ class Entity extends Object {
         var annos = Array.isArray(assertions) ? Promise.resolve(assertions) : findByTargetId(this.id,[],DEER.URLS.QUERY)
         return annos
             .then(annotations => annotations.filter(a=>(a.type ?? a['@type'])?.includes("Annotation")).map(anno => new Annotation(anno)))
-            .then(newAssertions => newAssertions?.length ? this.#announceUpdate() : this.#announceComplete())
+            .then(newAssertions => {
+                if (newAssertions?.length === 0) { return this.#announceComplete() }
+                newAssertions.forEach(anno => anno.registerTargets())
+                this.#announceUpdate()
+            })
             .catch(err => console.log(err))
     }
 
@@ -143,7 +147,6 @@ class Annotation extends Object {
     constructor(annotation) {
         super()
         this.data = annotation
-        this.#registerTargets()
     }
 
     get normalized() {
@@ -159,7 +162,7 @@ class Annotation extends Object {
         return this.data.id
     }
 
-    #registerTargets = () => {
+    registerTargets = () => {
         let targets = this.data.target
         if(!Array.isArray(targets)) { targets = [targets] }
 
