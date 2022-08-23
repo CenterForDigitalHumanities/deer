@@ -17,7 +17,7 @@ class Entity extends Object {
         if(!id) { throw new Error("Entity must have an id") }
         if(EntityMap.has(id)) { throw new Error("Entity already exists")}
         this.Annotations = new Map()
-        this.#isLazy = Boolean(isLazy)
+        this.__isLazy = Boolean(isLazy)
         this.data = entity
     }
     
@@ -46,7 +46,7 @@ class Entity extends Object {
         this._data = entity
         EntityMap.set(this.id, this)
         this.#announceUpdate()
-        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(!this.#isLazy).then(this.#announceNewEntity) }
+        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(!this.__isLazy).then(this.#announceNewEntity) }
     }
 
     attachAnnotation(annotation) {
