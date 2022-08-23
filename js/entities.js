@@ -1,4 +1,4 @@
-import { UTILS, DEER } from '/js/deer-utils.js'
+import { default as DEER } from './deer-config.js'
 
 const EntityMap = new Map() // get over here!
 
@@ -330,6 +330,8 @@ function buildValueObject(val, fromAnno) {
     valueObject.evidence = val.evidence || fromAnno.evidence || ""
     return valueObject
 }
+
+var UTILS = {getValue: val=>val}
 
 export { EntityMap, Entity, Annotation,objectMatch }
 
