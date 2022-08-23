@@ -30,5 +30,6 @@ if ('serviceWorker' in navigator) {
     importScripts('entities.js')
 }
 
+// Import custom components. The basic view.js is required.
 import('/components/view/view.js')
 import('/components/view/entity.js')

@@ -1,6 +1,5 @@
-import { default as UTILS } from '/js/deer-utils.js'
-import { default as DEER } from '/js/deer-config.js'
-import '/components/templates/default.js'
+import { UTILS, DEER } from '../../js/deer-utils.js'
+import '../templates/default.js'
 
 const template = (obj, options = {}) => {
     let indent = options.indent ?? 4

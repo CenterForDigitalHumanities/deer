@@ -1,5 +1,5 @@
 import { default as UTILS } from '/js/deer-utils.js'
-import { default as DEER } from '/js/deer-config.js'
+import { DEER } from '/js/deer-utils.js'
 
 const EntityMap = new Map() // get over here!
 

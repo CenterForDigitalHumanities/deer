@@ -13,9 +13,9 @@
 // import * as CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
 import { default as DEER } from './deer-config.js'
 
-var worker = new Worker('./js/worker.js', { type: 'module' })
+var worker = new Worker('./worker.js', { type: 'module' })
 
-const utils = {
+const UTILS = {
     worker,
     listFromCollection: function (collectionId) {
         let queryObj = {
@@ -45,7 +45,7 @@ const utils = {
         }
         if (Array.isArray(property)) {
             // It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
-            return property.map(item => utils.getValue(item, alsoPeek, asType))
+            return property.map(item => UTILS.getValue(item, alsoPeek, asType))
         } else {
             if (typeof property === "object") {
                 // TODO: JSON-LD insists on "@value", but this is simplified in a lot
@@ -411,4 +411,5 @@ const utils = {
     }
 }
 
-export default utils
+export default UTILS
+export { UTILS, DEER }

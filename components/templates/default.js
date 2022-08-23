@@ -1,5 +1,4 @@
-import { default as UTILS } from '/js/deer-utils.js'
-import { default as DEER } from '/js/deer-config.js'
+import { UTILS, DEER } from '../../js/deer-utils.js'
 
 /**
  * Get a certain property from an object and return it formatted as HTML to be drawn.  
