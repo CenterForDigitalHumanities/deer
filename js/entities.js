@@ -1,5 +1,4 @@
-import { default as UTILS } from '/js/deer-utils.js'
-import { DEER } from '/js/deer-utils.js'
+import { UTILS, DEER } from '/js/deer-utils.js'
 
 const EntityMap = new Map() // get over here!
 
@@ -58,10 +57,7 @@ class Entity extends Object {
         var annos = Array.isArray(assertions) ? Promise.resolve(assertions) : findByTargetId(this.id,[],DEER.URLS.QUERY)
         return annos
             .then(annotations => annotations.filter(a=>(a.type ?? a['@type'])?.includes("Annotation")).map(anno => new Annotation(anno)))
-            .then(newAssertions => {
-                if (newAssertions?.length > 0) this.#announceUpdate()
-                this.#announceComplete()
-            })
+            .then(newAssertions => newAssertions?.length ? this.#announceUpdate() : this.#announceComplete())
             .catch(err => console.log(err))
     }
 

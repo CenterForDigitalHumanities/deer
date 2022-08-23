@@ -13,7 +13,7 @@
 // import * as CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
 import { default as DEER } from './deer-config.js'
 
-var worker = new Worker('./worker.js', { type: 'module' })
+var worker = new Worker('/js/worker.js', { type: 'module' })
 
 const UTILS = {
     worker,
@@ -109,7 +109,7 @@ const UTILS = {
             return label || noLabel
         }
     },
-    postView(entity, isLazy, matchOn = ["__rerum.generatedBy", "creator"]) {
+    postView(entity, isLazy = false, matchOn = ["__rerum.generatedBy", "creator"]) {
         let UTILS = this
         const id = entity["@id"] ?? entity.id ?? entity
         if (typeof id !== "string") {
