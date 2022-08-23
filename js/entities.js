@@ -80,7 +80,7 @@ class Entity extends Object {
         .then(finds => {
             let originalObject 
             if(Array.isArray(finds)){
-                if(find.length){
+                if(finds.length){
                    originalObject = finds.find(e => e['@id'] === this.id) 
                 }
                 else{
