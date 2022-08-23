@@ -1,4 +1,4 @@
-import {Entity, Annotation, EntityMap, objectMatch} from './entities.js'
+import {Entity, EntityMap, objectMatch} from './entities.js'
 
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
