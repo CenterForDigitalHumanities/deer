@@ -46,7 +46,7 @@ class Entity extends Object {
         this._data = entity
         EntityMap.set(this.id, this)
         this.#announceUpdate()
-        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(this.__isLazy).then(this.#announceNewEntity) }
+        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(!this.__isLazy).then(this.#announceNewEntity) }
     }
 
     attachAnnotation(annotation) {
