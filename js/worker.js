@@ -35,7 +35,7 @@ self.onmessage = message => {
                 postMessage({
                     id: message.data.id,
                     action: "reload",
-                    payload: new Entity(message.data.id, message.isLazy)
+                    payload: new Entity(message.data.id, message.data.isLazy)
                 })
             } else {
                 postMessage({
