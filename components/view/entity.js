@@ -1,5 +1,5 @@
-import { default as DEER } from '/js/deer-config.js'
 import UTILS from '/js/deer-utils.js'
+import { default as DEER } from '/js/deer-config.js'
 import DeerView from './view.js'
 
 const template = obj => {
