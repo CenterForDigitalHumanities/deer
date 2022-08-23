@@ -78,8 +78,18 @@ class Entity extends Object {
         return results
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(finds => {
-            if(finds.length === 0) { return Promise.reject({status:404}) }
-            const originalObject = finds?.find(e => e['@id'] === this.id)
+            let originalObject 
+            if(Array.isArray(finds)){
+                if(find.length){
+                   originalObject = finds.find(e => e['@id'] === this.id) 
+                }
+                else{
+                   return Promise.reject({status:404})
+                }
+            }
+            else{
+                originalObject = finds
+            }
             if(typeof originalObject === "object") {
                 this.data = originalObject
             }
