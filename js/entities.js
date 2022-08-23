@@ -3,7 +3,7 @@ import { default as DEER } from './deer-config.js'
 const EntityMap = new Map() // get over here!
 
 class Entity extends Object {
-    constructor(entity={},isLazy=false) {
+    constructor(entity={},isLazy) {
         super()
         // accomodate Entity(String) and Entity(Object) or Entity(JSONString)
         if(typeof entity === "string") {
@@ -17,7 +17,7 @@ class Entity extends Object {
         if(!id) { throw new Error("Entity must have an id") }
         if(EntityMap.has(id)) { throw new Error("Entity already exists")}
         this.Annotations = new Map()
-        this.#isLazy = isLazy
+        this.#isLazy = Boolean(isLazy)
         this.data = entity
     }
     
