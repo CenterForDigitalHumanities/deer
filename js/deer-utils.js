@@ -109,7 +109,7 @@ const UTILS = {
             return label || noLabel
         }
     },
-    postView(entity, isLazy = false, matchOn = ["__rerum.generatedBy", "creator"]) {
+    postView(entity, isLazy, matchOn = ["__rerum.generatedBy", "creator"]) {
         let UTILS = this
         const id = entity["@id"] ?? entity.id ?? entity
         if (typeof id !== "string") {

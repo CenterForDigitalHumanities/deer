@@ -55,7 +55,7 @@ export default class DeerView extends HTMLElement {
             case DEER.LIST:
                 const id = this.getAttribute(DEER.ID)
                 if (id === null || this.getAttribute(DEER.COLLECTION)) { return }
-                UTILS.postView(id, this.getAttribute(DEER.LAZY))
+                UTILS.postView(id, Boolean(this.getAttribute(DEER.LAZY)))
                 break
             case DEER.LISTENING:
                 const listensTo = this.getAttribute(DEER.LISTENING)
