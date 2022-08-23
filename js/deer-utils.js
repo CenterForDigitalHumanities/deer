@@ -411,4 +411,6 @@ const UTILS = {
     }
 }
 
-export { UTILS, DEER }
+export default UTILS
+
+// export { UTILS, DEER }
