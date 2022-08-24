@@ -3,6 +3,8 @@ import { default as DEER } from './deer-config.js'
 const EntityMap = new Map() // get over here!
 
 class Entity extends Object {
+    #isLazy 
+    
     constructor(entity={},isLazy) {
         super()
         // accomodate Entity(String) and Entity(Object) or Entity(JSONString)
