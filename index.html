@@ -7,6 +7,7 @@
 <head>
     <title>Data Encoding and Exhibition for RERUM</title>
     <meta charset="UTF-8">
+    <link rel="modulepreload" href="/js/worker.js">
     <link rel="stylesheet" href="https://unpkg.com/chota@latest">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>    
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -162,7 +163,7 @@ DEER.TEMPLATES.cat = (obj,options) => `&lt;h5>${obj.name}&lt;/h5>&lt;img src="ht
             </p>
             <div class="card col-6">
                 <header>Lazy Loading</header>
-                <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-lazy="true"></deer-view>
+                <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706"></deer-view>
             </div>
             <pre class="col-6">&lt;deer-view 
     deer-lazy="true"
@@ -424,6 +425,7 @@ DEER.TEMPLATES.cat = (obj,options) => `&lt;h5>${obj.name}&lt;/h5>&lt;img src="ht
                 tagline.style.top = y / h * -5 + "em"
             }
 
+            document.addEventListener("selected", console.log, true)
         </script>
 </body>
 
