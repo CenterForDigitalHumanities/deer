@@ -1,3 +1,14 @@
+/**
+ * Sample element for rendering an entity in the DOM. The template is applied in the constructor. 
+ * This same template sample is in the /templates directory as the simple example.
+ * Developers can add their own classes by copying this and importing it in deer.js.
+ * 
+ * @export default class ViewEntity
+ * @definition {HTMLElement} deer-entity
+ * @author Patrick Cuba <cubap@slu.edu>
+ * @org SLU, Research Computing Group
+ */
+
 import { DEER, UTILS } from '/js/deer-utils.js'
 import DeerView from './view.js'
 
