@@ -24,9 +24,6 @@ const template = (obj, options = {}) => {
     }
 }
 
-/**
- * 
- */
 export default class DeerView extends HTMLElement {
     static get observedAttributes() { return [DEER.ID, DEER.KEY, DEER.LIST, DEER.LINK, DEER.LAZY, DEER.LISTENING]; }
 

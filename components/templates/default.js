@@ -65,7 +65,10 @@ DEER.TEMPLATES.list = function (obj, options = {}) {
 
 /**
  * Render an object as an Entity, with description list of properties.  
- * This duplicates the sample Class component in `/view/entity.js` for now.
+ * This duplicates the sample Class component in `/view/entity.js` but serves as an example for developers 
+ * who want to create their own template without an entire new class. The `deer-template` attribute can be 
+ * used on any custom element extending DeerView to specify the template to use.
+ * 
  * @param {Object} obj some obj to be labeled
  * @param {Object} options for lookup
  */
