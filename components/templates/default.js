@@ -1,5 +1,15 @@
-import { default as UTILS } from '/js/deer-utils.js'
-import { default as DEER } from '/js/deer-config.js'
+/**
+ * The default templates for rendering objects: entity, list, and prop.
+ * Additional tempaltes may be added here or in their own file. Templates 
+ * added to the DEER.TEMPLATES object will be available to all components 
+ * while custom elements can add their own templates directly.
+ * 
+ * @author Patrick Cuba <cubap@slu.edu>
+ * @organization SLU, Reseach Computing Group
+ * @tags templates, deer, rerum
+ */
+
+import { UTILS, DEER } from '/js/deer-utils.js'
 
 /**
  * Get a certain property from an object and return it formatted as HTML to be drawn.  
@@ -8,10 +18,10 @@ import { default as DEER } from '/js/deer-config.js'
  * @param {String} label The label to be displayed when drawn
  */
 DEER.TEMPLATES.prop = (obj, options = {}) => {
-    let prop = obj[options.key] ?? obj.id ?? obj['@id'] ?? "[ undefined ]"
+    let prop = obj[options.key]
     let key = options.key ?? "[ missing key ]"
     try {
-        return `<span class="${prop}">${key}: ${UTILS.getValue(prop) ?? "[ undefined ]"}</span>`
+        return `<span>${key}: ${UTILS.getValue(prop) ?? `Property <code>${key}</code> is not defined on <a href="${obj.id}" target="_blank">this document</a>`}</span>`
     } catch (err) {
         return null
     }

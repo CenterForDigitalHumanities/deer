@@ -1,9 +1,11 @@
-import { default as DEER } from './deer-config.js'
+import { UTILS, DEER } from './deer-utils.js'
 
 const EntityMap = new Map() // get over here!
 
 class Entity extends Object {
-    constructor(entity={}) {
+    #isLazy 
+    
+    constructor(entity={},isLazy) {
         super()
         // accomodate Entity(String) and Entity(Object) or Entity(JSONString)
         if(typeof entity === "string") {
@@ -17,6 +19,7 @@ class Entity extends Object {
         if(!id) { throw new Error("Entity must have an id") }
         if(EntityMap.has(id)) { throw new Error("Entity already exists")}
         this.Annotations = new Map()
+        this.#isLazy = Boolean(isLazy)
         this.data = entity
     }
     
@@ -45,7 +48,7 @@ class Entity extends Object {
         this._data = entity
         EntityMap.set(this.id, this)
         this.#announceUpdate()
-        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(true).then(this.#findAssertions).then(this.#announceNewEntity) }
+        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(!this.#isLazy).then(this.#announceNewEntity) }
     }
 
     attachAnnotation(annotation) {
@@ -78,10 +81,12 @@ class Entity extends Object {
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(finds => {
             if(finds.length === 0) { return Promise.reject({status:404}) }
-            this.data = finds?.find(e => e['@id'] === this.id) ?? finds
-            if (withAssertions) {
-                this.#findAssertions(finds)
+            const originalObject = finds.find?.(e => e['@id'] === this.id) ?? finds
+            if(!Array.isArray(originalObject) && typeof originalObject === "object") {
+                this.data = originalObject
             }
+            withAssertions ? this.#findAssertions(finds) : this.#findAssertions()
+            return
         })
         .catch(err => {
             switch(err.status) {
@@ -153,7 +158,7 @@ class Annotation extends Object {
     }
 
     get id() {
-        return this.data.id
+        return this.data.id ?? this.data['@id'] // id is primary key
     }
 
     #registerTargets = () => {
@@ -194,14 +199,13 @@ async function expand(entity = new Entity({}), matchOn) {
  * @param string matchOn key to match on.
  * @returns Object with assertions value of the assertion.
  */
-function applyAssertions(assertOn, annotation, matchOn) {
-    if (Array.isArray(annotation)) { return annotation.map(a=>applyAssertions(assertOn,a,matchOn)) }
+function applyAssertions(assertOn, annotationBody, matchOn) {
+    if (Array.isArray(annotationBody)) { return annotationBody.forEach(a=>applyAssertions(assertOn,a,matchOn)) }
 
-    if (!annotation.hasOwnProperty('body')) { return }
-    if (!checkMatch(assertOn, annotation, matchOn)) { return }
+    if (checkMatch(assertOn, annotationBody, matchOn)) { return }
 
     const assertions = {}
-    Object.entries(annotation.body).forEach(([k, v]) => {
+    Object.entries(annotationBody).forEach(([k, v]) => {
         if(v === undefined) { return }
         if (assertOn.hasOwnProperty(k) && assertOn[k] !== undefined && assertOn[k] !== null && assertOn[k] !== "" && assertOn[k] !== []) {
             Array.isArray(assertions[k]) ? assertions[k].push(v) : assertions[k] = [v]
@@ -209,6 +213,10 @@ function applyAssertions(assertOn, annotation, matchOn) {
             assertions[k] = v
         }
     })
+
+    // Simplify any arrays of length 1, which may not be a good idea.
+    Object.entries(assertions).forEach(([k, v]) => { if (Array.isArray(v) && v.length === 1) { v = v[0] } })
+
     return Object.assign(assertOn, assertions)
 }
 
@@ -224,8 +232,8 @@ function applyAssertions(assertOn, annotation, matchOn) {
  **/
 function checkMatch(expanding, asserting, matchOn = ["__rerum.generatedBy", "creator"]) {
     for (const m of matchOn) {
-        let obj_match = m.split('.').reduce((o, i) => o[i], expanding)
-        let anno_match = m.split('.').reduce((o, i) => o[i], asserting)
+        let obj_match = m.split('.').reduce((o, i) => o?.[i], expanding)
+        let anno_match = m.split('.').reduce((o, i) => o?.[i], asserting)
         if (obj_match === undefined || anno_match === undefined) {
             // Matching is not violated if one of the checked values is missing from a comparator,
             // but it is not a match without any positive matches.
@@ -319,66 +327,9 @@ function buildValueObject(val, fromAnno) {
         citationNote: fromAnno.label || fromAnno.name || "Composed object from DEER",
         comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
     }
-    valueObject.value = val.value || getValue(val)
+    valueObject.value = val.value || UTILS.getValue(val)
     valueObject.evidence = val.evidence || fromAnno.evidence || ""
     return valueObject
-}
-
-function getValue(property, alsoPeek = [], asType) {
-    // TODO: There must be a best way to do this...
-    let prop;
-    if (!property) {
-        console.error("Value of property to lookup is missing!")
-        return undefined
-    }
-    if (Array.isArray(property)) {
-        // It is an array of things, we can only presume that we want the array.  If it needs to become a string, local functions take on that responsibility.
-        return property
-    }
-
-    if (typeof property === "object") {
-        // TODO: JSON-LD insists on "@value", but this is simplified in a lot
-        // of contexts. Reading that is ideal in the future.
-        if (!Array.isArray(alsoPeek)) {
-            alsoPeek = [alsoPeek]
-        }
-        alsoPeek = alsoPeek.concat(["@value", "value", "$value", "val"])
-        for (let k of alsoPeek) {
-            if (property.hasOwnProperty(k)) {
-                prop = property[k]
-                break
-            } else {
-                prop = property
-            }
-        }
-    } else {
-        prop = property
-    }
-    try {
-        switch (asType.toUpperCase()) {
-            case "STRING":
-                prop = prop.toString();
-                break
-            case "NUMBER":
-                prop = parseFloat(prop);
-                break
-            case "INTEGER":
-                prop = parseInt(prop);
-                break
-            case "BOOLEAN":
-                prop = !Boolean(["false", "no", "0", "", "undefined", "null"].indexOf(String(prop).toLowerCase().trim()));
-                break
-            default:
-        }
-    } catch (err) {
-        if (asType) {
-            throw new Error("asType: '" + asType + "' is not possible.\n" + err.message)
-        } else {
-            // no casting requested
-        }
-    } finally {
-        return (prop.length === 1) ? prop[0] : prop
-    }
 }
 
 export { EntityMap, Entity, Annotation,objectMatch }
@@ -398,4 +349,3 @@ if(WorkerGlobalScope) {
          postMessage({ id, action, payload})
      }
 } 
- 

@@ -10,10 +10,12 @@
  * @see tiny.rerum.io
  */
 
-// import * as CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
 import { default as DEER } from './deer-config.js'
 
-var worker = new Worker('./js/worker.js', { type: 'module' })
+if('undefined' !== typeof window) {
+    window.DEERWorker = window.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
+}
+const worker = ('undefined' !== typeof WorkerGlobalScope) ? undefined : window?.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
 
 const utils = {
     worker,
@@ -410,4 +412,4 @@ const utils = {
     }
 }
 
-export default utils
+export { DEER, utils as UTILS }

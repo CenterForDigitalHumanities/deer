@@ -1,4 +1,4 @@
-import {Entity, Annotation, EntityMap, objectMatch} from './entities.js'
+import {Entity, EntityMap, objectMatch} from './entities.js'
 
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
@@ -35,7 +35,7 @@ self.onmessage = message => {
                 postMessage({
                     id: message.data.id,
                     action: "reload",
-                    payload: new Entity(message.data.id)
+                    payload: new Entity(message.data.id, message.data.isLazy)
                 })
             } else {
                 postMessage({

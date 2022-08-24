@@ -1,5 +1,5 @@
 const filesToCache = [
-    '/',
+    // '/',
     '/index.html',
     // '/pages/offline.html',
     // '/pages/404.html'
@@ -33,22 +33,22 @@ self.addEventListener('activate', event => {
             )
         })
     )
-    event.waitUntil(() => {
-        let opening = new Promise()
-        var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1)
-        DBOpenRequest.onsuccess = event => db = DBOpenRequest.result
+    // event.waitUntil(() => {
+    //     let opening = new Promise()
+    //     var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1)
+    //     DBOpenRequest.onsuccess = event => db = DBOpenRequest.result
 
-        DBOpenRequest.onerror = event => opening.reject(console.error(event))
+    //     DBOpenRequest.onerror = event => opening.reject(console.error(event))
 
-        DBOpenRequest.onupgradeneeded = event => {
-            db = event.target.result
-            // Create an objectStore for this database
-            var objectStore = db.createObjectStore(IDBSTORE, { keyPath: "id" })
-            console.log("Successfully upgraded db")
-            opening.resolve(db)
-        }
-        return opening
-    })
+    //     DBOpenRequest.onupgradeneeded = event => {
+    //         db = event.target.result
+    //         // Create an objectStore for this database
+    //         var objectStore = db.createObjectStore(IDBSTORE, { keyPath: "id" })
+    //         console.log("Successfully upgraded db")
+    //         opening.resolve(db)
+    //     }
+    //     return opening
+    // })
 })
 
 self.addEventListener('fetch', event => {

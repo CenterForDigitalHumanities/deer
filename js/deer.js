@@ -10,19 +10,11 @@
  * @see tiny.rerum.io
  */
 
-// Identify an alternate config location or only overwrite some items below.
-import { default as DEER } from './deer-config.js'
+// Add custom templates in the /templates directory
 
-// Overwrite or add certain values to the configuration to customize.
-
-// new template
-DEER.TEMPLATES.cat = (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`
-
-// Render is probably needed by all items, but can be removed.
-// Record is only needed for saving or updating items.
 // CDN at https://centerfordigitalhumanities.github.io/deer/releases/
 
-// attach service worker for offline support
+// Attach service worker for offline support. 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/js/serviceworker.js')
 } else {
@@ -30,5 +22,6 @@ if ('serviceWorker' in navigator) {
     importScripts('entities.js')
 }
 
+// Import custom components. The basic view.js is required for rendering.
 import('/components/view/view.js')
 import('/components/view/entity.js')
