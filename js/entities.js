@@ -4,6 +4,7 @@
  * @author  Patrick Cuba <cubap@slu.edu>
  * @org     SLU, Research Computing Group
  */
+
 import { UTILS, DEER } from './deer-utils.js'
 
 const EntityMap = new Map()
