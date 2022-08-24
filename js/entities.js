@@ -81,13 +81,12 @@ class Entity extends Object {
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(finds => {
             if(finds.length === 0) { return Promise.reject({status:404}) }
-            const originalObject = finds?.find(e => e['@id'] === this.id)
+            const originalObject = finds.find?.(e => e['@id'] === this.id) ?? finds
             if(typeof originalObject === "object") {
                 this.data = originalObject
             }
-            if (withAssertions) {
-                this.#findAssertions(finds)
-            }
+            withAssertions ? this.#findAssertions(finds) : this.#findAssertions()
+            return
         })
         .catch(err => {
             switch(err.status) {
