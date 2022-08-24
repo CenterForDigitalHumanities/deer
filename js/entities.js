@@ -1,4 +1,4 @@
-import { default as DEER } from './deer-config.js'
+import { UTILS, DEER } from './deer-utils.js'
 
 const EntityMap = new Map() // get over here!
 
@@ -328,12 +328,10 @@ function buildValueObject(val, fromAnno) {
         citationNote: fromAnno.label || fromAnno.name || "Composed object from DEER",
         comment: "Learn about the assembler for this object at https://github.com/CenterForDigitalHumanities/deer"
     }
-    valueObject.value = val.value || getValue(val)
+    valueObject.value = val.value || UTILS.getValue(val)
     valueObject.evidence = val.evidence || fromAnno.evidence || ""
     return valueObject
 }
-
-function getValue(val){return val}
 
 export { EntityMap, Entity, Annotation,objectMatch }
 

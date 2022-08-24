@@ -1,5 +1,4 @@
-import UTILS from '/js/deer-utils.js'
-import { default as DEER } from '/js/deer-config.js'
+import { UTILS, DEER } from '/js/deer-utils.js'
 import '/components/templates/default.js'
 
 const template = (obj, options = {}) => {
