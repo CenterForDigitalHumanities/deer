@@ -1,3 +1,14 @@
+/**
+ * The default templates for rendering objects: entity, list, and prop.
+ * Additional tempaltes may be added here or in their own file. Templates 
+ * added to the DEER.TEMPLATES object will be available to all components 
+ * while custom elements can add their own templates directly.
+ * 
+ * @author Patrick Cuba <cubap@slu.edu>
+ * @organization SLU, Reseach Computing Group
+ * @tags templates, deer, rerum
+ */
+
 import { UTILS, DEER } from '/js/deer-utils.js'
 
 /**
