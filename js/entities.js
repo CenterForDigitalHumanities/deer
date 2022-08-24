@@ -1,7 +1,21 @@
+/**
+ * Web Worker helper for handling Entity expansion and annotation discovery.
+ * 
+ * @author  Patrick Cuba <cubap@slu.edu>
+ * @org     SLU, Research Computing Group
+ */
 import { UTILS, DEER } from './deer-utils.js'
 
-const EntityMap = new Map() // get over here!
+const EntityMap = new Map()
 
+/**
+ * Create a new Entity object, find its annotations, and cache it.
+ * @class
+ * @classdesc Entity is an object described by the documents related to the URI recorded in the 
+ * `deer-id` attribute.
+ * @param {Object} entity Object to be described. Usually from a JSON-LD document.
+ * @param {Boolean} isLazy true if a compound query should not be made.
+ */
 class Entity extends Object {
     #isLazy 
     
@@ -141,6 +155,13 @@ class Entity extends Object {
     }
 }
 
+/**
+ * Create a new Annotation object, attach it to its targets, and cache it.
+ * @class
+ * @classdesc Annotation is an object describing the documents related to the URI recorded in the 
+ * `deer-id` attribute.
+ * @param {Object} annotation document asserting a value or relationship. Usually from a JSON-LD document.
+ */
 class Annotation extends Object {
     constructor(annotation) {
         super()

@@ -1,3 +1,9 @@
+/**
+ * Web worker for retreiving and caching data from entities. 
+ * 
+ * @author cubap@slu
+ */
+
 import {Entity, EntityMap, objectMatch} from './entities.js'
 
 const IDBSTORE = "deer"

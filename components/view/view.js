@@ -1,3 +1,13 @@
+/**
+ * Base element for rendering an entity in the DOM. The template is a simple <pre> tag with the JSON-LD data rendered in it. 
+ * Developers can add their own classes by extending this or add a simpler element with a custom template.
+ * 
+ * @export default class DeerView
+ * @definition {HTMLElement} deer-view
+ * @author Patrick Cuba <cubap@slu.edu>
+ * @org SLU, Research Computing Group
+ */
+
 import { UTILS, DEER } from '/js/deer-utils.js'
 import '/components/templates/default.js'
 
@@ -14,8 +24,11 @@ const template = (obj, options = {}) => {
     }
 }
 
+/**
+ * 
+ */
 export default class DeerView extends HTMLElement {
-    static get observedAttributes() { return [DEER.ID, DEER.KEY, DEER.LIST, DEER.LINK, DEER.LISTENING]; }
+    static get observedAttributes() { return [DEER.ID, DEER.KEY, DEER.LIST, DEER.LINK, DEER.LAZY, DEER.LISTENING]; }
 
     #options = {
         list: this.getAttribute(DEER.LIST),
