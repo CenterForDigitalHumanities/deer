@@ -10,7 +10,9 @@ const filesToCache = [
     '/js/deer-config.js',
     '/components/templates/default.js',
     '/components/view/view.js',
-    '/components/view/entity.js'
+    '/components/view/entity.js',
+    'https://unpkg.com/chota@latest',
+    '/images/deerlogo_banner.png',
 ]
 const staticCacheName = 'deer-cache-20200730'
 

@@ -16,7 +16,7 @@
 
 // Attach service worker for offline support. 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/js/serviceworker.js')
+    navigator.serviceWorker.register('/serviceworker.js')
 } else {
     console.log('Service workers are not supported in this browser.')
     importScripts('entities.js')
