@@ -1,8 +1,16 @@
 const filesToCache = [
-    // '/',
+    '/',
     '/index.html',
-    // '/pages/offline.html',
-    // '/pages/404.html'
+    '/pages/offline.html',
+    '/pages/404.html',
+    '/js/deer.js',
+    '/js/deer-utils.js',
+    '/js/worker.js',
+    '/js/entities.js',
+    '/js/deer-config.js',
+    '/components/templates/default.js',
+    '/components/view/view.js',
+    '/components/view/entity.js'
 ]
 const staticCacheName = 'deer-cache-20200730'
 
