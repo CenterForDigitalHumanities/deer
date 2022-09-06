@@ -23,5 +23,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // Import custom components. The basic view.js is required for rendering.
-import('/components/view/view.js')
-import('/components/view/entity.js')
+const deerView = import('/components/view/view.js')
+const deerEntity = import('/components/view/entity.js')
+
+export {deerView, deerEntity}
