@@ -8,7 +8,7 @@
  * @org SLU, Research Computing Group
  */
 
-import { UTILS, DEER } from '//deer.rerum.io/js/deer-utils.js'
+import { UTILS, DEER } from '//deer.rerum.io/releases/rc-1.0/js/deer-utils.js'
 import '//deer.rerum.io/components/templates/default.js'
 
 const template = (obj, options = {}) => {

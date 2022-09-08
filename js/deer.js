@@ -17,15 +17,15 @@
 // Attach service worker for offline support. 
 if ('serviceWorker' in navigator) {
     try {
-        navigator.serviceWorker.register('/serviceworker.js')
+       navigator.serviceWorker.register('/serviceworker.js')
     } catch (e) {
         // Maybe you do not want to use a service worker?
     }
 } else {
     console.log('Service workers are not supported in this browser.')
-    importScripts('//deer.rerum.io/js/entities.js')
+    importScripts('//deer.rerum.io/releases/rc-1.0/js/entities.js')
 }
 
 // Import custom components. The basic view.js is required for rendering.
-import('//deer.rerum.io/components/view/view.js')
-import('//deer.rerum.io/components/view/entity.js')
+import('//deer.rerum.io/releases/rc-1.0/components/view/view.js')
+import('//deer.rerum.io/releases/rc-1.0/components/view/entity.js')

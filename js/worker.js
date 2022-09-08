@@ -4,7 +4,7 @@
  * @author cubap@slu
  */
 
-import {Entity, EntityMap, objectMatch} from '//deer.rerum.io/js/entities.js'
+import {Entity, EntityMap, objectMatch} from '//deer.rerum.io/releases/rc-1.0/js/entities.js'
 
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
