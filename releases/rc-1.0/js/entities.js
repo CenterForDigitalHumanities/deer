@@ -5,7 +5,7 @@
  * @org     SLU, Research Computing Group
  */
 
-import { UTILS, DEER } from './deer-utils.js'
+import { UTILS, DEER } from '//deer.rerum.io/releases/rc-1.0/js/deer-utils.js'
 
 const EntityMap = new Map()
 
@@ -354,7 +354,7 @@ function buildValueObject(val, fromAnno) {
     return valueObject
 }
 
-export { EntityMap, Entity, Annotation,objectMatch }
+export { EntityMap, Entity, Annotation, objectMatch }
 
 /**
  * Careful with this. It's a global event listener simulation. The `document` object 
