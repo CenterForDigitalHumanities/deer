@@ -410,6 +410,9 @@
              inputData = this.serialize(data)
          }
          return CryptoJS.MD5(data)
+     },
+     config: async function(configObj={}) {
+        DEER = Object.assign(configObj)
      }
  }
  
