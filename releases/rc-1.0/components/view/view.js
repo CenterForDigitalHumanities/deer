@@ -27,7 +27,8 @@ const template = (obj, options = {}) => {
 
 export default class DeerView extends HTMLElement {
     static get observedAttributes() { return [DEER.ID, DEER.KEY, DEER.LIST, DEER.LINK, DEER.LAZY, DEER.LISTENING]; }
-
+    
+    #config = DEER
     #options = {
         list: this.getAttribute(DEER.LIST),
         link: this.getAttribute(DEER.LINK),
@@ -37,7 +38,6 @@ export default class DeerView extends HTMLElement {
         config: this.#config
     }
 
-    #config = DEER
 
     set config(configObj) { Object.assign(this.#config,configObj) }
     
