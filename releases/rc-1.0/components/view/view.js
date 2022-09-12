@@ -34,7 +34,7 @@ export default class DeerView extends HTMLElement {
         collection: this.getAttribute(DEER.COLLECTION),
         key: this.getAttribute(DEER.KEY),
         label: this.getAttribute(DEER.LABEL),
-        config: $config
+        config: this.#config
     }
 
     #config = DEER
