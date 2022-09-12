@@ -38,7 +38,6 @@ export default class DeerView extends HTMLElement {
         config: this.#config
     }
 
-
     set config(configObj) { Object.assign(this.#config,configObj) }
     
     constructor() {
