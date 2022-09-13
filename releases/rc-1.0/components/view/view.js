@@ -27,34 +27,41 @@ const template = (obj, options = {}) => {
 
 export default class DeerView extends HTMLElement {
     static get observedAttributes() { return [DEER.ID, DEER.KEY, DEER.LIST, DEER.LINK, DEER.LAZY, DEER.LISTENING]; }
-    
-    #config = DEER
+
+    Entity
+
     #options = {
         list: this.getAttribute(DEER.LIST),
         link: this.getAttribute(DEER.LINK),
         collection: this.getAttribute(DEER.COLLECTION),
         key: this.getAttribute(DEER.KEY),
         label: this.getAttribute(DEER.LABEL),
-        config: this.#config
+        config: DEER
     }
 
-    set config(configObj) { Object.assign(this.#config,configObj) }
-    
     constructor() {
         super()
-        this.template = this.#config.TEMPLATES[this.getAttribute(this.#config.TEMPLATE)] ?? template
+        this.template = this.#options.config.TEMPLATES[this.getAttribute(this.#options.config.TEMPLATE)] ?? template
     }
+
+    config(configObj={}) { 
+        Object.assign(this.#options.config, configObj)
+        this.render()
+        return this
+    }
+
+    render() {this.innerHTML = this.template(this.Entity,this.#options)}
 
     connectedCallback() {
         this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
         UTILS.worker.addEventListener('message', e => {
-            if (e.data.id !== this.getAttribute(this.#config.ID)) { return }
+            if (e.data.id !== this.getAttribute(this.#options.config.ID)) { return }
             switch (e.data.action) {
-                case "update":
-                    this.innerHTML = this.template(e.data.payload,this.#options)
-                    break
                 case "reload":
+                case "update":
+                    if(UTILS.objectMatch(this.Entity,e.data.payload)){ return }
                     this.Entity = e.data.payload
+                    this.render()
                 default:
             }
         })
@@ -64,27 +71,27 @@ export default class DeerView extends HTMLElement {
     adoptedCallback() { }
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
-            case DEER.ID:
-            case DEER.KEY:
-            case DEER.LINK:
-            case DEER.LIST:
-                const id = this.getAttribute(DEER.ID)
-                if (id === null || this.getAttribute(DEER.COLLECTION)) { return }
-                UTILS.postView(id, Boolean(this.getAttribute(DEER.LAZY)))
+            case this.#options.config.ID:
+            case this.#options.config.KEY:
+            case this.#options.config.LINK:
+            case this.#options.config.LIST:
+                const id = this.getAttribute(this.#options.config.ID)
+                if (id === null || this.getAttribute(this.#options.config.COLLECTION)) { return }
+                UTILS.postView(id, Boolean(this.getAttribute(this.#options.config.LAZY)))
                 break
-            case DEER.LISTENING:
-                const listensTo = this.getAttribute(DEER.LISTENING)
+            case this.#options.config.LISTENING:
+                const listensTo = this.getAttribute(this.#options.config.LISTENING)
                 if (!listensTo) {
-                    console.warn(`There is no HTML element with id ${this.getAttribute(DEER.LISTENING)} to attach an event to`)
+                    console.warn(`There is no HTML element with id ${this.getAttribute(this.#options.config.LISTENING)} to attach an event to`)
                     return
                 }
-                document.addEventListener(DEER.EVENTS.SELECTED, e => {
-                    let listenID = e.detail.target?.closest(`[${DEER.ID}][id]`)?.id
+                document.addEventListener(this.#options.config.EVENTS.SELECTED, e => {
+                    let listenID = e.detail.target?.closest(`[${this.#options.config.ID}][id]`)?.id
                     if (listenID === listensTo) {
-                        this.setAttribute(DEER.ID, e.detail.target?.closest(`[${DEER.ID}]`)?.getAttribute(DEER.ID))
+                        this.setAttribute(this.#options.config.ID, e.detail.target?.closest(`[${this.#options.config.ID}]`)?.getAttribute(this.#options.config.ID))
                     }
                 })
-                window[listensTo]?.addEventListener("click", e => UTILS.broadcast(e, DEER.EVENTS.SELECTED, window[listensTo]))
+                window[listensTo]?.addEventListener("click", e => UTILS.broadcast(e, this.#options.config.EVENTS.SELECTED, window[listensTo]))
             default:
                 break
 

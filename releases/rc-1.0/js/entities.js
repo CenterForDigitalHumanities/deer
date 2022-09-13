@@ -55,7 +55,7 @@ class Entity extends Object {
     
     set data(entity) {
         entity.id = entity.id ?? entity["@id"] ?? entity // id is primary key
-        if(objectMatch(this._data, entity)) {
+        if(UTILS.objectMatch(this._data, entity)) {
             console.warn("Entity data unchanged")
             return
         }
@@ -63,7 +63,7 @@ class Entity extends Object {
         this._data = entity
         EntityMap.set(this.id, this)
         this.#announceUpdate()
-        if(!objectMatch(oldRecord.id, this.id)) { this.#resolveURI(!this.#isLazy).then(this.#announceNewEntity) }
+        if(!UTILS.objectMatch(oldRecord.id, this.id)) { this.#resolveURI(!this.#isLazy).then(this.#announceNewEntity) }
     }
 
     attachAnnotation(annotation) {
@@ -279,25 +279,6 @@ function checkMatch(expanding, asserting, matchOn = ["__rerum.generatedBy", "cre
         }
     }
     return false
-}
-
-function objectMatch(o1 = {}, o2 = {}) {
-    const keys1 = Object.keys(o1)
-    const keys2 = Object.keys(o2)
-    if (keys1.length !== keys2.length) { return false }
-    for (const k of keys1) {
-        const val1 = o1[k]
-        const val2 = o2[k]
-        const recurseNeeded = isObject(val1) && isObject(val2);
-        if ((recurseNeeded && !this.objectMatch(val1, val2))
-            || (!recurseNeeded && val1 !== val2)) {
-            return false
-        }
-    }
-    return true
-    function isObject(object) {
-        return object != null && typeof object === 'object'
-    }
 }
 
 /**
