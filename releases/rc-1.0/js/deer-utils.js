@@ -13,10 +13,10 @@
  var {default:DEER} = await import('./deer-config.js').catch(e=>import('https://deer.rerum.io/releases/rc-1.0/js/deer-config.js'))
 
  if('undefined' !== typeof window) {
-     window.DEERWorker = window.DEERWorker ?? new Worker('./worker.js', { type: 'module' })
+     window.DEERWorker = window.DEERWorker ?? new Worker('https://deer.rerum.io/releases/rc-1.0/js/worker.js', { type: 'module' })
  }
  // Cross-Origin Workers is borked
- const worker = ('undefined' !== typeof WorkerGlobalScope) ? undefined : window?.DEERWorker ?? new Worker('./worker.js', { type: 'module' })
+ const worker = ('undefined' !== typeof WorkerGlobalScope) ? undefined : window?.DEERWorker ?? new Worker('https://deer.rerum.io/releases/rc-1.0/js/worker.js', { type: 'module' })
  
  const utils = {
      worker,
