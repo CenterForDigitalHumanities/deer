@@ -42,13 +42,13 @@ export default class DeerView extends HTMLElement {
     
     constructor() {
         super()
-        this.template = DEER.TEMPLATES[this.getAttribute(DEER.TEMPLATE)] ?? template
+        this.template = this.#config.TEMPLATES[this.getAttribute(this.#config.TEMPLATE)] ?? template
     }
 
     connectedCallback() {
         this.innerHTML = `<small>&copy;2022 Research Computing Group</small>`
         UTILS.worker.addEventListener('message', e => {
-            if (e.data.id !== this.getAttribute(DEER.ID)) { return }
+            if (e.data.id !== this.getAttribute(this.#config.ID)) { return }
             switch (e.data.action) {
                 case "update":
                     this.innerHTML = this.template(e.data.payload,this.#options)
