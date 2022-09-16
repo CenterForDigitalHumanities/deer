@@ -10,12 +10,13 @@
  * @see tiny.rerum.io
  */
 
-const {default:DEER} = await import('./deer-config.js').catch(e=>import('https://deer.rerum.io/releases/rc-1.0/deer-config.js'))
+const {default:DEER} = await import('./deer-config.js').catch(e=>import('https://localhost:5500/deer-config.js'))
 
-if('undefined' !== typeof window) {
-    window.DEERWorker = window.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
-}
-const worker = ('undefined' !== typeof WorkerGlobalScope) ? undefined : window?.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
+// if('undefined' !== typeof window) {
+//     window.DEERWorker = window.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
+// }
+// const worker = ('undefined' !== typeof WorkerGlobalScope) ? undefined : window?.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
+const worker = await import('./worker.js')
 
 const utils = {
     worker,

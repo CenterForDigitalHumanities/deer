@@ -1,26 +1,28 @@
 /**
  * Web worker for retreiving and caching data from entities. 
+ * @warning Not really a worker, but there are some serious CORS fraud 
+ * that prevents this from working as intended.
  * 
  * @author cubap@slu
  */
 
-import {Entity, EntityMap, objectMatch} from '//deer.rerum.io/releases/rc-1.0/js/entities.js'
+import { Entity, EntityMap, objectMatch } from '//localhost:5500/js/entities.js'
 
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
-    var DBOpenRequest = self.indexedDB.open(IDBSTORE, 1) // upgrade version 1 to version 2 if schema changes
+    const DBOpenRequest = self.indexedDB.open(IDBSTORE, 1) // upgrade version 1 to version 2 if schema changes
     DBOpenRequest.onsuccess = event => {
         console.log("Successfully opened db")
         resolve(DBOpenRequest.result)
         return
     }
-
+    
     DBOpenRequest.onerror = event => reject(event)
-
+    
     DBOpenRequest.onupgradeneeded = event => {
         const db = event.target.result
         // Create an objectStore for this database
-        var objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' }) // @id is an illegal keyPath
+        const objectStore = db.createObjectStore(IDBSTORE, { autoIncrement: false, keyPath: 'id' }) // @id is an illegal keyPath
         objectStore.onsuccess = event => {
             console.log("Successfully upgraded db")
             resolve(db)
@@ -51,13 +53,13 @@ self.onmessage = message => {
                 })
             }
             break
-        case "record":
-            break
+            case "record":
+                break
         default:
+        }
     }
-}
 
-function getItem(id, args = {}) {
+    function getItem(id, args = {}) {
     db.then(db => {
         let lookup = db.transaction(IDBSTORE, "readonly").objectStore(IDBSTORE).get(id).onsuccess = (event) => {
             let item = event.target.result
@@ -100,12 +102,16 @@ function getItem(id, args = {}) {
  * is not a real DOM element, so it doesn't have a `dispatchEvent` method. If more 
  * than one action type is needed, this should be refactored.
  */
-var document = {}
-document.dispatchEvent = msg => {
-    const id = msg.detail.id
-    const action = msg.detail.action
-    const payload = msg.detail.payload
+if (WorkerGlobalScope) {
 
-    postMessage({ id, action, payload})
+    var document = {}
+    document.dispatchEvent = msg => {
+        const id = msg.detail.id
+        const action = msg.detail.action
+        const payload = msg.detail.payload
+
+        postMessage({ id, action, payload })
+    }
 }
 
+export default {worker:self}

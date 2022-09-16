@@ -5,7 +5,7 @@
  * @org     SLU, Research Computing Group
  */
 
-import { UTILS, DEER } from '//deer.rerum.io/releases/rc-1.0/js/deer-utils.js'
+import { UTILS, DEER } from '//localhost:5500/js/deer-utils.js'
 
 const EntityMap = new Map()
 

@@ -23,9 +23,9 @@ if ('serviceWorker' in navigator) {
     }
 } else {
     console.log('Service workers are not supported in this browser.')
-    importScripts('//deer.rerum.io/releases/rc-1.0/js/entities.js')
+    importScripts('//localhost:5500/js/entities.js')
 }
 
 // Import custom components. The basic view.js is required for rendering.
-import('//deer.rerum.io/releases/rc-1.0/components/view/view.js')
-import('//deer.rerum.io/releases/rc-1.0/components/view/entity.js')
+import('//localhost:5500/components/view/view.js')
+import('//localhost:5500/components/view/entity.js')
