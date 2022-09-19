@@ -8,8 +8,8 @@
  * @org SLU, Research Computing Group
  */
 
-import { UTILS, DEER } from '//localhost:5500/js/deer-utils.js'
-import '//localhost:5500/components/templates/default.js'
+import { UTILS, DEER } from '/js/deer-utils.js'
+import '/components/templates/default.js'
 
 const template = (obj, options = {}) => {
     let indent = options.indent ?? 4

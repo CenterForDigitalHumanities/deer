@@ -9,7 +9,7 @@
  * @tags templates, deer, rerum
  */
 
-import { UTILS, DEER } from '//localhost:5500/js/deer-utils.js'
+import { UTILS, DEER } from '/js/deer-utils.js'
 
 /**
  * Get a certain property from an object and return it formatted as HTML to be drawn.  

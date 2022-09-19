@@ -9,8 +9,8 @@
  * @org SLU, Research Computing Group
  */
 
-import { DEER, UTILS } from '//localhost:5500/js/deer-utils.js'
-import DeerView from '//localhost:5500/components/view/view.js'
+import { DEER, UTILS } from '/js/deer-utils.js'
+import DeerView from './view.js'
 
 const template = obj => {
     let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`

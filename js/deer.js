@@ -16,16 +16,12 @@
 
 // Attach service worker for offline support. 
 if ('serviceWorker' in navigator) {
-    try {
-       navigator.serviceWorker.register('/serviceworker.js')
-    } catch (e) {
-        // Maybe you do not want to use a service worker?
-    }
+    navigator.serviceWorker.register('/serviceworker.js')
 } else {
     console.log('Service workers are not supported in this browser.')
-    importScripts('//localhost:5500/js/entities.js')
+    importScripts('entities.js')
 }
 
 // Import custom components. The basic view.js is required for rendering.
-import('//localhost:5500/components/view/view.js')
-import('//localhost:5500/components/view/entity.js')
+import('/components/view/view.js')
+import('/components/view/entity.js')

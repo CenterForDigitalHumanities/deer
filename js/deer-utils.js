@@ -10,7 +10,7 @@
  * @see tiny.rerum.io
  */
 
-const {default:DEER} = await import('./deer-config.js').catch(e=>import('https://localhost:5500/deer-config.js'))
+import { default as DEER } from './deer-config.js'
 
 // if('undefined' !== typeof window) {
 //     window.DEERWorker = window.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
