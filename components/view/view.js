@@ -11,6 +11,8 @@
 import { UTILS, DEER } from '//localhost:5500/js/deer-utils.js'
 import '//localhost:5500/components/templates/default.js'
 
+UTILS.worker = await import("../../js/worker.js").then(module => {return module.default}).catch(err => {return {"error":err}})
+
 const template = (obj, options = {}) => {
     let indent = options.indent ?? 4
     let replacer = (k, v) => {

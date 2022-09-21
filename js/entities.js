@@ -361,7 +361,7 @@ export { EntityMap, Entity, Annotation, objectMatch }
  * is not a real DOM element, so it doesn't have a `dispatchEvent` method. If more 
  * than one action type is needed, this should be refactored.
  */
-if(WorkerGlobalScope) {
+//if(typeof WorkerGlobalScope !== 'undefined') {
     var document = {}
      document.dispatchEvent = msg => {
          const id = msg.detail.id
@@ -370,4 +370,4 @@ if(WorkerGlobalScope) {
      
          postMessage({ id, action, payload})
      }
-} 
+//} 

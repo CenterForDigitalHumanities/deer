@@ -12,6 +12,8 @@
 import { default as UTILS } from './deer-utils.js'
 import { default as config } from './deer-config.js'
 
+UTILS.worker = await import("./js/worker.js").then(module => {return module.default}).catch(err => {return {"error":err}})
+
 const changeLoader = new MutationObserver(renderChange)
 var DEER = config
 

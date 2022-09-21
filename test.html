@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--
+    author: Patrick Cuba <cubap@slu.edu>
+    -->
+<html>
+
+<head>
+    <title>Data Encoding and Exhibition for RERUM</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <link rel="modulepreload" href="./js/worker.js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>    
+    <style>
+        .card header {
+            font-style: italic;
+        }
+        
+        section {
+            overflow: hidden;
+        }
+        
+        em code {
+            font-style: normal;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card col-6">
+            <header>JSON Template (default)</header>
+            <deer-view deer-id="http://devstore.rerum.io/v1/id/5c9d155fe4b0a44e13e61706" deer-template="entity"></deer-view>
+        </div>
+        <div class="card col-6">
+            <header>Load from Hash</header>
+            <deer-view-x class="col" id="hashExample" deer-template="entity">
+                no hash
+            </deer-view-x>
+        </div>
+    </div>
+            
+    <footer class="is-full-width is-center" style="flex:1;flex-direction:column;">
+        <a href="https://github.com/CenterForDigitalHumanities" target="_blank">
+            <img alt="@CenterForDigitalHumanities" class="avatar" height="48" src="https://avatars3.githubusercontent.com/u/13770519?v=4&amp;s=96" width="48">
+        </a>
+        <small>
+            Walter J. Ong,
+            <small>S.J.</small> Center for Digital Humanities
+        </small>
+    </footer>
+
+    <script src="./js/deer.js" type="module"></script>
+    <script src="./js/worker.js" type="module"></script>
+    <!-- <script src="./js/deer.js" type="module"></script> -->
+    <script>
+        window.onhashchange = onload = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))
+
+        document.addEventListener("selected", console.log, true)
+    </script>
+</body>
+
+</html>

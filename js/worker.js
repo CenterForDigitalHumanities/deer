@@ -103,13 +103,11 @@ self.onmessage = message => {
  * than one action type is needed, this should be refactored.
  */
 if (typeof WorkerGlobalScope !== "undefined") {
-
     var document = {}
     document.dispatchEvent = msg => {
         const id = msg.detail.id
         const action = msg.detail.action
         const payload = msg.detail.payload
-
         postMessage({ id, action, payload })
     }
 }
