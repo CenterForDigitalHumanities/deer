@@ -6,7 +6,7 @@
  * @author cubap@slu
  */
 
-import { Entity, EntityMap, objectMatch } from '//localhost:5500/js/entities.js'
+import { Entity, EntityMap, objectMatch } from '//localhost:8080/js/entities.js'
 
 const IDBSTORE = "deer"
 const db = new Promise((resolve, reject) => {
@@ -102,7 +102,7 @@ self.onmessage = message => {
  * is not a real DOM element, so it doesn't have a `dispatchEvent` method. If more 
  * than one action type is needed, this should be refactored.
  */
-if (WorkerGlobalScope) {
+if (typeof WorkerGlobalScope !== "undefined") {
 
     var document = {}
     document.dispatchEvent = msg => {
@@ -114,4 +114,4 @@ if (WorkerGlobalScope) {
     }
 }
 
-export default {worker:self}
+export default self

@@ -16,10 +16,23 @@ const {default:DEER} = await import('./deer-config.js').catch(e=>import('https:/
 //     window.DEERWorker = window.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
 // }
 // const worker = ('undefined' !== typeof WorkerGlobalScope) ? undefined : window?.DEERWorker ?? new Worker('/js/worker.js', { type: 'module' })
-const worker = await import('./worker.js')
+// const worker = await import('./worker.js')
+//   .then((module) => {
+//     return module.default
+//   })
+//   .catch((err) => {
+//     console.error(err)
+//   })
+// const worker = await (async () => {
+//         const {
+//           default: worker,
+//         } = await import("./worker.js").then(module => {return module.default}).catch(err => {console.error(err)})
+//     })()
+
+//const worker = import("./worker.js").then(module => {return module}).catch(err => {return {"error":err}})
 
 const utils = {
-    worker,
+    //"worker" : import("./worker.js").then(module => {return module}).catch(err => {return {"error":err}}),
     listFromCollection: function (collectionId) {
         let queryObj = {
             body: {
@@ -112,7 +125,7 @@ const utils = {
             return label || noLabel
         }
     },
-    postView(entity, matchOn = ["__rerum.generatedBy", "creator"]) {
+    postView: async function(entity, matchOn = ["__rerum.generatedBy", "creator"]) {
         let UTILS = this
         const id = entity["@id"] ?? entity.id ?? entity
         if (typeof id !== "string") {
@@ -127,7 +140,19 @@ const utils = {
                 entity: entity
             }
         }
-        this.worker.postMessage(message)
+        import("./worker.js").then(module => {module.default.postMessage(message)}).catch(err => {return {"error":err}})
+        //this.worker.then(module => {module.default.postMessage(message)}).catch(err => {console.error(err)})
+        //this.worker.postMessage(message)
+        //let theworker = await this.worker.then(wrkr => {return wrkr}).catch(err => {return err})
+        //theworker.postMessage(message)
+
+        // import("./worker.js")
+        //   .then((module) => {
+        //     module.default.postMessage(message)
+        //   })
+        //   .catch((err) => {
+        //     console.error(err)
+        //   })
     },
 
     /**
