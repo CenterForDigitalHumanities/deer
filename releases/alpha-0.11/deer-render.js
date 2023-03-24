@@ -288,6 +288,9 @@ export default class DeerRender {
                     fetch(DEER.URLS.QUERY, {
                         method: "POST",
                         mode: "cors",
+                        headers: {
+                             "Content-Type": "application/json;charset=utf-8"
+                         },
                         body: JSON.stringify(queryObj)
                     }).then(response => response.json())
                         .then(pointers => {
