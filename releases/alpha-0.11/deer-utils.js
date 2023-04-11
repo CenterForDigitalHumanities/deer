@@ -12,6 +12,12 @@
 
 import { default as DEER } from './deer-config.js'
 
+function httpsIdArray(id,justArray) {
+    if (!id.startsWith("http")) return justArray ? [ id ] : id
+    if (id.startsWith("https://")) return justArray ? [ id, id.replace('https','http') ] : { $or: [ id, id.replace('https','http') ] }
+    return justArray ? [ id, id.replace('http','https') ] : { $or: [ id, id.replace('http','https') ] }
+}
+
 export default {
     listFromCollection: function (collectionId) {
         let queryObj = {
@@ -276,20 +282,23 @@ export default {
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
     findByTargetId: async function (id, targetStyle = []) {
-        let everything = Object.keys(localStorage).filter(key=>key.startsWith(DEER.URLS.BASE_ID)).map(k => JSON.parse(localStorage.getItem(k)))
+        let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
         if (!Array.isArray(targetStyle)) {
             targetStyle = [targetStyle]
         }
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
         let historyWildcard = { "$exists": true, "$size": 0 }
         let obj = { "$or": [], "__rerum.history.next": historyWildcard }
+        const uris = httpsIdArray(id,true)
         for (let target of targetStyle) {
             //Entries that are not strings are not supported.  Ignore those entries.  
             //TODO: should we we let the user know we had to ignore something here?
             if (typeof target === "string") {
-                let o = {}
-                o[target] = id
-                obj["$or"].push(o)
+                uris.forEach(uri=>{
+                    const altQuery = {}
+                    altQuery[target] = uri
+                    obj.$or.push(altQuery)
+                })
             }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
