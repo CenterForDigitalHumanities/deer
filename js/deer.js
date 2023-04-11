@@ -20,7 +20,7 @@ DEER.TEMPLATES.cat = (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.
 
 // sandbox repository URLS
 DEER.URLS = {
-    BASE_ID: "//devstore.rerum.io/v1",
+    BASE_ID: "https://devstore.rerum.io/v1",
     CREATE: "//tinydev.rerum.io/app/create",
     UPDATE: "//tinydev.rerum.io/app/update",
     QUERY: "//tinydev.rerum.io/app/query",
