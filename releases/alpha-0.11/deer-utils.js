@@ -17,7 +17,7 @@ function httpsIdLinks(id){
 }
 
 function httpsQueryArray(id) {
-    return { $in: links }
+    return { $in: httpsIdLinks(id) }
 }
 
 export default {
