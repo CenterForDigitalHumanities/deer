@@ -27,6 +27,9 @@ export default {
         }
         return fetch(DEER.URLS.QUERY, {
             method: "POST",
+            headers:{
+                "Content-Type": "application/json;charset=utf-8"
+            },
             body: JSON.stringify(queryObj)
         }).then(response => response.json())
             .then(function (pointers) {
@@ -305,7 +308,7 @@ export default {
             method: "POST",
             body: JSON.stringify(obj),
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json;charset=utf-8"
             }
         })
             .then(response => response.json())
