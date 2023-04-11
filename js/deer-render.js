@@ -226,7 +226,7 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
         let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
         let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
         tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
-        tmpl += dob + dod
+        tmpl += dob + `</br>` + dod
         tmpl += `<a href="#${obj["@id"]}">${name}</a>`
         return tmpl
     } catch (err) {
