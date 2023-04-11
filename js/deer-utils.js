@@ -12,10 +12,12 @@
 
 import { default as DEER } from './deer-config.js'
 
-function httpsIdArray(id,justArray) {
-    if (!id.startsWith("http")) return justArray ? [ id ] : id
-    if (id.startsWith("https://")) return justArray ? [ id, id.replace('https','http') ] : { $or: [ id, id.replace('https','http') ] }
-    return justArray ? [ id, id.replace('http','https') ] : { $or: [ id, id.replace('http','https') ] }
+function httpsIdLinks(id){
+    return [ id.replace('/^https?:/','https:'), id.replace('/^https?:/','http:') ]
+}
+
+function httpsQueryArray(id) {
+    return { $in: links }
 }
 
 export default {
@@ -292,16 +294,14 @@ export default {
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
         let historyWildcard = { "$exists": true, "$size": 0 }
         let obj = { "$or": [], "__rerum.history.next": historyWildcard }
-        const uris = httpsIdArray(id,true)
+        const uris = httpsQueryArray(id)
         for (let target of targetStyle) {
             //Entries that are not strings are not supported.  Ignore those entries.  
             //TODO: should we we let the user know we had to ignore something here?
             if (typeof target === "string") {
-                uris.forEach(uri=>{
-                    const altQuery = {}
-                    altQuery[target] = uri
-                    obj.$or.push(altQuery)
-                })
+                const altQuery = {}
+                altQuery[target] = uris
+                obj.$or.push(altQuery)
             }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
@@ -355,8 +355,8 @@ export default {
     /**
      * Broadcast a message about DEER
      */
-    broadcast: function (event = {}, type, element, obj = {}) {
-        let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
+    broadcast: function (event, type, element, obj = {}) {
+        let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event?.target }), bubbles: true })
         element.dispatchEvent(e)
     },
 
