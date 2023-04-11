@@ -12,6 +12,14 @@
 
 import { default as DEER } from './deer-config.js'
 
+function httpsIdLinks(id){
+    return [ id.replace('/^https?:/','https:'), id.replace('/^https?:/','http:') ]
+}
+
+function httpsQueryArray(id) {
+    return { $in: httpsIdLinks(id) }
+}
+
 export default {
     listFromCollection: function (collectionId) {
         let queryObj = {
@@ -21,6 +29,9 @@ export default {
         }
         return fetch(DEER.URLS.QUERY, {
             method: "POST",
+            headers:{
+                "Content-Type": "application/json;charset=utf-8"
+            },
             body: JSON.stringify(queryObj)
         }).then(response => response.json())
             .then(function (pointers) {
@@ -118,7 +129,7 @@ export default {
             return entity
         }
         let getVal = UTILS.getValue
-        return fetch(findId).then(response => response.json())
+        return fetch(findId.replace(/^https?:/,location.protocol)).then(response => response.json())
             .then(obj => UTILS.findByTargetId(findId)
                 .then(function (annos) {
                     for (let i = 0; i < annos.length; i++) {
@@ -276,27 +287,28 @@ export default {
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
     findByTargetId: async function (id, targetStyle = []) {
-        let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
+        let everything = Object.keys(localStorage).filter(key=>key.replace(/^https?:/,"https:").startsWith(DEER.URLS.BASE_ID)).map(k => JSON.parse(localStorage.getItem(k)))
         if (!Array.isArray(targetStyle)) {
             targetStyle = [targetStyle]
         }
         targetStyle = targetStyle.concat(["target", "target.@id", "target.id"]) //target.source?
         let historyWildcard = { "$exists": true, "$size": 0 }
         let obj = { "$or": [], "__rerum.history.next": historyWildcard }
+        const uris = httpsQueryArray(id)
         for (let target of targetStyle) {
             //Entries that are not strings are not supported.  Ignore those entries.  
             //TODO: should we we let the user know we had to ignore something here?
             if (typeof target === "string") {
-                let o = {}
-                o[target] = id
-                obj["$or"].push(o)
+                const altQuery = {}
+                altQuery[target] = uris
+                obj.$or.push(altQuery)
             }
         }
         let matches = await fetch(DEER.URLS.QUERY, {
             method: "POST",
             body: JSON.stringify(obj),
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json;charset=utf-8"
             }
         })
             .then(response => response.json())
@@ -343,8 +355,8 @@ export default {
     /**
      * Broadcast a message about DEER
      */
-    broadcast: function (event = {}, type, element, obj = {}) {
-        let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event.target }), bubbles: true })
+    broadcast: function (event, type, element, obj = {}) {
+        let e = new CustomEvent(type, { detail: Object.assign(obj, { target: event?.target }), bubbles: true })
         element.dispatchEvent(e)
     },
 

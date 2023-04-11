@@ -36,6 +36,7 @@ async function renderChange(mutationsList) {
                     obj = JSON.parse(localStorage.getItem(id))
                 } catch (err) { }
                 if (!obj || !obj["@id"]) {
+                    id = id.replace(/^https?:/,location.protocol) // avoid mixed content
                     obj = await fetch(id).then(response => response.json()).catch(error => error)
                     if (obj) {
                         localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
@@ -225,7 +226,7 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
         let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
         let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
         tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
-        tmpl += dob + dod
+        tmpl += dob + `</br>` + dod
         tmpl += `<a href="#${obj["@id"]}">${name}</a>`
         return tmpl
     } catch (err) {
@@ -272,6 +273,7 @@ export default class DeerRender {
                 throw err
             } else {
                 if (this.id) {
+                    this.id = this.id.replace(/^https?:/,location.protocol) // avoid mixed content
                     fetch(this.id).then(response => response.json()).then(obj => RENDER.element(this.elem, obj)).catch(err => err)
                 } else if (this.collection) {
                     // Look not only for direct objects, but also collection annotations
@@ -288,9 +290,9 @@ export default class DeerRender {
                     fetch(DEER.URLS.QUERY, {
                         method: "POST",
                         mode: "cors",
-                        headers: {
-                             "Content-Type": "application/json;charset=utf-8"
-                         },
+                        headers:{
+                            "Content-Type": "application/json;charset=utf-8"
+                        },
                         body: JSON.stringify(queryObj)
                     }).then(response => response.json())
                         .then(pointers => {
