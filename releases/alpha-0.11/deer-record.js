@@ -31,6 +31,7 @@ async function renderChange(mutationsList) {
                     obj = JSON.parse(localStorage.getItem(id))
                 } catch (err) { }
                 if (!obj || !obj["@id"]) {
+                    id = id.replace(/^https?:/,location.protocol) // avoid mixed content
                     obj = await fetch(id).then(response => response.json()).catch(error => error)
                     if (obj) {
                         localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))

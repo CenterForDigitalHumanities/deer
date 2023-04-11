@@ -36,6 +36,7 @@ async function renderChange(mutationsList) {
                     obj = JSON.parse(localStorage.getItem(id))
                 } catch (err) { }
                 if (!obj || !obj["@id"]) {
+                    id = id.replace(/^https?:/,location.protocol) // avoid mixed content
                     obj = await fetch(id).then(response => response.json()).catch(error => error)
                     if (obj) {
                         localStorage.setItem(obj["@id"] || obj.id, JSON.stringify(obj))
@@ -288,9 +289,9 @@ export default class DeerRender {
                     fetch(DEER.URLS.QUERY, {
                         method: "POST",
                         mode: "cors",
-                        headers: {
-                             "Content-Type": "application/json;charset=utf-8"
-                         },
+                        headers:{
+                            "Content-Type": "application/json;charset=utf-8"
+                        },
                         body: JSON.stringify(queryObj)
                     }).then(response => response.json())
                         .then(pointers => {
