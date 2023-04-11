@@ -273,6 +273,7 @@ export default class DeerRender {
                 throw err
             } else {
                 if (this.id) {
+                    this.id = this.id.replace(/^https?:/,location.protocol) // avoid mixed content
                     fetch(this.id).then(response => response.json()).then(obj => RENDER.element(this.elem, obj)).catch(err => err)
                 } else if (this.collection) {
                     // Look not only for direct objects, but also collection annotations
