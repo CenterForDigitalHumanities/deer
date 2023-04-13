@@ -36,7 +36,7 @@ export default {
         }).then(response => response.json())
             .then(function (pointers) {
                 let list = []
-                pointers.map(tc => list.push(fetch(tc.target).then(response => response.json())))
+                pointers.map(tc => list.push(fetch(tc.target.replace(/^https?:/,location.protocol)).then(response => response.json())))
                 return Promise.all(list)
             })
             .then(function (list) {
