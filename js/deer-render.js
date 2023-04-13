@@ -294,27 +294,28 @@ export default class DeerRender {
                             "Content-Type": "application/json;charset=utf-8"
                         },
                         body: JSON.stringify(queryObj)
-                    }).then(response => response.json())
-                        .then(pointers => {
-                            let list = []
-                            pointers.map(tc => {
-                                let t = tc.target || tc["@id"] || tc.id
-                                t = t.replace(/^https?:/,location.protocol)
-                                list.push(fetch(t).then(response => response.json().catch(err => { __deleted: console.log(err) })))
-                            })
-                            return Promise.all(list).then(l => l.filter(i => !i.hasOwnProperty("__deleted")))
+                    })
+                    .then(response => response.json())
+                    .then(pointers => {
+                        let list = []
+                        pointers.map(tc => {
+                            let t = tc.target || tc["@id"] || tc.id
+                            t = t.replace(/^https?:/,location.protocol)
+                            list.push(fetch(t).then(response => response.json().catch(err => { __deleted: console.log(err) })))
                         })
-                        .then(list => {
-                            let listObj = {
-                                name: this.collection,
-                                itemListElement: list
-                            }
-                            this.elem.setAttribute(DEER.LIST, "itemListElement")
-                            try {
-                                listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
-                            } catch (err) { }
-                            RENDER.element(this.elem, listObj)
-                        })
+                        return Promise.all(list).then(l => l.filter(i => !i.hasOwnProperty("__deleted")))
+                    })
+                    .then(list => {
+                        let listObj = {
+                            name: this.collection,
+                            itemListElement: list
+                        }
+                        this.elem.setAttribute(DEER.LIST, "itemListElement")
+                        try {
+                            listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
+                        } catch (err) { }
+                        RENDER.element(this.elem, listObj)
+                    })
                 }
             }
         } catch (err) {
