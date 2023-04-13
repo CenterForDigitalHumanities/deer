@@ -297,9 +297,12 @@ export default class DeerRender {
                     }).then(response => response.json())
                         .then(pointers => {
                             let list = []
-                            let t = tc.target || tc["@id"] || tc.id
-                            t = t.replace(/^https?:/,location.protocol)
-                            pointers.map(tc => list.push(fetch(t).then(response => response.json().catch(err => { __deleted: console.log(err) }))))
+                             
+                            pointers.map(tc => {
+                                let t = tc.target || tc["@id"] || tc.id
+                                t = t.replace(/^https?:/,location.protocol)
+                                list.push(fetch(t).then(response => response.json().catch(err => { __deleted: console.log(err) })))
+                            })
                             return Promise.all(list).then(l => l.filter(i => !i.hasOwnProperty("__deleted")))
                         })
                         .then(list => {
