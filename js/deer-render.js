@@ -297,7 +297,6 @@ export default class DeerRender {
                     }).then(response => response.json())
                         .then(pointers => {
                             let list = []
-                             
                             pointers.map(tc => {
                                 let t = tc.target || tc["@id"] || tc.id
                                 t = t.replace(/^https?:/,location.protocol)
