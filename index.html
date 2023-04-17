@@ -270,12 +270,12 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
 &lt;/form></pre>
 
             <div class="card col-6">
-                <header>Thing Form</header>
+                <header>Thing Form -- You may change the date.</header>
                 <form deer-type="Thing" deer-creator="Anonymous User at Form" deer-context="http://schema.org" deer-id="https://devstore.rerum.io/v1/id/60c7a956c3fb58284513eda3" id="formExample">
                     <div class="row">
                         <div class="col">
                             <label>Label:</label>
-                            <input type="text" deer-key="name">
+                            <input disabled type="text" deer-key="name">
                             <input type="hidden" deer-key="creator" value="demoAgent">
                         </div>
                     </div>
@@ -286,7 +286,7 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
                         </div>
                         <div class="col">
                             <label>Condition</label>
-                            <select deer-key="condition">
+                            <select could-be-deer-key="condition">
                                 <option>Good</option>
                                 <option>Very Good</option>
                                 <option>Mint</option>
@@ -363,7 +363,7 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
 &lt;/form></pre>
                         
             <div class="card col-6">
-                <header>Simple Thing Form</header>
+                <header>Simple Thing Form -- You may change the date.</header>
                 <form deer-type="Thing" deer-creator="Anonymous User" deer-item-type="simple" deer-context="http://schema.org" deer-id="https://devstore.rerum.io/v1/id/5cf19371e4b07d216aab775e" id="simpleFormExample">
                     <div class="row">
                         <div class="col">
