@@ -425,25 +425,18 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
                 form does not edit or update the value.</em></small>
             </div>
         </section>
-
-        <footer class="is-full-width is-center is-vertical-align">
+        <footer class="nav nav-center text-primary is-full-width is-vertical-align">
             <div>
-                <a href="https://github.com/CenterForDigitalHumanities" target="_blank">
-                    <img alt="@CenterForDigitalHumanities" class="avatar" height="48" src="https://avatars3.githubusercontent.com/u/13770519?v=4&amp;s=96" width="48">
+                <a target="_blank" href="https://www.slu.edu/research/faculty-resources/research-computing.php">
+                    <img class="brand" src="./images/rcg-logo.jpg"> <small>Research Computing Group </small>
                 </a>
-                <small>
-                    Research Computing Group
-                </small>
             </div>
             <div>
                 <a target="_blank" href="https://rerum.io">
-                    <img class="brand" src="./images/rerum-logo.png"> 
+                    <img class="brand" src="./images/rerum-logo.png"> <small>RERUM</small>
                 </a>
-                <small>RERUM</small>
             </div>
         </footer>
-
-
         <script src="./releases/alpha-0.11/deer.js" type="module"></script>
         <script>
             window.onhashchange = onload = () => hashExample.setAttribute("deer-id", window.location.hash.substr(1))
