@@ -30,6 +30,10 @@
             opacity: 0.4;
             cursor: not-allowed;
         }
+
+        footer.div{
+            display: inline-flex;
+        }
     </style>
 </head>
 
@@ -422,13 +426,21 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
             </div>
         </section>
 
-        <footer class="is-full-width is-center" style="flex:1;flex-direction:column;">
-            <a href="https://github.com/CenterForDigitalHumanities" target="_blank">
-                <img alt="@CenterForDigitalHumanities" class="avatar" height="48" src="https://avatars3.githubusercontent.com/u/13770519?v=4&amp;s=96" width="48">
-            </a>
-            <small>
-                Research Computing Group
-            </small>
+        <footer class="is-full-width is-center is-vertical-align">
+            <div>
+                <a href="https://github.com/CenterForDigitalHumanities" target="_blank">
+                    <img alt="@CenterForDigitalHumanities" class="avatar" height="48" src="https://avatars3.githubusercontent.com/u/13770519?v=4&amp;s=96" width="48">
+                </a>
+                <small>
+                    Research Computing Group
+                </small>
+            </div>
+            <div>
+                <a target="_blank" href="https://rerum.io">
+                    <img class="brand" src="./images/rerum-logo.png"> 
+                </a>
+                <small>RERUM</small>
+            </div>
         </footer>
 
 
