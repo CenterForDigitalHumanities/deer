@@ -20,6 +20,10 @@
         em code {
             font-style: normal;
         }
+
+        textarea:disabled, input:disabled{
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -296,7 +300,7 @@ TEMPLATES.cat = (obj) => `&lt;h5>${obj.name}&lt;/h5>
                     <div class="row">
                         <div class="col">
                             <label>Description:</label>
-                            <textarea deer-key="description" deer-creator="Anonymous User on Input"></textarea>
+                            <textarea disabled deer-key="description" deer-creator="Anonymous User on Input"></textarea>
                         </div>
                     </div>
                     <div class="row">
