@@ -13,7 +13,7 @@
 import { default as DEER } from './deer-config.js'
 
 function httpsIdLinks(id){
-    return [ id.replace('/^https?:/','https:'), id.replace('/^https?:/','http:') ]
+    return [ id.replace(/^https?:/,'https:'), id.replace(/^https?:/,'http:') ]
 }
 
 function httpsQueryArray(id) {
