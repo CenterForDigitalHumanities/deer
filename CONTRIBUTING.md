@@ -11,7 +11,7 @@ If you want to contribute, it is imortant you are able to deploy the code and ru
 
 You want a web server because a core functionality of the DEER framework is to ask the internet for resources by their URI, like https://store.rerum.io/v1/id/11111.  Running DEER through your filesystem as opposed to a web server will cause errors when trying to pull in resources from the web.  Feel free to try.
 
-Make sure Git is installed on your machine.  For download and installation instruction, [head to the Git guide](https://git-scm.com/downloads).  Note this can also be achieved by install [GitHub for Desktop](https://desktop.github.com/).  
+Make sure Git is installed on your machine.  For download and installation instruction, [head to the Git guide](https://git-scm.com/downloads).  Note this can also be achieved by installing [GitHub for Desktop](https://desktop.github.com/).  
 
 The following is a git shell example for installing the app on your local machine.
 
