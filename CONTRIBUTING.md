@@ -31,4 +31,4 @@ cd /web_container/deer
 git checkout my_new_branch
 ```
 
-Now you can make code changes and see them in real time.  You can make HTML pages in `/web_container/deer` and fill those pages with DEER forms and views.  Test your changes and see what they look like!  When you are finished with the commits to your new branch, open a Pull Request that targets the `main` branch at [https://github.com/CenterForDigitalHumanities/deer/tree/main/] (https://github.com/CenterForDigitalHumanities/deer/tree/main/).
+Now you can make code changes and see them in real time.  You can make HTML pages in `/web_container/deer` and fill those pages with DEER forms and views.  Test your changes and see what they look like!  When you are finished with the commits to your new branch, open a Pull Request that targets the `main` branch at [https://github.com/CenterForDigitalHumanities/deer/tree/main/](https://github.com/CenterForDigitalHumanities/deer/tree/main/).
