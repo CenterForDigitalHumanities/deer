@@ -99,6 +99,7 @@ RENDER.element = function (elem, obj) {
     })
 }
 
+
 /**
  * The TEMPLATED renderer to draw JSON to the screen
  * @param {Object} obj some json to be drawn as JSON
