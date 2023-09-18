@@ -104,6 +104,7 @@ RENDER.element = function (elem, obj) {
  * @param {Object} obj some json to be drawn as JSON
  * @param {Object} options additional properties to draw with the JSON
  */
+
 DEER.TEMPLATES.json = function (obj, options = {}) {
     let indent = options.indent || 4
     let replacer = (k, v) => {
