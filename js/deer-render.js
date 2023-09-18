@@ -112,7 +112,7 @@ DEER.TEMPLATES.json = function (obj, options = {}) {
         return v
     }
     try {
-        return `<pre style="border: 2px solid blue;">${JSON.stringify(obj, replacer, indent)}</pre>`
+        return `<pre style="border: 2px solid red;">${JSON.stringify(obj, replacer, indent)}</pre>`
     } catch (err) {
         return null
     }
