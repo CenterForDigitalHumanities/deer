@@ -17,6 +17,8 @@ import { default as config } from './deer-config.js'
 const changeLoader = new MutationObserver(renderChange)
 var DEER = config
 
+
+
 /**
  * Observer callback for rendering newly loaded objects. Checks the
  * mutationsList for "deep-object" attribute changes.
