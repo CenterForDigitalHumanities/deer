@@ -218,6 +218,7 @@ DEER.TEMPLATES.list = function (obj, options = {}) {
  * @param {Object} obj some json of type Person to be drawn
  * @param {Object} options additional properties to draw with the Person
  */
+ 
 DEER.TEMPLATES.person = function (obj, options = {}) {
     try {
         let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
