@@ -28,7 +28,7 @@ export default {
         CREATE: "//tinydev.rerum.io/app/create",
         UPDATE: "//tinydev.rerum.io/app/update",
         OVERWRITE: "//tinydev.rerum.io/app/overwrite",
-        QUERY: "//tinydev.rerum.io/app/query",
+        QUERY: "//tinydev.rerum.io/app/query?limit=50&skip=0",
         SINCE: "//devstore.rerum.io/v1/since"
     },
 
