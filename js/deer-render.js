@@ -244,6 +244,14 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
 DEER.TEMPLATES.event = function (obj, options = {}) {
     try {
         let tmpl = `<h1>${UTILS.getLabel(obj)}</h1>`
+	let start = DEER.TEMPLATES.prop(obj, {key: "startDate", label: "Start Time"}) || ''
+	let end = DEER.TEMPLATES.prop(obj, {key: "endDate", label: "End Time"}) || ''
+	let about = (obj.about && UTILS.getValue(obj.about)) || ''
+	let locat = DEER.TEMPLATES.prop(obj, {key: "location", label: "Location"}) || ''
+	tmpl += start + '</br>' + end
+	tmpl += '</br>' + locat
+	tmpl += obj.about ? '<div>About: ${about} </div>' : ''
+	tmpl += `<a href="#${obj["@id"]}">${name}</a>`
         return tmpl
     } catch (err) {
         return null
