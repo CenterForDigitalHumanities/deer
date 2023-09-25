@@ -105,18 +105,34 @@ RENDER.element = function (elem, obj) {
  * @param {Object} options additional properties to draw with the JSON
  */
 
-DEER.TEMPLATES.json = function (obj, options = {}) {
-    let indent = options.indent || 4
-    let replacer = (k, v) => {
-        if (DEER.SUPPRESS.indexOf(k) !== -1) return
-        return v
-    }
+function myFunction(jsonString) {
     try {
-        return `<pre style="border: 2px solid blue;">${JSON.stringify(obj, replacer, indent)}</pre>`
+        // Copy the JSON text to the clipboard
+        navigator.clipboard.writeText(jsonString);
+        alert("JSON copied to clipboard");
     } catch (err) {
-        return null
+        console.error("Unable to copy JSON to clipboard:", err);
     }
 }
+
+DEER.TEMPLATES.json = function (obj, options = {}) {
+    let indent = options.indent || 4;
+    let replacer = (k, v) => {
+        if (DEER.SUPPRESS.indexOf(k) !== -1) return;
+        return v;
+    };
+    try {
+        const jsonString = JSON.stringify(obj, replacer, indent);
+
+        return `
+            <div>
+            <pre style="border: 4px solid rgb(35, 31, 32); border-left-width: 8px; padding-left: 5px; background-color: lightgray; border-collapse: separate;">${jsonString}</pre>
+            </div>
+        `;
+    } catch (err) {
+        return null;
+    }
+};
 
 /**
  * Get a certain property from an object and return it formatted as HTML to be drawn.  
