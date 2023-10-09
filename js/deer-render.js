@@ -120,6 +120,7 @@ DEER.TEMPLATES.json = function (obj, options = {}) {
 }
 
 /**
+ * B
  * Get a certain property from an object and return it formatted as HTML to be drawn.  
  * @param {Object} obj some obj containing a key that needs to be drawn
  * @param {String} key the name of the key in the obj we are looking for
@@ -338,7 +339,9 @@ export default class DeerRender {
         }
 
         let listensTo = elem.getAttribute(DEER.LISTENING)
+	
         if (listensTo) {
+		elem.getAttribute(DEER.ID)
             elem.addEventListener(DEER.EVENTS.CLICKED, e => {
                 try {
                     if (e.detail.target.closest(DEER.VIEW + "," + DEER.FORM).getAttribute("id") === listensTo) elem.setAttribute(DEER.ID, e.detail.target.closest('[' + DEER.ID + ']').getAttribute(DEER.ID))

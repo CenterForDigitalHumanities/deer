@@ -45,6 +45,10 @@ async function renderChange(mutationsList) {
             case DEER.LISTENING:
                 let listensTo = mutation.target.getAttribute(DEER.LISTENING)
                 if (listensTo) {
+			mutation.target.addEventListener(DEER.EVENTS.MOUSEOVER, e => {
+				mutation.target.style.cursor = "pointer"
+
+			})
                     mutation.target.addEventListener(DEER.EVENTS.CLICKED, e => {
                         let loadId = e.detail["@id"]
                         if (loadId === listensTo) { mutation.target.setAttribute("deer-id", loadId) }
@@ -480,6 +484,7 @@ export default class DeerReport {
             .then(obj => { return obj.new_obj_state })
     }
 }
+	
 
 export function initializeDeerForms(config) {
     const forms = document.querySelectorAll(config.FORM)

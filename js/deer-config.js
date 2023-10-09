@@ -40,7 +40,8 @@ export default {
         NEW_FORM: "deer-form",
         VIEW_RENDERED : "deer-view-rendered",
         FORM_RENDERED : "deer-form-rendered",
-        CLICKED: "deer-clicked"
+        CLICKED: "deer-clicked",
+	MOUSEOVER: "deer-mouseover"
     },
 
     SUPPRESS: ["__rerum", "@context"], //properties to ignore
