@@ -287,6 +287,7 @@ export default class DeerReport {
                     UTILS.warning("Duplicate input " + DEER.KEY + " attribute value '" + el.getAttribute(DEER.KEY) + "' detected during submission.  This input will be ignored.  See duplicate below. ", el)
                 }
                 return flatKeys.indexOf(el.getAttribute(DEER.KEY)) === i
+                //throw an error when values contain a '.' here 
             })
                 .map(input => {
                     let inputId = input.getAttribute(DEER.SOURCE)
