@@ -226,21 +226,19 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
         let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", label: "Death Date" }) || ``
         let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
         let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
-        let middleName = (obj.middleName && UTILS.getValue(obj.middleName)) || ""
-        let organization = (obj.organization && UTILS.getValue(obj.organization)) || ""
+        let brand = (obj.brand && UTILS.getValue(obj.brand)) || ""
         let address = (obj.address && UTILS.getValue(obj.address)) || ""
-        let pob = (obj.pob && UTILS.getValue(obj.pob)) || "" //place of birth
-        let pod = (obj.pod && UTILS.getValue(obj.pod)) || "" //place of death
+        let birthPlace = (obj.birthPlace && UTILS.getValue(obj.birthPlace)) || "" 
+        let deathPlace = (obj.deathPlace && UTILS.getValue(obj.deathPlace)) || "" 
         let colleague = (obj.colleague && UTILS.getValue(obj.colleague)) || ""
         let brand = (obj.brand && UTILS.getValue(obj.brand)) || "" //brand association
         let email = (obj.email && UTILS.getValue(obj.email)) || ""
 
         tmpl += (obj.familyName || obj.givenName || obj.middleName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
         tmpl += dob + `</br>` + dod
-        tmpl += organization ? '<div>Affiliated with: ${organization}</div>'
         tmpl += address ? '<div>Address: ${address}</div>' : ''
-        tmpl += pob ? '<div>Place of Birth: ${pob}</div>' : ''
-        tmpl += pod ? '<div>Place of Death: ${pod}</div>' : ''
+        tmpl += birthPlace ? '<div>Place of Birth: ${pob}</div>' : ''
+        tmpl += deathPlace ? '<div>Place of Death: ${pod}</div>' : ''
         tmpl += colleague ? '<div>Colleague: ${colleague}</div>' : ''
         tmpl += brand ? '<div>Brand: ${brand}</div>' : ''
         tmpl += email ? '<div>Email: ${email}</div>' : ''
