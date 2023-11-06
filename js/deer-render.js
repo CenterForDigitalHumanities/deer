@@ -220,6 +220,7 @@ DEER.TEMPLATES.list = function (obj, options = {}) {
  * @param {Object} obj some json of type Person to be drawn
  * @param {Object} options additional properties to draw with the Person
  */
+ 
 DEER.TEMPLATES.person = function (obj, options = {}) {
     try {
         let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
@@ -227,8 +228,24 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
         let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", label: "Death Date" }) || ``
         let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
         let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
-        tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
+        let middleName = (obj.middleName && UTILS.getValue(obj.middleName)) || ""
+        let organization = (obj.organization && UTILS.getValue(obj.organization)) || ""
+        let address = (obj.address && UTILS.getValue(obj.address)) || ""
+        let pob = (obj.pob && UTILS.getValue(obj.pob)) || "" //place of birth
+        let pod = (obj.pod && UTILS.getValue(obj.pod)) || "" //place of death
+        let colleague = (obj.colleague && UTILS.getValue(obj.colleague)) || ""
+        let brand = (obj.brand && UTILS.getValue(obj.brand)) || "" //brand association
+        let email = (obj.email && UTILS.getValue(obj.email)) || ""
+
+        tmpl += (obj.familyName || obj.givenName || obj.middleName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
         tmpl += dob + `</br>` + dod
+        tmpl += organization ? '<div>Affiliated with: ${organization}</div>'
+        tmpl += address ? '<div>Address: ${address}</div>' : ''
+        tmpl += pob ? '<div>Place of Birth: ${pob}</div>' : ''
+        tmpl += pod ? '<div>Place of Death: ${pod}</div>' : ''
+        tmpl += colleague ? '<div>Colleague: ${colleague}</div>' : ''
+        tmpl += brand ? '<div>Brand: ${brand}</div>' : ''
+        tmpl += email ? '<div>Email: ${email}</div>' : ''
         tmpl += `<a href="#${obj["@id"]}">${name}</a>`
         return tmpl
     } catch (err) {
