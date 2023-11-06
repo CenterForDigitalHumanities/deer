@@ -220,6 +220,7 @@ DEER.TEMPLATES.list = function (obj, options = {}) {
  * @param {Object} obj some json of type Person to be drawn
  * @param {Object} options additional properties to draw with the Person
  */
+ 
 DEER.TEMPLATES.person = function (obj, options = {}) {
     try {
         let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
@@ -227,8 +228,22 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
         let dod = DEER.TEMPLATES.prop(obj, { key: "deathDate", label: "Death Date" }) || ``
         let famName = (obj.familyName && UTILS.getValue(obj.familyName)) || "[ unknown ]"
         let givenName = (obj.givenName && UTILS.getValue(obj.givenName)) || ""
-        tmpl += (obj.familyName || obj.givenName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
+        let brand = (obj.brand && UTILS.getValue(obj.brand)) || ""
+        let address = (obj.address && UTILS.getValue(obj.address)) || ""
+        let birthPlace = (obj.birthPlace && UTILS.getValue(obj.birthPlace)) || "" 
+        let deathPlace = (obj.deathPlace && UTILS.getValue(obj.deathPlace)) || "" 
+        let colleague = (obj.colleague && UTILS.getValue(obj.colleague)) || ""
+        let brand = (obj.brand && UTILS.getValue(obj.brand)) || "" //brand association
+        let email = (obj.email && UTILS.getValue(obj.email)) || ""
+
+        tmpl += (obj.familyName || obj.givenName || obj.middleName) ? `<div>Name: ${famName}, ${givenName}</div>` : ``
         tmpl += dob + `</br>` + dod
+        tmpl += address ? '<div>Address: ${address}</div>' : ''
+        tmpl += birthPlace ? '<div>Place of Birth: ${pob}</div>' : ''
+        tmpl += deathPlace ? '<div>Place of Death: ${pod}</div>' : ''
+        tmpl += colleague ? '<div>Colleague: ${colleague}</div>' : ''
+        tmpl += brand ? '<div>Brand: ${brand}</div>' : ''
+        tmpl += email ? '<div>Email: ${email}</div>' : ''
         tmpl += `<a href="#${obj["@id"]}">${name}</a>`
         return tmpl
     } catch (err) {
