@@ -105,16 +105,6 @@ RENDER.element = function (elem, obj) {
  * @param {Object} options additional properties to draw with the JSON
  */
 
-function myFunction(jsonString) {
-    try {
-        // Copy the JSON text to the clipboard
-        navigator.clipboard.writeText(jsonString);
-        alert("JSON copied to clipboard");
-    } catch (err) {
-        console.error("Unable to copy JSON to clipboard:", err);
-    }
-}
-
 DEER.TEMPLATES.json = function (obj, options = {}) {
     let indent = options.indent || 4;
     let replacer = (k, v) => {
@@ -128,7 +118,7 @@ DEER.TEMPLATES.json = function (obj, options = {}) {
 
         return `
             <div>
-                <pre style="border: 4px solid rgb(35, 31, 32); border-left-width: 8px; padding-left: 5px; background-color: lightgray; border-collapse: separate;">${jsonString}</pre>
+                <pre style="border-left: 8px solid rgb(35, 31, 32); padding-left: 5px; background-color: lightgray; border-collapse: separate;">${jsonString}</pre>
                 <a href="${url}" download="data.json">
                     <button>Download JSON</button>
                 </a>
@@ -138,6 +128,8 @@ DEER.TEMPLATES.json = function (obj, options = {}) {
         return null;
     }
 };
+
+
 
 /**
  * Get a certain property from an object and return it formatted as HTML to be drawn.  
