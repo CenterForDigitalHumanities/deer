@@ -106,18 +106,39 @@ RENDER.element = function (elem, obj) {
  * @param {Object} obj some json to be drawn as JSON
  * @param {Object} options additional properties to draw with the JSON
  */
+
 DEER.TEMPLATES.json = function (obj, options = {}) {
-    let indent = options.indent || 4
+    let indent = options.indent || 4;
     let replacer = (k, v) => {
-        if (DEER.SUPPRESS.indexOf(k) !== -1) return
-        return v
-    }
+        if (DEER.SUPPRESS.indexOf(k) !== -1) return;
+        return v;
+    };
     try {
-        return `<pre>${JSON.stringify(obj, replacer, indent)}</pre>`
+        const jsonString = JSON.stringify(obj, replacer, indent);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        return `
+            <div style="position: relative;">
+                <pre style="border-left: 8px solid rgb(35, 31, 32); padding-left: 15px; background-color: lightgray; border-collapse: separate; position: relative;">${jsonString}
+                    <a href="${url}" download="data.json" style="position: absolute; top: 5px; right: 5px;">
+                        <button style="background-color: rgb(35, 31, 32); color: white; font-family: 'montserrat', sans-serif;">Download JSON</button>
+                    </a>
+                </pre>
+            </div>
+        `;
     } catch (err) {
-        return null
+        return null;
     }
-}
+};
+
+
+
+
+
+
+
+
 
 /**
  * Get a certain property from an object and return it formatted as HTML to be drawn.  
