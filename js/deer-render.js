@@ -117,17 +117,24 @@ DEER.TEMPLATES.json = function (obj, options = {}) {
         const url = URL.createObjectURL(blob);
 
         return `
-            <div>
-                <pre style="border-left: 8px solid rgb(35, 31, 32); padding-left: 5px; background-color: lightgray; border-collapse: separate;">${jsonString}</pre>
-                <a href="${url}" download="data.json">
-                    <button>Download JSON</button>
-                </a>
+            <div style="position: relative;">
+                <pre style="border-left: 8px solid rgb(35, 31, 32); padding-left: 15px; background-color: lightgray; border-collapse: separate; position: relative;">${jsonString}
+                    <a href="${url}" download="data.json" style="position: absolute; top: 5px; right: 5px;">
+                        <button style="background-color: rgb(35, 31, 32); color: white; font-family: 'montserrat', sans-serif;">Download JSON</button>
+                    </a>
+                </pre>
             </div>
         `;
     } catch (err) {
         return null;
     }
 };
+
+
+
+
+
+
 
 
 
