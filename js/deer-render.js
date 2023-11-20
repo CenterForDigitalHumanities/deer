@@ -238,6 +238,28 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
 }
 /**
  * The TEMPLATED renderer to draw JSON to the screen
+ * @param {Object} obj some json of type Organization to be drawn
+ * @param {Object} options additional properties to draw with the Organization
+ */
+DEER.TEMPLATES.organization = function (obj, options = {}) {
+    try {
+        let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`;
+        let foundingDate = DEER.TEMPLATES.prop(obj, { key: "foundingDate", label: "Founding Date" }) || ``;
+        let dissolutionDate = DEER.TEMPLATES.prop(obj, { key: "dissolutionDate", label: "Dissolution Date" }) || ``;
+        let name = UTILS.getValue(obj.name) || "[ unknown ]";
+        tmpl += `<div>Name: ${name}</div>`;
+        tmpl += foundingDate + `<br>` + dissolutionDate;
+        let location = DEER.TEMPLATES.prop(obj, { key: "location", label: "Location" }) || ``;
+        tmpl += location;
+        tmpl += `<a href="#${obj["@id"]}">${name}</a>`;
+        return tmpl;
+    } catch (err) {
+        return null;
+    }
+    return null;
+};
+/**
+ * The TEMPLATED renderer to draw JSON to the screen
  * @param {Object} obj some json of type Event to be drawn
  * @param {Object} options additional properties to draw with the Event
  */
