@@ -259,6 +259,45 @@ DEER.TEMPLATES.event = function (obj, options = {}) {
     return null
 }
 
+/**
+ * Escape a value so it is safe to interpolate into template HTML strings.
+ * Values may originate from remote annotations and cannot be trusted as markup.
+ * @param {any} val some value to be embedded in an HTML string
+ */
+function escapeHTML(val) {
+    return String(val).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+}
+
+/**
+ * The TEMPLATED renderer to draw JSON to the screen
+ * @param {Object} obj some json of type Organization to be drawn
+ * @param {Object} options additional properties to draw with the Organization
+ */
+DEER.TEMPLATES.organization = function (obj, options = {}) {
+    try {
+        let tmpl = `<h2>${escapeHTML(UTILS.getLabel(obj))}</h2>`
+        let details = [
+            { key: "foundingDate", label: "Founding Date" },
+            { key: "dissolutionDate", label: "Dissolution Date" },
+            { key: "url", label: "URL" },
+            { key: "email", label: "Email" },
+            { key: "telephone", label: "Telephone" },
+            { key: "address", label: "Address" }
+        ]
+            .filter(prop => obj[prop.key])
+            .map(prop => `<span>${prop.label}: ${escapeHTML(UTILS.getValue(obj[prop.key]))}</span>`)
+            .join(`<br>`)
+        tmpl += details
+        let description = (obj.description && UTILS.getValue(obj.description)) || ``
+        tmpl += description ? `<div>Description: ${escapeHTML(description)}</div>` : ``
+        if (obj["@id"]) { tmpl += `<a href="#${escapeHTML(obj["@id"])}">${escapeHTML(UTILS.getLabel(obj))}</a>` }
+        return tmpl
+    } catch (err) {
+        // An empty render is preferable to the null return of older templates, which RENDER.element cannot draw.
+        return ``
+    }
+}
+
 export default class DeerRender {
     constructor(elem, deer = {}) {
         for (let key in DEER) {
